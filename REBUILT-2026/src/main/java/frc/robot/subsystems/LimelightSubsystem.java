@@ -13,10 +13,11 @@ import com.ctre.phoenix6.signals.StripTypeValue;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.SolidColor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.phoenix6.CANBus;
 
 public class LimelightSubsystem extends SubsystemBase {
 
-  CANdle lights = new CANdle(0);
+  CANdle lights = new CANdle(0, new CANBus("Ryan"));
 
   public LimelightSubsystem() {
     CANdleConfiguration CANdleConfigs = new CANdleConfiguration();
@@ -32,6 +33,6 @@ public class LimelightSubsystem extends SubsystemBase {
     } else {
       lights.setControl(new SolidColor(0, 120).withColor(new RGBWColor(255, 0, 0)));
     }
-    SmartDashboard.putBoolean("TX", LimelightHelpers.getTV(""));
+    SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(""));
   }
 }
