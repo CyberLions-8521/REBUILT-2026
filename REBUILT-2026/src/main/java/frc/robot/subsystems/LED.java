@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
@@ -18,7 +19,7 @@ public class LED extends SubsystemBase {
   /** Creates a new LED. */
 
   private static final int kID = 0;
-  private CANdle candle = new CANdle(kID); // change ID later
+  private CANdle candle = new CANdle(kID, new CANBus("Ryan")); // change ID later
 
   //colors
   private static final RGBWColor kGreen = new RGBWColor(0, 255, 17);
