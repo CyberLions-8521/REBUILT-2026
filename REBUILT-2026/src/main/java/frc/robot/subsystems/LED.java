@@ -22,8 +22,8 @@ public class LED extends SubsystemBase {
   private CANdle candle = new CANdle(kID, new CANBus("Ryan")); // change ID later
 
   //colors
-  private static final RGBWColor kGreen = new RGBWColor(0, 255, 17);
-  private static final RGBWColor kOff = new RGBWColor(0, 0, 0);
+  private static final RGBWColor kGreen = new RGBWColor(255, 0, 0);
+  private static final RGBWColor kOff = new RGBWColor();
 
   //animations
   private final SolidColor solid = new SolidColor(0, 120);
