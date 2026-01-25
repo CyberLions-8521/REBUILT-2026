@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.SolidColor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
+import frc.robot.Constants.LimelightConstants;
 
 public class LimelightSubsystem extends SubsystemBase {
 
@@ -21,14 +22,14 @@ public class LimelightSubsystem extends SubsystemBase {
 
   public LimelightSubsystem() {
     CANdleConfiguration CANdleConfigs = new CANdleConfiguration();
-    CANdleConfigs.LED.withStripType(StripTypeValue.RGB)
+    CANdleConfigs.LED.withStripType(StripTypeValue.GRB)
                      .withBrightnessScalar(0.5);
     lights.getConfigurator().apply(CANdleConfigs);
   }
 
   @Override
   public void periodic() {
-    if (LimelightHelpers.getTV("")) {
+    if (LimelightHelpers.getTV(LimelightConstants.limelightName)) {
       lights.setControl(new SolidColor(0, 120).withColor(new RGBWColor(124, 252, 0)));
     } else {
       lights.setControl(new SolidColor(0, 120).withColor(new RGBWColor(255, 0, 0)));
