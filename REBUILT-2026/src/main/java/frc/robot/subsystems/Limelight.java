@@ -1,12 +1,14 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.PoseEstimate;
 
 public class Limelight extends SubsystemBase {
+
+    public Pose3d TargetPose;
+    public Pose3d RobotPose;
 
     public Limelight() {
 
@@ -24,7 +26,7 @@ public class Limelight extends SubsystemBase {
             0.0,    // Side offset (meters)
             0.5,    // Height offset (meters)
             0.0,    // Roll (degrees)
-            30.0,   // Pitch (degrees)
+            0,   // Pitch (degrees)
             0.0     // Yaw (degrees)
         );
 
@@ -46,22 +48,7 @@ public class Limelight extends SubsystemBase {
 
     @Override
     public void periodic() {
-        PoseEstimate PoseEst = new PoseEstimate();
-
-        // DEFAULT CONSTRUCTOR
-        // public PoseEstimate(Pose2d pose,
-        // double timestampSeconds,
-        // double latency,
-        // int tagCount,
-        // double tagSpan,
-        // double avgTagDist,
-        // double avgTagArea,
-        // LimelightHelpers.RawFiducial[] rawFiducials,
-        // boolean isMegaTag2)
-         
-        // https://docs.limelightvision.io/docs/docs-limelight/apis/complete-networktables-api
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_orb").getDoubleArray(new double[6]);
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("targetpose_robotspace").getDoubleArray(new double[6]);
-
+        TargetPose = LimelightHelpers.getTargetPose3d_RobotSpace("");
+        RobotPose = LimelightHelpers.getBotPose3d_wpiBlue("");
     }
 }   
