@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -9,6 +10,8 @@ public class Limelight extends SubsystemBase {
 
     public Pose3d TargetPose;
     public Pose3d RobotPose;
+    public final int[] hubIDs = new int[]{9,10,8,5,11,2,18,27,21,24,26,25};
+
 
     public Limelight() {
 
@@ -37,17 +40,38 @@ public class Limelight extends SubsystemBase {
             0.70485     // Height offset
         );
 
-        final int[] hubIDs = new int[]{9,10,8,5,11,2,18,27,21,24,26,25};
         LimelightHelpers.SetFiducialIDFiltersOverride("", hubIDs); // Only track these tag IDs
         LimelightHelpers.SetFiducialDownscalingOverride("", 1.0f); //downscale by 1x (no effect)
-
-        if(LimelightHelpers.getTV("")) {
-                SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(""));
-        }
     }
+
+
+    public FunctionalCommand DoLimelight(){
+        return new FunctionalCommand(
+            ()->{
+                if (LimelightHelpers.getTV("")){
+                    int[] validIDs = new int[]{LimelightHelpers.RawFiducial.id};
+                    LimelightHelpers.SetFiducialIDFiltersOverride("", validIDs);
+                }
+            },
+            ()->{
+                if (LimelightHelpers.getTV("")) {
+                    SmartDashboard.putNumber("TX", LimelightHelpers.getTX(null));
+                }
+            },
+            ()->{
+                LimelightHelpers.SetFiducialIDFiltersOverride("", hubIDs);
+            },
+            () -> false, this);
+    } 
 
     @Override
     public void periodic() {
+
+
+        //https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization
+        //TargetPose = Gets the target's 3D pose with respect to the robot's coordinate system.
+        //RobotPose =  Gets the robot's 3D pose in the WPILib Blue Alliance Coordinate System. (wpiRed is not recommended)
+
         TargetPose = LimelightHelpers.getTargetPose3d_RobotSpace("");
         RobotPose = LimelightHelpers.getBotPose3d_wpiBlue("");
     }
