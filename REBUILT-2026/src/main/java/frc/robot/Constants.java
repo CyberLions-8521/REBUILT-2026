@@ -74,5 +74,8 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight3.0";
+        public static final double outpostShootingRadius = 0; //set later
+        public static final double outpostShootingRadiusTolerance = 0; //set later
+        
     }
 }

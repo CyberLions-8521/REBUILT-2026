@@ -16,11 +16,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
 import frc.robot.Constants.LimelightConstants;
 
-public class LimelightSubsystem extends SubsystemBase {
+public class LEDLights extends SubsystemBase {
 
   CANdle lights = new CANdle(0, new CANBus("Ryan"));
 
-  public LimelightSubsystem() {
+  public LEDLights() {
     CANdleConfiguration CANdleConfigs = new CANdleConfiguration();
     CANdleConfigs.LED.withStripType(StripTypeValue.GRB)
                      .withBrightnessScalar(0.5);

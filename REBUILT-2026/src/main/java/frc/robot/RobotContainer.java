@@ -6,11 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.LEDLights;
 
 public class RobotContainer {
 
-  LimelightSubsystem m_limelight = new LimelightSubsystem();
+  LEDLights m_limelight = new LEDLights();
   public RobotContainer() {
     configureBindings();
   }
