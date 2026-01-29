@@ -1,0 +1,81 @@
+package frc.robot;
+
+import edu.wpi.first.math.util.Units;
+
+public class Constants {
+    public static class SwerveConstants {
+        public static final int turnMotorFreeLimit = 20;    // current limits in amps
+        public static final int turnMotorStallLimit = 20;   // current limits in amps
+        public static final int driveMotorFreeLimit = 40;   // current limits in amps
+        public static final int driveMotorStallLimit = 40;  // current limits in amps
+
+        private static final double kWheelDiameter = Units.inchesToMeters(4);
+        private static final double kWheelCircumference = Math.PI * kWheelDiameter;
+        private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4i
+        public static final double kDriveConversionFactor = kWheelCircumference / kDriveGearRatio;  // meters (of robot travel)
+
+        private static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
+        public static final double kAngleConversion = 360;              // degrees
+        public static final double kTurnConversionFactor = kAngleConversion / kTurnGearRatio;       // degrees (of output shaft)
+
+        private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
+        private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
+        public static final double driveFF = 1.0 / kDriveWheelFreeSpeedRps;
+        public static final double driveP = 0.025;
+        public static final double driveI = 0;
+        public static final double driveD = 0;
+        public static final double turnP = 0.04;
+        public static final double turnI = 0;
+        public static final double turnD = 0.01;        
+        public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
+    }
+
+    public static class SwerveDrivebaseConstants {
+        public static final double kSlewRateLimiter = 3.0;
+        public static final int kFrontLeftDriveID  = 6;
+        public static final int kFrontLeftTurnID   = 4;
+        public static final int kFrontRightDriveID = 3;
+        public static final int kFrontRightTurnID  = 14;
+        public static final int kBackLeftDriveID   = 50;
+        public static final int kBackLeftTurnID    = 2;
+        public static final int kBackRightDriveID  = 8;
+        public static final int kBackRightTurnID   = 7;
+
+        // Note: CANcoder CAN IDs are on a separate CAN bus than SparkMAXs
+        // allowing for duplicates between CANcoders and SparkMAXs
+        public static final int kFrontLeftCANCoderID  = 10;
+        public static final int kFrontRightCANCoderID = 11;
+        public static final int kBackLeftCANCoderID   = 9;
+        public static final int kBackRightCANCoderID  = 12;
+
+        public static final double kWheelBase = Units.inchesToMeters(23.25);    // x-direction of robot
+        public static final double kTrackWidth = Units.inchesToMeters(23.25);   // y-direction of robot
+
+        public static final double kMaxMetersPerSecond = 3.0;
+        public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
+
+        public static final double kCANcoderAbsDiscontPoint = 0.5;
+        public static final double kFrontLeftCANCoderMagnetOffset  = -0.175049;     // measured in Phoenix Tuner X
+        public static final double kFrontRightCANCoderMagnetOffset = -0.603516;     // measured in Phoenix Tuner X
+        public static final double kBackLeftCANCoderMagnetOffset   = -0.645508;     // measured in Phoenix Tuner X
+        public static final double kBackRightCANCoderMagnetOffset  = -0.271484;     // measured in Phoenix Tuner X
+
+        public static final double kStrafeP = 0.0;
+        public static final double kStrafeI = 0.0;
+        public static final double kStrafeD = 0.0;
+    }
+
+    public static class LimelightConstants {
+        public static final String kName = "limelight-twoplus";
+
+        public static final double kAimP = 0.0;
+        public static final double kAimI = 0.0;
+        public static final double kAimD = 0.0;
+
+        public static final double kRangeP = 0.0;
+        public static final double kRangeI = 0.0;
+        public static final double kRangeD = 0.0;
+
+        
+    }
+}

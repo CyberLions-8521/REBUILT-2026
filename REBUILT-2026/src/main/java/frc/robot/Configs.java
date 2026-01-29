@@ -1,0 +1,51 @@
+package frc.robot;
+
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
+import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.SwerveConstants;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+public class Configs {
+    public static class SwerveModuleConfigs{
+        public static final SparkMaxConfig m_configDrive = new SparkMaxConfig();
+        public static final SparkMaxConfig m_configTurn = new SparkMaxConfig();
+
+        static {
+            m_configDrive
+                .idleMode(IdleMode.kBrake)
+                .inverted(true)
+                .smartCurrentLimit(SwerveConstants.driveMotorStallLimit, SwerveConstants.driveMotorFreeLimit);
+
+            m_configTurn
+                .idleMode(IdleMode.kBrake)
+                .inverted(true)
+                .smartCurrentLimit(SwerveConstants.turnMotorStallLimit, SwerveConstants.turnMotorFreeLimit);
+
+            m_configDrive.encoder
+                .positionConversionFactor(SwerveConstants.kDriveConversionFactor)           // meters
+                .velocityConversionFactor(SwerveConstants.kDriveConversionFactor / 60.0);   // meters per second
+
+            m_configTurn.encoder
+                .positionConversionFactor(SwerveConstants.kTurnConversionFactor)            // degrees
+                .velocityConversionFactor(SwerveConstants.kTurnConversionFactor / 60.0);    // degrees per second
+
+            m_configDrive.closedLoop
+                .pidf(SwerveConstants.driveP, SwerveConstants.driveI, SwerveConstants.driveD, SwerveConstants.driveFF)
+                .outputRange(-1, 1)
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .positionWrappingEnabled(false);
+
+            m_configTurn.closedLoop
+                .pid(SwerveConstants.driveP, SwerveConstants.driveI, SwerveConstants.driveD)
+                .outputRange(-1, 1)
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .positionWrappingEnabled(true)
+                .positionWrappingInputRange(-SwerveConstants.kAngleConversion / 2.0, SwerveConstants.kAngleConversion / 2.0); 
+    }
+}
