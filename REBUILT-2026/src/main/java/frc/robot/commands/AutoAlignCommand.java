@@ -1,17 +1,17 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.MathUtil;
 import frc.robot.subsystems.Swerve;
 import frc.robot.Constants.SwerveDrivebaseConstants;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.LimelightHelpers;
 
-public class AutoAlignCommand extends CommandBase {
+public class AutoAlignCommand extends Command {
     private final Swerve m_swerve;
 
     public AutoAlignCommand(Swerve swerve) {
-        this.swerve = swerve; 
+        this.m_swerve = swerve; 
         addRequirements(swerve);
     }
 

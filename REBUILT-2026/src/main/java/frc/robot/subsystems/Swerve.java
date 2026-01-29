@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subs;
+package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
@@ -40,9 +40,7 @@ public class Swerve extends SubsystemBase {
   private final SlewRateLimiter filter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
 
   private final PIDController m_alignPID =
-    new PIDController(LimelightConstants.kP,
-                      LimelightConstants.kI,
-                      LimelightConstants.kD);
+    new PIDController(0,0,0);
   
   public Swerve() {
     m_gyro.reset();
@@ -208,6 +206,27 @@ public class Swerve extends SubsystemBase {
             Math.abs(m_frontRight.getDriveDistance()) +
             Math.abs(m_backLeft.getDriveDistance())   +
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
+  }
+
+  //AUTO ALIGN
+  double getTargetingAngularVelocity() { // aiming control
+      double tx = LimelightHelpers.getTX(LimelightConstants.kName);
+
+      double targetingAngularVelocity = tx * LimelightConstants.kAimP;
+
+      //conversion to radians/second
+      targetingAngularVelocity *= SwerveDrivebaseConstants.kMaxAngularSpeed;
+      //invert since tx is positive to the right
+      targetingAngularVelocity *= -1.0;
+
+      return targetingAngularVelocity;
+  }
+
+  double getTargetingForwardSpeed() { // ranging control
+      double targetingForwardSpeed = LimelightHelpers.getTY(LimelightConstants.kName) * LimelightConstants.kRangeP;
+      targetingForwardSpeed *= SwerveDrivebaseConstants.kMaxMetersPerSecond;
+      targetingForwardSpeed *= -1.0; //invert since ty is positive when target is above crosshair
+      return targetingForwardSpeed;
   }
 
   public void periodic() {

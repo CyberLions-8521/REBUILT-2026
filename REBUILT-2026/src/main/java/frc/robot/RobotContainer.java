@@ -56,6 +56,14 @@ public class RobotContainer {
 
     // auto align
     m_driveController.a().whileTrue(new AutoAlignCommand(m_db));
+    /* 
+    m_driveController.a().whileTrue(this.getDriveCommand(
+      m_driveController::getTargetingForwardSpeed, 
+      0, 
+      m_driveController::getTargetingAngularVelocity, 
+      false
+    ));
+    */
   }
 
   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
