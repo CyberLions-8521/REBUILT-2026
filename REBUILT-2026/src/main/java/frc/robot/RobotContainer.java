@@ -4,18 +4,27 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.AutoAlign;
 import frc.robot.subsystems.LEDLights;
+import frc.robot.subsystems.SwerveDrivebase;
 
 public class RobotContainer {
 
-  LEDLights m_limelight = new LEDLights();
+  LEDLights m_LEDLights = new LEDLights();
+  CommandXboxController m_controller = new CommandXboxController(0);
+  SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  AutoAlign align = new AutoAlign(m_drivebase, 0, 1.5);
   public RobotContainer() {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    m_controller.a().whileTrue(align);
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
