@@ -236,7 +236,6 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putNumber("TY", LimelightHelpers.getTY(LimelightConstants.kName));
     SmartDashboard.putNumber("Straight Distance", this.getStraightDistance());
     // SmartDashboard.putNumber("Offset", this.calculateDistanceFromAprilTag());
-    tunePIDSmartDashboard();
   }
 
 }

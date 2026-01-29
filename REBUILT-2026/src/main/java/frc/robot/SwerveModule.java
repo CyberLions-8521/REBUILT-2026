@@ -4,7 +4,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.SensorDirectionValue;

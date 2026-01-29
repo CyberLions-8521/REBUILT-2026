@@ -3,6 +3,10 @@ package frc.robot;
 import edu.wpi.first.math.util.Units;
 
 public class Constants {
+    public static class ControllerConstants {
+        public static final double kDeadband = 0.2;
+    }
+    
     public static class SwerveConstants {
         public static final int turnMotorFreeLimit = 20;    // current limits in amps
         public static final int turnMotorStallLimit = 20;   // current limits in amps
@@ -63,6 +67,11 @@ public class Constants {
         public static final double kStrafeP = 0.0;
         public static final double kStrafeI = 0.0;
         public static final double kStrafeD = 0.0;
+    }
+
+    public static class OperatorConstants {
+        public static final int kDriveControllerPort = 0;
+        public static final int kCommandControllerPort = 1;
     }
 
     public static class LimelightConstants {
