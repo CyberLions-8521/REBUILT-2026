@@ -210,26 +210,6 @@ public class Swerve extends SubsystemBase {
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
 
-  double getTargetingAngularVelocity() { // aiming control
-    double tx = LimelightHelpers.getTX(LimelightConstants.kName);
-
-    double targetingAngularVelocity = tx * LimelightConstants.kAimP;
-
-    //conversion to radians/second
-    targetingAngularVelocity *= SwerveDrivebaseConstants.kMaxAngularSpeed;
-    //invert since tx is positive to the right
-    targetingAngularVelocity *= -1.0;
-
-    return targetingAngularVelocity;
-  }
-
-  double getTargetingForwardSpeed() { // ranging control
-    double targetingForwardSpeed = LimelightHelpers.getTY(LimelightConstants.kName) * LimelightConstants.kRangeP;
-    targetingForwardSpeed *= SwerveDrivebaseConstants.kMaxMetersPerSecond;
-    targetingForwardSpeed *= -1.0; //invert since ty is positive when target is above crosshair
-    return targetingForwardSpeed;
-  }
-
   public void periodic() {
     logData();
     SmartDashboard.putNumber("TX", LimelightHelpers.getTX(LimelightConstants.kName));
