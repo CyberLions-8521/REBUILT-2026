@@ -77,14 +77,8 @@ public class Constants {
     public static class LimelightConstants {
         public static final String kName = "limelight-twoplus";
 
-        public static final double kAimP = 0.0;
-        public static final double kAimI = 0.0;
-        public static final double kAimD = 0.0;
-
-        public static final double kRangeP = 0.0;
-        public static final double kRangeI = 0.0;
-        public static final double kRangeD = 0.0;
-
-        
+        //tuning auto align
+        public static final double kAimP = 0.035;
+        public static final double kRangeP = 0.1;
     }
 }
