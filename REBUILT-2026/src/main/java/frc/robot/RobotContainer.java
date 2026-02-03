@@ -12,7 +12,10 @@ public class RobotContainer {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    // for when the controller is actually coded
+    // m_gamepad.a().whileTrue(m_indexer.runIndexer(0.5));
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
