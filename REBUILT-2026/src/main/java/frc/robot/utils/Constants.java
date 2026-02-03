@@ -9,10 +9,8 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public class Constants {
     public static final class SwerveConstants {
-        public static final int turnMotorFreeLimit = 20;    // current limits in amps
-        public static final int turnMotorStallLimit = 20;   // current limits in amps
-        public static final int driveMotorFreeLimit = 40;   // current limits in amps
-        public static final int driveMotorStallLimit = 40;  // current limits in amps
+        public static final int driveMotorCurrentLimit = 80;
+        public static final int turnMotorCurrentLimit = 80;
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
@@ -26,12 +24,45 @@ public class Constants {
         private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
         public static final double driveFF = 1.0 / kDriveWheelFreeSpeedRps;
-        public static final double driveP = 0.025;
+        public static final double driveP = 0; //set later
         public static final double driveI = 0;
-        public static final double driveD = 0;
-        public static final double turnP = 0.04;
+        public static final double driveD = 0; //set later
+        public static final double turnP = 0; //set later
         public static final double turnI = 0;
-        public static final double turnD = 0.01;        
+        public static final double turnD = 0; //set ;ater
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
+
+        public static final double kSlewRateLimiter = 3.0;
+        public static final int kFrontLeftDriveID  = 0; //assign later
+        public static final int kFrontLeftTurnID   = 0; //assign later
+        public static final int kFrontRightDriveID = 0; //assign later
+        public static final int kFrontRightTurnID  = 0; //assign later
+        public static final int kBackLeftDriveID   = 0; //assign later
+        public static final int kBackLeftTurnID    = 0; //assign later
+        public static final int kBackRightDriveID  = 0; //assign later
+        public static final int kBackRightTurnID   = 0; //assign later
+
+        public static final int kFrontLeftCANCoderID  = 10;
+        public static final int kFrontRightCANCoderID = 11;
+        public static final int kBackLeftCANCoderID   = 9;
+        public static final int kBackRightCANCoderID  = 12;
+
+        public static final double kWheelBase = Units.inchesToMeters(0);    // x-direction of robot, set later
+        public static final double kTrackWidth = Units.inchesToMeters(0);   // y-direction of robot, set later
+
+        public static final double kMaxMetersPerSecond = 3.0;
+        public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
+
+        public static final double kCANcoderAbsDiscontPoint = 0.5;
+        public static final double kFrontLeftCANCoderMagnetOffset  = 0;     // set later
+        public static final double kFrontRightCANCoderMagnetOffset = 0;     // set later
+        public static final double kBackLeftCANCoderMagnetOffset   = 0;     // set later
+        public static final double kBackRightCANCoderMagnetOffset  = 0;     // set later
+
+        public static final double kStrafeP = 0.0;
+        public static final double kStrafeI = 0.0;
+        public static final double kStrafeD = 0.0;
+
+        public static final double kAutoAlignSpeed = 0.5;
     }
 }

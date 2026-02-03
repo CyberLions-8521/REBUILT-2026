@@ -6,6 +6,7 @@
 package frc.robot.utils;
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -29,10 +30,6 @@ import frc.robot.utils.Constants.SwerveConstants;
 public class SwerveModule {
     private TalonFX m_driveMotor;
     private TalonFX m_turnMotor; 
-    private RelativeEncoder m_driveEncoder;
-    private RelativeEncoder m_turnEncoder;
-    private SparkClosedLoopController m_drivePID;
-    private SparkClosedLoopController m_turnPID;
 
     private CANcoder m_CANcoder;
 
@@ -42,45 +39,39 @@ public class SwerveModule {
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
         m_driveMotor = new TalonFX(driveMotorPort);
         m_turnMotor  = new TalonFX(turnMotorPort);
-        m_driveEncoder = m_driveMotor.getEncoder();
-        m_turnEncoder  = m_turnMotor.getEncoder();
-        m_drivePID = m_driveMotor.getClosedLoopController();
-        m_turnPID  = m_turnMotor.getClosedLoopController();
         m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANCoderBus);
 
-        configure(SwerveModuleConfigs.m_configDrive, SwerveModuleConfigs.m_configTurn);
+        configure(SwerveConfigs.m_configDrive, SwerveConfigs.m_configTurn);
         resetEncoder();
         configMagnets(magnetOffset, absoluteSensorDiscont);
     }  
 
-    //DATA LOGGING
-    //for literally everything 
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition() % 360 - 180);
+        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude() % 360 - 180);
         SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble()*SwerveConstants.kAngleConversion);
         SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
 
-        SmartDashboard.putNumber(motor + " drive position", m_driveEncoder.getPosition());
-        SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition());
+        SmartDashboard.putNumber(motor + " drive position", m_driveMotor.getPosition().getValue().baseUnitMagnitude());
+        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude());
 
-        SmartDashboard.putNumber(motor + " drive velocity", m_driveEncoder.getVelocity());
-        SmartDashboard.putNumber(motor + " turn velocity", m_turnEncoder.getVelocity());
+        SmartDashboard.putNumber(motor + " drive velocity", m_driveMotor.getVelocity().getValue().baseUnitMagnitude());
+        SmartDashboard.putNumber(motor + " turn velocity", m_turnMotor.getVelocity().getValue().baseUnitMagnitude());
 
-        SmartDashboard.putNumber(motor + " drive current", m_driveMotor.getOutputCurrent());
-        SmartDashboard.putNumber(motor + " turn current", m_turnMotor.getOutputCurrent());
+        // SmartDashboard.putNumber(motor + " drive current", m_driveMotor.getOutputCurrent());
+        // SmartDashboard.putNumber(motor + " turn current", m_turnMotor.getOutputCurrent());
 
-        SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getAppliedOutput());
-        SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getAppliedOutput());
+        // SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getAppliedOutput());
+        // SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getAppliedOutput());
 
-        SmartDashboard.putNumber(motor + " drive temp", m_driveMotor.getMotorTemperature());
-        SmartDashboard.putNumber(motor + " turn temp", m_turnMotor.getMotorTemperature());
+        // SmartDashboard.putNumber(motor + " drive temp", m_driveMotor.getMotorTemperature());
+        // SmartDashboard.putNumber(motor + " turn temp", m_turnMotor.getMotorTemperature());
 
-        SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getBusVoltage());
-        SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getBusVoltage());
+        // SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getBusVoltage());
+        // SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getBusVoltage());
     }
 
     public SwerveModuleState getState() {
-        return new SwerveModuleState(m_driveEncoder.getVelocity(), Rotation2d.fromDegrees(m_turnEncoder.getPosition()));
+        return new SwerveModuleState(m_driveMotor.getVelocity(), Rotation2d.fromDegrees(m_turnMotor.getPosition()));
     }
     
     //extra tuning if needed
@@ -93,15 +84,15 @@ public class SwerveModule {
     }
 
     public void zeroTurnEncoder() {
-        m_turnEncoder.setPosition(0);
+        m_driveMotor.setPosition(0);
     }
 
     public void zeroDriveEncoder() {
-        m_driveEncoder.setPosition(0);
+        m_driveMotor.setPosition(0);
     }
 
 
-    public void configure(SparkMaxConfig driveConfig, SparkMaxConfig turnConfig) {
+    public void configure(TalonFXConfiguration driveConfig, TalonFXConfiguration turnConfig) {
         m_driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_turnMotor.configure(turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -114,11 +105,6 @@ public class SwerveModule {
         m_turnPID.setReference(targetState.angle.getDegrees(), ControlType.kPosition);
 
         m_desiredState = targetState; 
-    }
-
-    public void resetEncoder() {
-        m_driveEncoder.setPosition(0);
-        m_turnEncoder.setPosition(m_CANcoder.getAbsolutePosition().getValueAsDouble() * (SwerveConstants.kAngleConversion));  //degrees
     }
 
     public void setEncoderDistance(double distance) {
