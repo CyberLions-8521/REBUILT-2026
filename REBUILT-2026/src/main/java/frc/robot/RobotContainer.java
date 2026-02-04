@@ -14,9 +14,6 @@ public class RobotContainer {
 
   private void configureBindings() {
 
-    // currently making the a button map to fire for 5 seconds
-    m_gamepad.a().onTrue(m_shooter.shoot());
-
   }
 
   public Command getAutonomousCommand() {
