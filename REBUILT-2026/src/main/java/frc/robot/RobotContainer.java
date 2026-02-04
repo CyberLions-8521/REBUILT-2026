@@ -6,13 +6,28 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+import frc.robot.subsystems.Shooter;
 
 public class RobotContainer {
+
+  // constructing shooter object and command
+  private Shooter m_shooter = new Shooter();
+
+  // constructing Xbox controller (remmeber to set to port)
+  private CommandXboxController m_gamepad = new CommandXboxController(0);
+
   public RobotContainer() {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+
+    // currently making the a button map to fire for 5 seconds
+    m_gamepad.a().onTrue(m_shooter.shoot());
+
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
