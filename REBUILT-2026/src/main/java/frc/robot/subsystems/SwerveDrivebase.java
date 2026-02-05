@@ -49,33 +49,29 @@ public class SwerveDrivebase extends SubsystemBase {
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
       SwerveConstants.kFrontLeftTurnID,
-      SwerveConstants.kFrontLeftCANCoderID,
-      SwerveConstants.kFrontLeftCANCoderMagnetOffset,
-      SwerveConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontLeftMagEncoderID,
+      SwerveConstants.kFrontLeftMagEncoderMagnetOffset
     );
 
     m_frontRight = new SwerveModule(
       SwerveConstants.kFrontRightDriveID,
       SwerveConstants.kFrontRightTurnID,
-      SwerveConstants.kFrontRightCANCoderID,
-      SwerveConstants.kFrontRightCANCoderMagnetOffset,
-      SwerveConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontRightMagEncoderID,
+      SwerveConstants.kFrontRightMagEncoderMagnetOffset
     );
 
     m_backLeft = new SwerveModule(
       SwerveConstants.kBackLeftDriveID,
       SwerveConstants.kBackLeftTurnID,
-      SwerveConstants.kBackLeftCANCoderID,
-      SwerveConstants.kBackLeftCANCoderMagnetOffset,
-      SwerveConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackLeftMagEncoderID,
+      SwerveConstants.kBackLeftMagEncoderMagnetOffset
     );
 
     m_backRight = new SwerveModule(
       SwerveConstants.kBackRightDriveID,
       SwerveConstants.kBackRightTurnID,
-      SwerveConstants.kBackRightCANCoderID,
-      SwerveConstants.kBackRightCANCoderMagnetOffset,
-      SwerveConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackRightMagEncoderID,
+      SwerveConstants.kBackRightMagEncoderMagnetOffset
     );
 
     m_kinematics = new SwerveDriveKinematics(

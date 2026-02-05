@@ -5,13 +5,10 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
@@ -21,6 +18,7 @@ import com.revrobotics.spark.config.SparkMaxConfigAccessor;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Configs.SwerveConfigs;
 import frc.robot.Constants.SwerveConstants;
@@ -34,30 +32,29 @@ public class SwerveModule {
     private SparkClosedLoopController m_drivePID;
     private SparkClosedLoopController m_turnPID;
 
-    private CANcoder m_CANcoder;
+    private DutyCycleEncoder m_SRXEncoder;
 
     private SwerveModuleState m_desiredState = new SwerveModuleState();
 
 
-    public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset, double absoluteSensorDiscont) {
+    public SwerveModule(int driveMotorPort, int turnMotorPort, int SRXEncoderPort, double magnetOffset) {
         m_driveMotor = new SparkMax(driveMotorPort, SparkLowLevel.MotorType.kBrushless);
         m_turnMotor  = new SparkMax(turnMotorPort, SparkLowLevel.MotorType.kBrushless);
         m_driveEncoder = m_driveMotor.getEncoder();
         m_turnEncoder  = m_turnMotor.getEncoder();
         m_drivePID = m_driveMotor.getClosedLoopController();
         m_turnPID  = m_turnMotor.getClosedLoopController();
-        m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANCoderBus);
+        m_SRXEncoder = new DutyCycleEncoder(SRXEncoderPort, SwerveConstants.kSRXEncoderMaxValue, magnetOffset);
 
         configure(SwerveConfigs.m_configDrive, SwerveConfigs.m_configTurn);
         resetEncoder();
-        configMagnets(magnetOffset, absoluteSensorDiscont);
     }  
 
     //DATA LOGGING
     //for literally everything 
     public void logData(String motor){
         SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition() % 360 - 180);
-        SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble()*SwerveConstants.kAngleConversion);
+        SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get() - 0.5) *SwerveConstants.kAngleConversion);
         SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
 
         SmartDashboard.putNumber(motor + " drive position", m_driveEncoder.getPosition());
@@ -110,15 +107,15 @@ public class SwerveModule {
         Rotation2d currentRotation = Rotation2d.fromDegrees(m_turnEncoder.getPosition());
         targetState.optimize(currentRotation);
 
-        m_drivePID.setReference(targetState.speedMetersPerSecond, ControlType.kVelocity);
-        m_turnPID.setReference(targetState.angle.getDegrees(), ControlType.kPosition);
+        m_drivePID.setSetpoint(targetState.speedMetersPerSecond, ControlType.kVelocity);
+        m_turnPID.setSetpoint(targetState.angle.getDegrees(), ControlType.kPosition);
 
         m_desiredState = targetState; 
     }
 
     public void resetEncoder() {
         m_driveEncoder.setPosition(0);
-        m_turnEncoder.setPosition(m_CANcoder.getAbsolutePosition().getValueAsDouble() * (SwerveConstants.kAngleConversion));  //degrees
+        m_turnEncoder.setPosition((m_SRXEncoder.get() - 0.5) * (SwerveConstants.kAngleConversion));  //degrees
     }
 
     public void setEncoderDistance(double distance) {
@@ -140,20 +137,8 @@ public class SwerveModule {
     }
 
     //for smartdashboard logging purposes
-    public double getCANCoderPosition() {
-        return m_CANcoder.getAbsolutePosition().getValueAsDouble(); // rotations 
-    }
-
-    public void configMagnets(double kCANCoderMagnetOffset, double kCANCoderAbsoluteSensorDiscontinuityPoint) {
-        MagnetSensorConfigs m_magnetConfigs = new MagnetSensorConfigs();
-
-        m_magnetConfigs
-            .withMagnetOffset(kCANCoderMagnetOffset)
-            .withAbsoluteSensorDiscontinuityPoint(kCANCoderAbsoluteSensorDiscontinuityPoint)
-            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
-         
-        m_CANcoder.getConfigurator().apply(m_magnetConfigs);
-        
+    public double getSRXMagPosition() {
+        return m_SRXEncoder.get() - 0.5; // rotations 
     }
 
     public SparkMaxConfigAccessor getConfigAccessor() {
