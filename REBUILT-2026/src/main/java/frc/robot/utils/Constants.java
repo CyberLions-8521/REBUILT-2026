@@ -30,6 +30,7 @@ public class Constants {
         public static final double turnP = 0; //set later
         public static final double turnI = 0;
         public static final double turnD = 0; //set ;ater
+        public static final double turnFF = 0; //set later
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;

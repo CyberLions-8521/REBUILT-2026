@@ -41,14 +41,15 @@ public class Configs {
                 .withKP(SwerveConstants.turnP)
                 .withKI(SwerveConstants.turnI)
                 .withKD(SwerveConstants.driveD);
-            m_driveConfig.CurrentLimits
+            m_turnConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.turnMotorCurrentLimit);
-            m_driveConfig.MotorOutput
+            m_turnConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
-            m_driveConfig.Feedback
-                .withSensorToMechanismRatio(SwerveConstants.kTurnConversionFactor);   
+            m_turnConfig.Feedback
+                .withSensorToMechanismRatio(SwerveConstants.kTurnConversionFactor)   
+                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
 
             m_magnetConfigs
                 .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
