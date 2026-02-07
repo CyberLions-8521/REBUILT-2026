@@ -163,4 +163,8 @@ public class SwerveModule {
         return m_driveMotor.configAccessor;
     }
 
+    public SwerveModuleState getCurrentState() {
+        return new SwerveModuleState(m_driveEncoder.getVelocity(), Rotation2d.fromDegrees(m_turnEncoder.getPosition()));
+    }
+
 }

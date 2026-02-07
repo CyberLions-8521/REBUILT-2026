@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.Supplier;
+import java.lang.Exception;
 
 import com.studica.frc.AHRS;
 
@@ -13,6 +14,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -30,6 +32,7 @@ import frc.robot.SwerveModule;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.config.RobotConfig;
 
 
 public class Swerve extends SubsystemBase {
@@ -92,7 +95,28 @@ public class Swerve extends SubsystemBase {
 
     m_auto = new PathPlannerAuto(AutoBuilder.getAllAutoNames().get(0));
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, Rotation2d.fromDegrees(-m_gyro.getAngle()), getModulePositions(), m_auto.getStartingPose());
+  
+    //Loads config from GUI settings but can also be stored in constants later
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    //Configure AutoBuilder
+    
+    AutoBuilder.configure(
+      this::getPose, 
+      this::resetPose, 
+      null, 
+      null, 
+      null, 
+      null, 
+      null);
+    
   }
+
 
   //DATA LOGGING
   public void logData() {
@@ -110,7 +134,6 @@ public class Swerve extends SubsystemBase {
   }
 
   //PATHPLANNER
-  
 
   //DRIVE COMMANDS
   public void drive(double vx, double vy, double omega, boolean fieldRelative) {
@@ -195,6 +218,18 @@ public class Swerve extends SubsystemBase {
       m_backLeft.getSwerveModulePosition(),
       m_backRight.getSwerveModulePosition()
     };
+  }
+
+  public Pose2d getPose(){
+    return m_poseEstimator.getEstimatedPosition();
+  }
+
+  public void resetPose(Pose2d newPose){
+    m_poseEstimator.resetPose(newPose);
+  }
+
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return m_kinematics.toChassisSpeeds(m_frontLeft.getCurrentState(), m_frontRight.getCurrentState(), m_backLeft.getCurrentState(), m_backRight.getCurrentState());
   }
   
   public Command resetEncodersCommand() {
