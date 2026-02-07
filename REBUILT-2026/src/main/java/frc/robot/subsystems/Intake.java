@@ -22,8 +22,8 @@ public class Intake extends SubsystemBase {
     }
 
     private void logData(){
-        SmartDashboard.putNumber("Intake Position", m_intake.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Pivot Position", m_intake.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Position", getIntakePosition());
+        SmartDashboard.putNumber("Pivot Position", getPivotPosition());
     }
 
     public Command getIntakeCommand(double speed) {
@@ -63,8 +63,14 @@ public class Intake extends SubsystemBase {
     public void resetPivotEncoders(){
         m_pivot.setPosition(0);
     }
-    
 
+    public double getIntakePosition(){
+        return m_intake.getPosition().getValueAsDouble();
+    }
+    
+    public double getPivotPosition(){
+        return m_pivot.getPosition().getValueAsDouble();
+    }
 
     @Override
     public void periodic() {

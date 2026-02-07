@@ -21,7 +21,12 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_controller.a().whileTrue(m_intake.getIntakeCommand(0.02));
+    m_controller.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.02));
+    m_controller.rightTrigger().whileTrue(m_intake.getIntakeCommand(-0.02));
+
+    m_controller.leftBumper().whileTrue(m_intake.getPivotCommand(0.02));
+    m_controller.rightBumper().whileTrue(m_intake.getPivotCommand(-0.02));
+
   }
 
   public Command getAutonomousCommand() {
