@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -25,9 +24,9 @@ public class Limelight extends SubsystemBase {
 
         LimelightHelpers.setCameraPose_RobotSpace("", 
             //turn these into constants later
-            0.5,    // Forward offset (meters)
+            0.0,    // Forward offset (meters)
             0.0,    // Side offset (meters)
-            0.5,    // Height offset (meters)
+            0.0,    // Height offset (meters)
             0.0,    // Roll (degrees)
             0,   // Pitch (degrees)
             0.0     // Yaw (degrees)
@@ -35,34 +34,14 @@ public class Limelight extends SubsystemBase {
 
         LimelightHelpers.setFiducial3DOffset("", 
             //to top of hub opening from center apriltag
-            0.5969,    // Forward offset
+            0.0,    // Forward offset
             0.0,    // Side offset  
-            0.70485     // Height offset
+            0.0     // Height offset
         );
 
         LimelightHelpers.SetFiducialIDFiltersOverride("", hubIDs); // Only track these tag IDs
         LimelightHelpers.SetFiducialDownscalingOverride("", 1.0f); //downscale by 1x (no effect)
     }
-
-
-    public FunctionalCommand DoLimelight(){
-        return new FunctionalCommand(
-            ()->{
-                if (LimelightHelpers.getTV("")){
-                    int[] validIDs = new int[]{LimelightHelpers.RawFiducial.id};
-                    LimelightHelpers.SetFiducialIDFiltersOverride("", validIDs);
-                }
-            },
-            ()->{
-                if (LimelightHelpers.getTV("")) {
-                    SmartDashboard.putNumber("TX", LimelightHelpers.getTX(null));
-                }
-            },
-            ()->{
-                LimelightHelpers.SetFiducialIDFiltersOverride("", hubIDs);
-            },
-            () -> false, this);
-    } 
 
     @Override
     public void periodic() {
@@ -71,8 +50,15 @@ public class Limelight extends SubsystemBase {
         //https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization
         //TargetPose = Gets the target's 3D pose with respect to the robot's coordinate system.
         //RobotPose =  Gets the robot's 3D pose in the WPILib Blue Alliance Coordinate System. (wpiRed is not recommended)
+        //To do:
+        //- Check if the methods correspond and are proportional with real world measurements
+        //- Figure out when to use TargetPose and RobotPose (or just one)
 
-        TargetPose = LimelightHelpers.getTargetPose3d_RobotSpace("");
-        RobotPose = LimelightHelpers.getBotPose3d_wpiBlue("");
+        TargetPose = LimelightHelpers.getTargetPose3d_RobotSpace("");   
+        // RobotPose = LimelightHelpers.getBotPose3d_wpiBlue("");
+
+        SmartDashboard.putNumber("TargetPose X", TargetPose.getX());
+        SmartDashboard.putNumber("TargetPose Y", TargetPose.getY());
+        SmartDashboard.putNumber("TargetPose Z", TargetPose.getZ());
     }
 }   
