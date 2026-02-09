@@ -46,7 +46,7 @@ public class Configs {
                 .outputRange(-1, 1)
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
-                .positionWrappingInputRange(-SwerveConstants.kAngleConversion / 2.0, SwerveConstants.kAngleConversion / 2.0); 
+                .positionWrappingInputRange(0, SwerveConstants.kAngleConversion); 
         }
     }
 }

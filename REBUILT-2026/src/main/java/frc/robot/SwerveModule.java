@@ -54,7 +54,7 @@ public class SwerveModule {
     //for literally everything 
     public void logData(String motor){
         SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition() % 360 - 180);
-        SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get() - 0.5) *SwerveConstants.kAngleConversion);
+        SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get()) * SwerveConstants.kAngleConversion);
         SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
 
         SmartDashboard.putNumber(motor + " drive position", m_driveEncoder.getPosition());
@@ -115,7 +115,7 @@ public class SwerveModule {
 
     public void resetEncoder() {
         m_driveEncoder.setPosition(0);
-        m_turnEncoder.setPosition((m_SRXEncoder.get() - 0.5) * (SwerveConstants.kAngleConversion));  //degrees
+        m_turnEncoder.setPosition((m_SRXEncoder.get()) * (SwerveConstants.kAngleConversion));  //degrees
     }
 
     public void setEncoderDistance(double distance) {
@@ -138,7 +138,7 @@ public class SwerveModule {
 
     //for smartdashboard logging purposes
     public double getSRXMagPosition() {
-        return m_SRXEncoder.get() - 0.5; // rotations 
+        return m_SRXEncoder.get(); // rotations 
     }
 
     public SparkMaxConfigAccessor getConfigAccessor() {

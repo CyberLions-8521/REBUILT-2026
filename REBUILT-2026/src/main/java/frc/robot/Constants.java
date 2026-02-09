@@ -18,10 +18,10 @@ public class Constants {
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
-        private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4i
+        private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4
         public static final double kDriveConversionFactor = kWheelCircumference / kDriveGearRatio;  // meters (of robot travel)
 
-        private static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
+        private static final double kTurnGearRatio = 12.8;     // found on SDS page for MK4
         public static final double kAngleConversion = 360;              // degrees
         public static final double kTurnConversionFactor = kAngleConversion / kTurnGearRatio;       // degrees (of output shaft)
 
@@ -53,8 +53,8 @@ public class Constants {
         public static final int kBackLeftMagEncoderID   = 0; //set later
         public static final int kBackRightMagEncoderID  = 0; //set later
 
-        public static final double kWheelBase = Units.inchesToMeters(23.25);    // x-direction of robot
-        public static final double kTrackWidth = Units.inchesToMeters(23.25);   // y-direction of robot
+        public static final double kWheelBase = Units.inchesToMeters(19.5);    // x-direction of robot
+        public static final double kTrackWidth = Units.inchesToMeters(19.5);   // y-direction of robot
 
         public static final double kMaxMetersPerSecond = 3.0;
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
