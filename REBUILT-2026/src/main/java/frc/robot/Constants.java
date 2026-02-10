@@ -37,14 +37,14 @@ public class Constants {
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
-        public static final int kFrontLeftDriveID  = 6;
-        public static final int kFrontLeftTurnID   = 4;
-        public static final int kFrontRightDriveID = 3;
-        public static final int kFrontRightTurnID  = 14;
-        public static final int kBackLeftDriveID   = 50;
-        public static final int kBackLeftTurnID    = 2;
-        public static final int kBackRightDriveID  = 8;
-        public static final int kBackRightTurnID   = 7;
+        public static final int kFrontLeftDriveID  = 7;
+        public static final int kFrontLeftTurnID   = 13;
+        public static final int kFrontRightDriveID = 21;
+        public static final int kFrontRightTurnID  = 25;
+        public static final int kBackLeftDriveID   = 14;
+        public static final int kBackLeftTurnID    = 10;
+        public static final int kBackRightDriveID  = 3;
+        public static final int kBackRightTurnID   = 1;
 
         // Note: CANcoder CAN IDs are on a separate CAN bus than SparkMAXs
         // allowing for duplicates between CANcoders and SparkMAXs
