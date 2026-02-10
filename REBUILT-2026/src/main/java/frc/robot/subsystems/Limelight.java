@@ -14,7 +14,7 @@ import com.ctre.phoenix6.signals.StripTypeValue;
 public class Limelight extends SubsystemBase {
 
     private final String LimelightName = "Limelight-3.0";
-    private final CANdle CANdle = new CANdle(0);
+    private final CANdle CANdle = new CANdle(4, "ryan");
     
     public Limelight() {
         CANdleConfiguration Configs = new CANdleConfiguration();
