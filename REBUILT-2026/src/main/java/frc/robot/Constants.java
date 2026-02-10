@@ -60,10 +60,10 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kSRXEncoderMaxValue = 1;
-        public static final double kFrontLeftMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
+        public static final double kFrontLeftMagEncoderMagnetOffset  = 1;     // set later, measure in Phoenix tuner x
         public static final double kFrontRightMagEncoderMagnetOffset = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 3;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 2;     // set later, measure in Phoenix tuner x
 
         public static final double kStrafeP = 0.0;
         public static final double kStrafeI = 0.0;
