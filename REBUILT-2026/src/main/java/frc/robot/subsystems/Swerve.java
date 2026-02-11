@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,7 +34,8 @@ import frc.robot.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
-
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 public class Swerve extends SubsystemBase {
   private final SwerveModule m_frontLeft;
@@ -109,11 +111,22 @@ public class Swerve extends SubsystemBase {
     AutoBuilder.configure(
       this::getPose, 
       this::resetPose, 
-      null, 
-      null, 
-      null, 
-      null, 
-      null);
+      this::getRobotRelativeSpeeds, 
+      (speeds, feedforwards) -> drive(speeds), 
+      new PPHolonomicDriveController(
+        new PIDConstants(0.0, 0.0, 0.0), 
+        new PIDConstants(0.0, 0.0, 0.0)
+      ), 
+      config, 
+      () -> {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      this
+      );
     
   }
 
