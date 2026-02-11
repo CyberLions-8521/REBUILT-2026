@@ -8,22 +8,23 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.subsystems.Shooter;
 
 
 public class Shooter extends SubsystemBase {
 
-  private SparkMax m_masterShooter;
-  private SparkMax m_helperShooter;
+  private TalonFX m_masterShooter;
+  private TalonFX m_helperShooter;
 
   /** Creates a new Shooter. */
   public Shooter() {
     // remember to edit the port later
-    m_masterShooter = new SparkMax(0, MotorType.kBrushless);
-    m_helperShooter = new SparkMax(0, MotorType.kBrushless);
+    m_masterShooter = new TalonFX(-1);
+    m_helperShooter = new TalonFX(-1);
   }
 
   public void move(double speed) {
