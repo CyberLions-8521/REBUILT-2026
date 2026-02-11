@@ -26,9 +26,9 @@ public class Shooter extends SubsystemBase {
     m_helperShooter = new SparkMax(0, MotorType.kBrushless);
   }
 
-  public void move() {
-    m_masterShooter.set(1);
-    m_helperShooter.set(1);
+  public void move(double speed) {
+    m_masterShooter.set(speed);
+    m_helperShooter.set(speed);
   }
   
   public void stop() {
@@ -36,7 +36,8 @@ public class Shooter extends SubsystemBase {
     m_helperShooter.stopMotor();
   }
 
-  public Command shoot() { return new RunCommand( () -> { move(); } ).finallyDo(interrupted -> stop()); }
+  // for the move(double speed) command, change to any double within the range [0,1] for testing 
+  public Command shoot() { return new RunCommand( () -> { move(1); } ).finallyDo(interrupted -> stop()); }
 
   @Override
   public void periodic() {
