@@ -17,15 +17,24 @@ import frc.robot.subsystems.Shooter;
 
 public class Shooter extends SubsystemBase {
 
-  private SparkMax m_shooter;
+  private SparkMax m_masterShooter;
+  private SparkMax m_helperShooter;
 
   /** Creates a new Shooter. */
   public Shooter() {
-    m_shooter = new SparkMax(0, MotorType.kBrushless);
+    // remember to edit the port later
+    m_masterShooter = new SparkMax(0, MotorType.kBrushless);
+    m_helperShooter = new SparkMax(0, MotorType.kBrushless);
   }
 
-  public void move() { m_shooter.set(1); }
-  public void stop() { m_shooter.stopMotor(); }
+  public void move() {
+    m_masterShooter.set(1);
+    m_helperShooter.set(1);
+  }
+  public void stop() {
+    m_masterShooter.stopMotor();
+    m_helperShooter.stopMotor();
+    }
 
   public Command shoot() { return new RunCommand( () -> { move(); } ).finallyDo(interrupted -> stop()); }
 
