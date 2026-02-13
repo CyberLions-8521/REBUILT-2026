@@ -27,7 +27,7 @@ public class RobotContainer {
   private final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   private final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-  // AutoAlign align = new AutoAlign(m_drivebase, 0, 1.5);
+  AutoAlign align = new AutoAlign(m_drivebase, 0, 1.5);
   // LEDLights m_LEDLights = new LEDLights();
   
   public RobotContainer() {
@@ -41,6 +41,7 @@ public class RobotContainer {
     //   getJoystickValues(m_controller::getLeftX, vy_limiter),
     //   getJoystickValues(m_controller::getRightX, omega_limiter),
     //   m_controller.getHID()::getRightBumperButton));
+    m_controller.a().whileTrue(align);
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
