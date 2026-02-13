@@ -35,12 +35,12 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // m_drivebase.setDefaultCommand(this.getDriveCommand(
-    //   1,
-    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
-    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
-    //   getJoystickValues(m_controller::getRightX, omega_limiter),
-    //   m_controller.getHID()::getRightBumperButton));
+    m_drivebase.setDefaultCommand(this.getDriveCommand(
+      1,
+      getJoystickValues(m_controller::getLeftY, vx_limiter),
+      getJoystickValues(m_controller::getLeftX, vy_limiter),
+      getJoystickValues(m_controller::getRightX, omega_limiter),
+      m_controller.getHID()::getRightBumperButton));
     m_controller.a().whileTrue(align);
   }
 

@@ -48,10 +48,10 @@ public class Constants {
 
         // Note: CANcoder CAN IDs are on a separate CAN bus than SparkMAXs
         // allowing for duplicates between CANcoders and SparkMAXs
-        public static final int kFrontLeftMagEncoderID  = 0; //set later
+        public static final int kFrontLeftMagEncoderID  = 1; //set later
         public static final int kFrontRightMagEncoderID = 0; //set later
-        public static final int kBackLeftMagEncoderID   = 0; //set later
-        public static final int kBackRightMagEncoderID  = 0; //set later
+        public static final int kBackLeftMagEncoderID   = 3; //set later
+        public static final int kBackRightMagEncoderID  = 2; //set later
 
         public static final double kWheelBase = Units.inchesToMeters(19.5);    // x-direction of robot
         public static final double kTrackWidth = Units.inchesToMeters(19.5);   // y-direction of robot
@@ -60,10 +60,10 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kSRXEncoderMaxValue = 1;
-        public static final double kFrontLeftMagEncoderMagnetOffset  = 1;     // set later, measure in Phoenix tuner x
-        public static final double kFrontRightMagEncoderMagnetOffset = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 3;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 2;     // set later, measure in Phoenix tuner x
+        public static final double kFrontLeftMagEncoderMagnetOffset  = 0.782056;     // set later, measure in Phoenix tuner x
+        public static final double kFrontRightMagEncoderMagnetOffset = 0.387926;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 0.015398;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 0.833306;     // set later, measure in Phoenix tuner x
 
         public static final double kStrafeP = 0.0;
         public static final double kStrafeI = 0.0;

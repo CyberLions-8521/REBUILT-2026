@@ -22,7 +22,7 @@ public class AutoAlign extends Command {
     private final double desiredAngle;
     private final double desiredRadius;
 
-    int[] validIDs = {3,4};
+    // int[] validIDs = {3,4};
 
   public AutoAlign(SwerveDrivebase drivebase, double desiredAngle, double desiredRadius) {
     this.drivebase = drivebase;
@@ -32,14 +32,14 @@ public class AutoAlign extends Command {
     yPID.setTolerance(0.1);
     angularPID.setTolerance(0.1);
     angularPID.enableContinuousInput(-Math.PI, Math.PI);
-    LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validIDs);
+    // LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validIDs);
     addRequirements(drivebase);
   }
 
   public void getCoordinates() {
-    SmartDashboard.getNumber("Limelight X",LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX());
-    SmartDashboard.getNumber("Limelight Y",LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY());
-    SmartDashboard.getNumber("Limelight Z",LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getZ());
+    SmartDashboard.putNumber("Limelight X", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX());
+    SmartDashboard.putNumber("Limelight Y", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY());
+    SmartDashboard.putNumber("Limelight Z", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getZ());
   }
 
   public void tunePID() {
@@ -64,16 +64,17 @@ public class AutoAlign extends Command {
   @Override
   public void execute() {
     if (LimelightHelpers.getTV(LimelightConstants.limelightName)) {
-      // tunePID();
+      tunePID();
+      
       getCoordinates();
-      // double offsetX = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX(); //make sure to configure the limelight in robot space!!
-      // double offsetY = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY(); //.getTargetPose3d_RobotSpace returns the coordinates of the apriltag relative to the robot
+      double offsetX = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX(); //make sure to configure the limelight in robot space!!
+      double offsetY = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY(); //.getTargetPose3d_RobotSpace returns the coordinates of the apriltag relative to the robot
 
-      // double xChange = MathUtil.clamp(xPID.calculate(offsetX, desiredRadius * Math.cos(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
-      // double yChange = MathUtil.clamp(yPID.calculate(offsetY, desiredRadius * Math.sin(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
-      // double angularChange = MathUtil.clamp(angularPID.calculate(drivebase.getHeading().getRadians(), desiredAngle), -0.2 * SwerveConstants.kMaxAngularSpeed, 0.2 * SwerveConstants.kMaxAngularSpeed);
+      double xChange = MathUtil.clamp(xPID.calculate(offsetX, desiredRadius * Math.cos(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
+      double yChange = MathUtil.clamp(yPID.calculate(offsetY, desiredRadius * Math.sin(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
+      double angularChange = MathUtil.clamp(angularPID.calculate(drivebase.getHeading().getRadians(), desiredAngle), -0.2 * SwerveConstants.kMaxAngularSpeed, 0.2 * SwerveConstants.kMaxAngularSpeed);
 
-      // drivebase.drive(xChange, yChange, angularChange, false);
+      drivebase.drive(xChange, yChange, angularChange, false);
     }
 
   }
