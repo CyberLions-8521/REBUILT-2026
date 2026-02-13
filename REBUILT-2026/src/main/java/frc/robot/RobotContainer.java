@@ -15,17 +15,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.ControllerConstants;
-import frc.robot.Constants.SwerveDrivebaseConstants;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.SwerveDrivebase;
 
 import frc.robot.commands.AutoAlignCommand;
 
 public class RobotContainer {
-  private final Swerve m_db = new Swerve();
-  private final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
-  private final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
-  private final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
+  private final SwerveDrivebase m_db = new SwerveDrivebase();
+  private final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  private final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  private final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
   
   private final CommandXboxController m_driveController = new CommandXboxController(OperatorConstants.kDriveControllerPort);
@@ -69,9 +69,9 @@ public class RobotContainer {
   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
     return new RunCommand(
       () -> m_db.drive(
-        -vx.get() * multiplier * SwerveDrivebaseConstants.kMaxMetersPerSecond,
-        -vy.get() * multiplier * SwerveDrivebaseConstants.kMaxMetersPerSecond,
-        -omega.get() * multiplier * SwerveDrivebaseConstants.kMaxMetersPerSecond,
+        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -omega.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         !fieldRelative.get()),
       m_db);    
   }

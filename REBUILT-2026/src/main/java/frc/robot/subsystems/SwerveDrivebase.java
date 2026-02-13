@@ -9,25 +9,27 @@ import java.util.function.Supplier;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import frc.robot.Constants.SwerveDrivebaseConstants;
 import frc.robot.Constants.LimelightConstants;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.SwerveModule;
+import edu.wpi.first.math.estimator.PoseEstimator;
 
 
-public class Swerve extends SubsystemBase {
+public class SwerveDrivebase extends SubsystemBase {
   private final SwerveModule m_frontLeft;
   private final SwerveModule m_frontRight;
   private final SwerveModule m_backLeft;
@@ -37,51 +39,46 @@ public class Swerve extends SubsystemBase {
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private final SlewRateLimiter filter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
+  private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-  private final PIDController m_alignPID =
-    new PIDController(0,0,0);
+  private PoseEstimator m_poseEstimator;
   
-  public Swerve() {
+  public SwerveDrivebase() {
     m_gyro.reset();
 
     m_frontLeft = new SwerveModule(
-      SwerveDrivebaseConstants.kFrontLeftDriveID,
-      SwerveDrivebaseConstants.kFrontLeftTurnID,
-      SwerveDrivebaseConstants.kFrontLeftCANCoderID,
-      SwerveDrivebaseConstants.kFrontLeftCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontLeftDriveID,
+      SwerveConstants.kFrontLeftTurnID,
+      SwerveConstants.kFrontLeftMagEncoderID,
+      SwerveConstants.kFrontLeftMagEncoderMagnetOffset
     );
 
     m_frontRight = new SwerveModule(
-      SwerveDrivebaseConstants.kFrontRightDriveID,
-      SwerveDrivebaseConstants.kFrontRightTurnID,
-      SwerveDrivebaseConstants.kFrontRightCANCoderID,
-      SwerveDrivebaseConstants.kFrontRightCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontRightDriveID,
+      SwerveConstants.kFrontRightTurnID,
+      SwerveConstants.kFrontRightMagEncoderID,
+      SwerveConstants.kFrontRightMagEncoderMagnetOffset
     );
 
     m_backLeft = new SwerveModule(
-      SwerveDrivebaseConstants.kBackLeftDriveID,
-      SwerveDrivebaseConstants.kBackLeftTurnID,
-      SwerveDrivebaseConstants.kBackLeftCANCoderID,
-      SwerveDrivebaseConstants.kBackLeftCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackLeftDriveID,
+      SwerveConstants.kBackLeftTurnID,
+      SwerveConstants.kBackLeftMagEncoderID,
+      SwerveConstants.kBackLeftMagEncoderMagnetOffset
     );
 
     m_backRight = new SwerveModule(
-      SwerveDrivebaseConstants.kBackRightDriveID,
-      SwerveDrivebaseConstants.kBackRightTurnID,
-      SwerveDrivebaseConstants.kBackRightCANCoderID,
-      SwerveDrivebaseConstants.kBackRightCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackRightDriveID,
+      SwerveConstants.kBackRightTurnID,
+      SwerveConstants.kBackRightMagEncoderID,
+      SwerveConstants.kBackRightMagEncoderMagnetOffset
     );
 
     m_kinematics = new SwerveDriveKinematics(
-      new Translation2d(SwerveDrivebaseConstants.kWheelBase / 2, SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(SwerveDrivebaseConstants.kWheelBase / 2, -SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(-SwerveDrivebaseConstants.kWheelBase / 2, SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(-SwerveDrivebaseConstants.kWheelBase / 2, -SwerveDrivebaseConstants.kTrackWidth / 2)
+      new Translation2d(SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
+      new Translation2d(SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2),
+      new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
+      new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
     logData();
   }
@@ -113,7 +110,7 @@ public class Swerve extends SubsystemBase {
     }
 
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        m_swerveModuleStates, SwerveDrivebaseConstants.kMaxMetersPerSecond);
+        m_swerveModuleStates, SwerveConstants.kMaxMetersPerSecond);
     m_frontLeft.setDesiredState(m_swerveModuleStates[0]);
     m_frontRight.setDesiredState(m_swerveModuleStates[1]);
     m_backLeft.setDesiredState(m_swerveModuleStates[2]);
@@ -207,34 +204,42 @@ public class Swerve extends SubsystemBase {
             Math.abs(m_backLeft.getDriveDistance())   +
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
+  
 
-  //AUTO ALIGN
-  double getTargetingAngularVelocity() { // aiming control
-      double tx = LimelightHelpers.getTX(LimelightConstants.kName);
 
-      double targetingAngularVelocity = tx * LimelightConstants.kAimP;
+  public void estimatePose() {
+    
+      m_poseEstimator.update(
+        m_gyro.getRotation2d(),
+        new SwerveModulePosition[] {
+          m_frontLeft.getPosition(),
+          m_frontRight.getPosition(),
+          m_backLeft.getPosition(),
+          m_backRight.getPosition()
+        });
 
-      //conversion to radians/second
-      targetingAngularVelocity *= SwerveDrivebaseConstants.kMaxAngularSpeed;
-      //invert since tx is positive to the right
-      targetingAngularVelocity *= -1.0;
 
-      return targetingAngularVelocity;
+    LimelightHelpers.SetRobotOrientation("limelight", m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    
+    boolean doRejectUpdate = false;
+
+    if(Math.abs(m_gyro.getRate()) > 360)
+    {
+      doRejectUpdate = true;
+    }
+    if(mt2.tagCount == 0)
+    {
+      doRejectUpdate = true;
+    }
+    if(!doRejectUpdate)
+    {
+      m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+      m_poseEstimator.addVisionMeasurement(
+          mt2.pose,
+          mt2.timestampSeconds);
+    }
   }
-
-  double getTargetingForwardSpeed() { // ranging control
-      double targetingForwardSpeed = LimelightHelpers.getTY(LimelightConstants.kName) * LimelightConstants.kRangeP;
-      targetingForwardSpeed *= SwerveDrivebaseConstants.kMaxMetersPerSecond;
-      targetingForwardSpeed *= -1.0; //invert since ty is positive when target is above crosshair
-      return targetingForwardSpeed;
-  }
-
-  public void periodic() {
-    logData();
-    SmartDashboard.putNumber("TX", LimelightHelpers.getTX(LimelightConstants.kName));
-    SmartDashboard.putNumber("TY", LimelightHelpers.getTY(LimelightConstants.kName));
-    SmartDashboard.putNumber("Straight Distance", this.getStraightDistance());
-    // SmartDashboard.putNumber("Offset", this.calculateDistanceFromAprilTag());
-  }
+  
 
 }

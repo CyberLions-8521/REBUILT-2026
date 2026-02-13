@@ -2,15 +2,15 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.MathUtil;
-import frc.robot.subsystems.Swerve;
-import frc.robot.Constants.SwerveDrivebaseConstants;
+import frc.robot.subsystems.SwerveDrivebase;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.LimelightHelpers;
 
 public class AutoAlignCommand extends Command {
-    private final Swerve m_swerve;
+    private final SwerveDrivebase m_swerve;
 
-    public AutoAlignCommand(Swerve swerve) {
+    public AutoAlignCommand(SwerveDrivebase swerve) {
         this.m_swerve = swerve; 
         addRequirements(swerve);
     }
@@ -21,7 +21,7 @@ public class AutoAlignCommand extends Command {
         double targetingAngularVelocity = tx * LimelightConstants.kAimP;
 
         //conversion to radians/second
-        targetingAngularVelocity *= SwerveDrivebaseConstants.kMaxAngularSpeed;
+        targetingAngularVelocity *= SwerveConstants.kMaxAngularSpeed;
         //invert since tx is positive to the right
         targetingAngularVelocity *= -1.0;
 
@@ -30,7 +30,7 @@ public class AutoAlignCommand extends Command {
 
     double getTargetingForwardSpeed() { // ranging control
         double targetingForwardSpeed = LimelightHelpers.getTY(LimelightConstants.kName) * LimelightConstants.kRangeP;
-        targetingForwardSpeed *= SwerveDrivebaseConstants.kMaxMetersPerSecond;
+        targetingForwardSpeed *= SwerveConstants.kMaxMetersPerSecond;
         targetingForwardSpeed *= -1.0; //invert since ty is positive when target is above crosshair
         return targetingForwardSpeed;
     }
