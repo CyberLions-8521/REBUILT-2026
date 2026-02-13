@@ -30,13 +30,13 @@ public class AutoAlign extends Command {
     this.desiredRadius = desiredRadius;
     xPID.setTolerance(0.1);
     yPID.setTolerance(0.1);
-    angularPID.setTolerance(0.1);
-    angularPID.enableContinuousInput(-Math.PI, Math.PI);
+    angularPID.setTolerance(1);
+    angularPID.enableContinuousInput(-180, 180);
     // LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validIDs);
     addRequirements(drivebase);
   }
 
-  public void getCoordinates() {
+  public void getData() {
     SmartDashboard.putNumber("Limelight X", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX());
     SmartDashboard.putNumber("Limelight Y", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY());
     SmartDashboard.putNumber("Limelight Z", LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getZ());
@@ -66,15 +66,18 @@ public class AutoAlign extends Command {
     if (LimelightHelpers.getTV(LimelightConstants.limelightName)) {
       tunePID();
       
-      getCoordinates();
+      getData();
       double offsetX = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX(); //make sure to configure the limelight in robot space!!
       double offsetY = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY(); //.getTargetPose3d_RobotSpace returns the coordinates of the apriltag relative to the robot
 
-      double xChange = MathUtil.clamp(xPID.calculate(offsetX, desiredRadius * Math.cos(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
-      double yChange = MathUtil.clamp(yPID.calculate(offsetY, desiredRadius * Math.sin(desiredAngle)), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
-      double angularChange = MathUtil.clamp(angularPID.calculate(drivebase.getHeading().getRadians(), desiredAngle), -0.2 * SwerveConstants.kMaxAngularSpeed, 0.2 * SwerveConstants.kMaxAngularSpeed);
+      double xChange = MathUtil.clamp(xPID.calculate(offsetX, desiredRadius * Math.toDegrees(Math.cos(desiredAngle))), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
+      double yChange = MathUtil.clamp(yPID.calculate(offsetY, desiredRadius * Math.toDegrees(Math.sin(desiredAngle))), -0.2 * SwerveConstants.kMaxMetersPerSecond, 0.2 * SwerveConstants.kMaxMetersPerSecond);
+      double angularChange = MathUtil.clamp(angularPID.calculate(drivebase.getHeading().getDegrees(), desiredAngle), -0.2 * SwerveConstants.kMaxAngularSpeed, 0.2 * SwerveConstants.kMaxAngularSpeed);
 
-      drivebase.drive(xChange, yChange, angularChange, false);
+      // drivebase.drive(xChange, yChange, angularChange, false);
+      SmartDashboard.putNumber("xChange", xChange);
+      SmartDashboard.putNumber("yChange", yChange);
+      SmartDashboard.putNumber("angularChange", angularChange);
     }
 
   }

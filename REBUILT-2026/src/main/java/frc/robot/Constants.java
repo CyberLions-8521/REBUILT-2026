@@ -37,21 +37,21 @@ public class Constants {
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
-        public static final int kFrontLeftDriveID  = 7;
-        public static final int kFrontLeftTurnID   = 13;
-        public static final int kFrontRightDriveID = 21;
-        public static final int kFrontRightTurnID  = 25;
-        public static final int kBackLeftDriveID   = 14;
-        public static final int kBackLeftTurnID    = 10;
-        public static final int kBackRightDriveID  = 3;
-        public static final int kBackRightTurnID   = 1;
+        public static final int kFrontLeftDriveID  = 3;
+        public static final int kFrontLeftTurnID   = 1;
+        public static final int kFrontRightDriveID = 14;
+        public static final int kFrontRightTurnID  = 10;
+        public static final int kBackLeftDriveID   = 21;
+        public static final int kBackLeftTurnID    = 25;
+        public static final int kBackRightDriveID  = 7;
+        public static final int kBackRightTurnID   = 13;
 
         // Note: CANcoder CAN IDs are on a separate CAN bus than SparkMAXs
         // allowing for duplicates between CANcoders and SparkMAXs
-        public static final int kFrontLeftMagEncoderID  = 1; //set later
-        public static final int kFrontRightMagEncoderID = 0; //set later
-        public static final int kBackLeftMagEncoderID   = 3; //set later
-        public static final int kBackRightMagEncoderID  = 2; //set later
+        public static final int kFrontLeftMagEncoderID  = 2; //set later
+        public static final int kFrontRightMagEncoderID = 3; //set later
+        public static final int kBackLeftMagEncoderID   = 0; //set later
+        public static final int kBackRightMagEncoderID  = 1; //set later
 
         public static final double kWheelBase = Units.inchesToMeters(19.5);    // x-direction of robot
         public static final double kTrackWidth = Units.inchesToMeters(19.5);   // y-direction of robot
@@ -60,10 +60,10 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kSRXEncoderMaxValue = 1;
-        public static final double kFrontLeftMagEncoderMagnetOffset  = 0.782056;     // set later, measure in Phoenix tuner x
-        public static final double kFrontRightMagEncoderMagnetOffset = 0.387926;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 0.015398;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 0.833306;     // set later, measure in Phoenix tuner x
+        public static final double kFrontLeftMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
+        public static final double kFrontRightMagEncoderMagnetOffset = 0;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 0;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
 
         public static final double kStrafeP = 0.0;
         public static final double kStrafeI = 0.0;
