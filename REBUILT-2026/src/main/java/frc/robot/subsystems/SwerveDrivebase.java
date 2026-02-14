@@ -12,6 +12,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -42,9 +43,11 @@ public class SwerveDrivebase extends SubsystemBase {
   private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
   private PoseEstimator m_poseEstimator;
+
+  private Pose3d targetPoseRobot = new Pose3d();
   
   public SwerveDrivebase() {
-    m_gyro.reset();
+    resetGyro();
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -80,7 +83,6 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
-    logData();
   }
 
   //DATA LOGGING
@@ -104,7 +106,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SwerveModuleState[] m_swerveModuleStates;
     if(fieldRelative) {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(
-        ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(-m_gyro.getAngle())));
+        ChassisSpeeds.fromFieldRelativeSpeeds(-vx, vy, omega, Rotation2d.fromDegrees(-m_gyro.getAngle())));
     } else {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(vx, vy, omega));
     }
@@ -204,7 +206,25 @@ public class SwerveDrivebase extends SubsystemBase {
             Math.abs(m_backLeft.getDriveDistance())   +
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
-  
+
+  @Override
+  public void periodic() {
+    // m_frontLeft.logData("frontLeft");
+    // m_frontRight.logData("frontRight");
+    // m_backLeft.logData("backLeft");
+    // m_backRight.logData("backRight");
+    // logData();
+    getLimelightData();
+  }
+
+  public void getLimelightData() {
+    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+    SmartDashboard.putNumber("Limelight X (m)", targetPoseRobot.getX());
+    SmartDashboard.putNumber("Limelight Y (m)", targetPoseRobot.getY());
+    SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
+  }
 
 
   public void estimatePose() {

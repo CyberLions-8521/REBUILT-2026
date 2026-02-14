@@ -60,10 +60,10 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kSRXEncoderMaxValue = 1;
-        public static final double kFrontLeftMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
-        public static final double kFrontRightMagEncoderMagnetOffset = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
+        public static final double kFrontLeftMagEncoderMagnetOffset  = 0.336;     // set later, measure in Phoenix tuner x
+        public static final double kFrontRightMagEncoderMagnetOffset = 0.467;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 0.874;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 0.302;     // set later, measure in Phoenix tuner x
 
         public static final double kStrafeP = 0.0;
         public static final double kStrafeI = 0.0;
@@ -73,7 +73,7 @@ public class Constants {
     }
 
     public static final class LimelightConstants {
-        public static final String limelightName = "limelight3.0";
+        public static final String limelightName = "limelight";
         public static final double outpostShootingRadius = 0; //set later
         public static final double outpostShootingRadiusTolerance = 0; //set later
         

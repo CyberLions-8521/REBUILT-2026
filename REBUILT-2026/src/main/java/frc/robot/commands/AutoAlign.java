@@ -64,8 +64,7 @@ public class AutoAlign extends Command {
   @Override
   public void execute() {
     if (LimelightHelpers.getTV(LimelightConstants.limelightName)) {
-      tunePID();
-      
+      // tunePID();
       getData();
       double offsetX = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getX(); //make sure to configure the limelight in robot space!!
       double offsetY = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName).getY(); //.getTargetPose3d_RobotSpace returns the coordinates of the apriltag relative to the robot
@@ -78,6 +77,11 @@ public class AutoAlign extends Command {
       SmartDashboard.putNumber("xChange", xChange);
       SmartDashboard.putNumber("yChange", yChange);
       SmartDashboard.putNumber("angularChange", angularChange);
+
+      SmartDashboard.putNumber("TX", LimelightHelpers.getTX(LimelightConstants.limelightName));
+      SmartDashboard.putNumber("TY", LimelightHelpers.getTY(LimelightConstants.limelightName));
+
+
     }
 
   }
