@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.commands.AutoAlign;
 import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.SwerveDrivebase;
 
@@ -23,11 +23,12 @@ public class RobotContainer {
 
   CommandXboxController m_controller = new CommandXboxController(0);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
-  private final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-  private final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-  private final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-  AutoAlign align = new AutoAlign(m_drivebase, 0, 1.5);
+  public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+
+  // AutoAlign align = new AutoAlign(m_drivebase, 0, 0.5);
   // LEDLights m_LEDLights = new LEDLights();
   
   public RobotContainer() {
@@ -35,13 +36,19 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // m_drivebase.setDefaultCommand(this.getDriveCommand(
-    //   1,
-    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
-    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
-    //   getJoystickValues(m_controller::getRightX, omega_limiter),
-    //   m_controller.getHID()::getRightBumperButton));
-    m_controller.a().whileTrue(align);
+    m_drivebase.setDefaultCommand(this.getDriveCommand(
+      1,
+      getJoystickValues(m_controller::getLeftY, vx_limiter),
+      getJoystickValues(m_controller::getLeftX, vy_limiter),
+      getJoystickValues(m_controller::getRightX, omega_limiter),
+      m_controller.getHID()::getRightBumperButton));
+
+    m_controller.a().whileTrue(this.getDriveCommand(
+      1,
+      getJoystickValues(m_controller::getLeftY, vx_limiter),
+      getJoystickValues(m_controller::getLeftX, vy_limiter),
+      m_drivebase.getTXAdujstmentRotation(omega_limiter),
+      m_controller.getHID()::getRightBumperButton));
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
@@ -54,7 +61,7 @@ public class RobotContainer {
       m_drivebase);    
   }
 
-  private Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
+  public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
     return () -> {
       double deadBandValue = MathUtil.applyDeadband(controller.get(), 0.2);
       double squaredValue = Math.copySign(deadBandValue * deadBandValue, deadBandValue);

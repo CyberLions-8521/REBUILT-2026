@@ -42,9 +42,12 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
+
   private PoseEstimator m_poseEstimator;
 
   private Pose3d targetPoseRobot = new Pose3d();
+
+  private PIDController m_TXController;
   
   public SwerveDrivebase() {
     resetGyro();
@@ -83,6 +86,8 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
+
+    m_TXController = new PIDController(0, 0, 0);
   }
 
   //DATA LOGGING
@@ -95,6 +100,8 @@ public class SwerveDrivebase extends SubsystemBase {
 
     // //not necessary but can be useful for debugging
     SmartDashboard.putNumber("gyro", -m_gyro.getAngle());
+    SmartDashboard.putNumber("Limelight TX", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("Limelight TY", LimelightHelpers.getTY(LimelightConstants.limelightName));
     // SmartDashboard.putNumber("gyro rate", m_gyro.getRate());
     // SmartDashboard.putNumber("gyro pitch", m_gyro.getPitch());
     // SmartDashboard.putNumber("gyro roll", m_gyro.getRoll());
@@ -226,6 +233,21 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
   }
 
+  public void tuneTXController() {
+    double P = SmartDashboard.getNumber("TX P", 0);
+    double I = SmartDashboard.getNumber("TX I", 0);
+    double D = SmartDashboard.getNumber("TX D", 0);
+    m_TXController.setP(P);
+    m_TXController.setI(I);
+    m_TXController.setD(D);
+  }
+
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
+    return () -> {
+      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      return limiter.calculate(adjustment);
+    };
+  }
 
   public void estimatePose() {
     
