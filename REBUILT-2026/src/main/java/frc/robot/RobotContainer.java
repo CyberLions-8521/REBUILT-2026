@@ -41,13 +41,13 @@ public class RobotContainer {
       getJoystickValues(m_controller::getLeftY, vx_limiter),
       getJoystickValues(m_controller::getLeftX, vy_limiter),
       getJoystickValues(m_controller::getRightX, omega_limiter),
-      m_controller.getHID()::getLeftBumperButton));
+      () -> true));
     m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
       1,
       getJoystickValues(m_controller::getLeftY, vx_limiter),
       getJoystickValues(m_controller::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter),
-      m_controller.getHID()::getLeftBumperButton));
+      () -> false));
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
@@ -56,7 +56,7 @@ public class RobotContainer {
         -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         -omega.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        !fieldRelative.get()),
+        fieldRelative.get()),
       m_drivebase);    
   }
 
