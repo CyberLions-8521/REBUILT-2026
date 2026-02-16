@@ -113,7 +113,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SwerveModuleState[] m_swerveModuleStates;
     if(fieldRelative) {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(
-        ChassisSpeeds.fromFieldRelativeSpeeds(-vx, vy, omega, Rotation2d.fromDegrees(-m_gyro.getAngle())));
+        ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(-m_gyro.getAngle())));
     } else {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(vx, vy, omega));
     }
