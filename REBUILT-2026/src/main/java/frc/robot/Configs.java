@@ -19,7 +19,7 @@ public class Configs {
         static {
             m_configDrive
                 .idleMode(IdleMode.kBrake)
-                .inverted(false)
+                .inverted(true)
                 .smartCurrentLimit(SwerveConstants.driveMotorStallLimit, SwerveConstants.driveMotorFreeLimit);
 
             m_configTurn
