@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -170,10 +170,10 @@ public class SwerveDrivebase extends SubsystemBase {
   
 
   public void resetEncoders(){
-    m_frontLeft.resetDriveEncoder();
-    m_frontRight.resetDriveEncoder();
-    m_backLeft.resetDriveEncoder();
-    m_backRight.resetDriveEncoder();
+    m_frontLeft.zeroDriveEncoder();
+    m_frontRight.zeroDriveEncoder();
+    m_backLeft.zeroDriveEncoder();
+    m_backRight.zeroDriveEncoder();
   }
 
   public void setEncoderDistance(double distance){

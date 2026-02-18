@@ -34,24 +34,24 @@ public class Constants {
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
-        public static final int kFrontLeftDriveID  = 0; //assign later
-        public static final int kFrontLeftTurnID   = 0; //assign later
-        public static final int kFrontRightDriveID = 0; //assign later
-        public static final int kFrontRightTurnID  = 0; //assign later
-        public static final int kBackLeftDriveID   = 0; //assign later
-        public static final int kBackLeftTurnID    = 0; //assign later
-        public static final int kBackRightDriveID  = 0; //assign later
-        public static final int kBackRightTurnID   = 0; //assign later
+        public static final int kFrontLeftDriveID  = 1; 
+        public static final int kFrontLeftTurnID   = 2; 
+        public static final int kFrontRightDriveID = 3; 
+        public static final int kFrontRightTurnID  = 4; 
+        public static final int kBackLeftDriveID   = 5; 
+        public static final int kBackLeftTurnID    = 6; 
+        public static final int kBackRightDriveID  = 7; 
+        public static final int kBackRightTurnID   = 8; 
 
-        public static final int kFrontLeftCANCoderID  = 10;
-        public static final int kFrontRightCANCoderID = 11;
-        public static final int kBackLeftCANCoderID   = 9;
-        public static final int kBackRightCANCoderID  = 12;
+        public static final int kFrontLeftCANCoderID  = 11;
+        public static final int kFrontRightCANCoderID = 12;
+        public static final int kBackLeftCANCoderID   = 13;
+        public static final int kBackRightCANCoderID  = 14;
 
-        public static final double kWheelBase = Units.inchesToMeters(0);    // x-direction of robot, set later
-        public static final double kTrackWidth = Units.inchesToMeters(0);   // y-direction of robot, set later
+        public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
+        public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 3.0;
+        public static final double kMaxMetersPerSecond = 4.0; //tune later
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
@@ -59,11 +59,5 @@ public class Constants {
         public static final double kFrontRightCANCoderMagnetOffset = 0;     // set later
         public static final double kBackLeftCANCoderMagnetOffset   = 0;     // set later
         public static final double kBackRightCANCoderMagnetOffset  = 0;     // set later
-
-        public static final double kStrafeP = 0.0;
-        public static final double kStrafeI = 0.0;
-        public static final double kStrafeD = 0.0;
-
-        public static final double kAutoAlignSpeed = 0.5;
     }
 }
