@@ -25,8 +25,9 @@ public class Configs {
         static {
             m_driveConfig.Slot0
                 .withKP(SwerveConstants.driveP)
-                .withKI(SwerveConstants.driveI)
-                .withKD(SwerveConstants.driveD);
+                .withKD(SwerveConstants.driveD)
+                .withKS(SwerveConstants.driveS)
+                .withKD(SwerveConstants.driveV);
             m_driveConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.driveMotorCurrentLimit);
@@ -39,8 +40,8 @@ public class Configs {
 
             m_turnConfig.Slot0
                 .withKP(SwerveConstants.turnP)
-                .withKI(SwerveConstants.turnI)
-                .withKD(SwerveConstants.driveD);
+                .withKD(SwerveConstants.driveD)
+                .withKS(SwerveConstants.turnS);
             m_turnConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.turnMotorCurrentLimit);

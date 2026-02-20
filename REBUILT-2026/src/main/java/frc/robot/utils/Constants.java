@@ -23,14 +23,13 @@ public class Constants {
 
         private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static final double driveFF = 1.0 / kDriveWheelFreeSpeedRps;
         public static final double driveP = 0; //set later
-        public static final double driveI = 0;
         public static final double driveD = 0; //set later
+        public static final double driveV = 0; //used for feedforward
+        public static final double driveS = 0; //set later
         public static final double turnP = 0; //set later
-        public static final double turnI = 0;
         public static final double turnD = 0; //set ;ater
-        public static final double turnFF = 0; //set later
+        public static final double turnS = 0; //set later
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
@@ -59,5 +58,11 @@ public class Constants {
         public static final double kFrontRightCANCoderMagnetOffset = 0;     // set later
         public static final double kBackLeftCANCoderMagnetOffset   = 0;     // set later
         public static final double kBackRightCANCoderMagnetOffset  = 0;     // set later
+    }
+
+    public static final class LimelightConstants {
+        public static final String limelightName = "limelight";
+        public static final double TXControllerP = 0;
+        public static final double TXControllerD = 0;
     }
 }

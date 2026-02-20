@@ -19,7 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.LimelightHelpers;
+import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 import frc.robot.utils.SwerveModule;
 
@@ -34,7 +35,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  private PIDController m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
 
   public SwerveDrivebase() {
     m_gyro.reset();
@@ -73,18 +74,13 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
-    logData();
   }
 
-  //DATA LOGGING
 
   public void logData() {
-
     SmartDashboard.putNumber("gyro", -m_gyro.getAngle());
-    
   }
 
-  //DRIVE COMMANDS
   public void drive(double vx, double vy, double omega, boolean fieldRelative) {
     SwerveModuleState[] m_swerveModuleStates;
     if(fieldRelative) {
@@ -188,6 +184,54 @@ public class SwerveDrivebase extends SubsystemBase {
             Math.abs(m_frontRight.getDriveDistance()) +
             Math.abs(m_backLeft.getDriveDistance())   +
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
+  }
+
+  @Override
+  public void periodic() {
+    tunePID();
+    tuneTXController();
+    logData();
+  }
+
+  public void tunePID () {
+    double turnP = SmartDashboard.getNumber("turnP", 0);
+    double turnD = SmartDashboard.getNumber("turnD", 0);
+    double turnS = SmartDashboard.getNumber("turnS", 0);
+
+    double driveP = SmartDashboard.getNumber("driveP", 0);
+    double driveD = SmartDashboard.getNumber("driveD", 0);
+    double driveS = SmartDashboard.getNumber("driveS", 0);
+    double driveV = SmartDashboard.getNumber("driveV", 0);
+
+    m_frontLeft.configDrivePID(driveP, driveD, driveV, driveS);
+    m_frontRight.configDrivePID(driveP, driveD, driveV, driveS);
+    m_backLeft.configDrivePID(driveP, driveD, driveV, driveS);
+    m_backRight.configDrivePID(driveP, driveD, driveV, driveS);
+
+    m_frontLeft.configTurnPID(turnP, turnD, turnS);
+    m_frontRight.configTurnPID(turnP, turnD, turnS);
+    m_backLeft.configTurnPID(turnP, turnD, turnS);
+    m_backRight.configTurnPID(turnP, turnD, turnS);
+
+  }
+
+  public void tuneTXController() {
+    double P = SmartDashboard.getNumber("TX P", 0);
+    double D = SmartDashboard.getNumber("TX D", 0);
+    m_TXController.setP(P);
+    m_TXController.setD(D);
+  }
+
+  public void getLimelightData() {
+    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+  }
+
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
+    return () -> {
+      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      return limiter.calculate(adjustment);
+    };
   }
 
 }

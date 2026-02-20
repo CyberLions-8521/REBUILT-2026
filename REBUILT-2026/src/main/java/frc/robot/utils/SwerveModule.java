@@ -112,22 +112,22 @@ public class SwerveModule {
         m_turnMotor.set(0);
     }
 
-    public void configPID(){
-          
+    public void configDrivePID(double kP, double kD, double kS, double kV){
           Slot0Configs m_driveConfig = new Slot0Configs();
-          Slot0Configs m_turnConfig = new Slot0Configs();
-        
-          m_driveConfig.kP = SmartDashboard.getNumber("Drive P", 0);
-          m_driveConfig.kD = SmartDashboard.getNumber("Drive D", 0);
-          m_driveConfig.kV = SmartDashboard.getNumber("Drive FF", 0);
-
-          m_turnConfig.kP = SmartDashboard.getNumber("Drive P", 0);
-          m_turnConfig.kD = SmartDashboard.getNumber("Drive D", 0);
-          m_turnConfig.kV = SmartDashboard.getNumber("Drive FF", 0);
-
-
+          m_driveConfig.kP = kP;
+          m_driveConfig.kD = kD;
+          m_driveConfig.kS = kS;
+          m_driveConfig.kV = kV;
           m_driveMotor.getConfigurator().apply(m_driveConfig);
+     }
+
+    public void configTurnPID(double kP, double kD, double kS){ 
+          Slot0Configs m_turnConfig = new Slot0Configs();
+          m_turnConfig.kP = kP;
+          m_turnConfig.kD = kD;
+          m_turnConfig.kS = kS;
           m_turnMotor.getConfigurator().apply(m_turnConfig);
      }
+
 
 }
