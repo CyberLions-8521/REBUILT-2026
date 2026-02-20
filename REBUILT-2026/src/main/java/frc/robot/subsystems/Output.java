@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +18,9 @@ public class Output extends SubsystemBase {
   private TalonFX m_motorTopLeader;
   private Follower m_motorTopFollower;
 
+  private double m_botEnc = m_motorBotLeader.getPosition().getValueAsDouble();
+  private double m_topEnc = m_motorTopLeader.getPosition().getValueAsDouble();
+
   private OutputConfigs m_configs = new OutputConfigs();
   
   public Output(int motorBotLeadID, int motorBotFolID, int motorTopLeadID, int motorTopFolID) {
@@ -33,6 +32,15 @@ public class Output extends SubsystemBase {
     m_motorBotLeader.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
     m_motorTopLeader.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
   }
+
+  public void runMotors(double speed) {
+    m_motorBotLeader.set(speed);
+    m_motorTopLeader.set(speed);
+  }
+
+
+
+
 
   /**
    * Example command factory method.

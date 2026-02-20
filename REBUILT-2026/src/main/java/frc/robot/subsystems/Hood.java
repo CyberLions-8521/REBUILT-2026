@@ -1,15 +1,26 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
+
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs.HoodConfigs;
 
 public class Hood extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public Hood() {}
+
+  //v = (R/cos)(sqrt(((R^2)g)/(2(Rtan+h))))
+
+  private TalonFX m_motor;
+  private double m_enc = m_motor.getPosition().getValueAsDouble();
+  
+  private HoodConfigs m_configs = new HoodConfigs();
+  
+
+  public Hood(int motorID) {
+    m_motor = new TalonFX(motorID);
+    m_motor.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
+
+  }
 
   /**
    * Example command factory method.

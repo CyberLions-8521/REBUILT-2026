@@ -18,6 +18,15 @@ public class Configs {
        }
     }
 
+    public static final class HoodConfigs {
+       public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
+
+       static {
+            kKrakenLeaderConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Brake);
+       }
+    }
+
 
 
 
