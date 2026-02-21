@@ -9,8 +9,8 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public class Constants {
     public static final class SwerveConstants {
-        public static final int driveMotorCurrentLimit = 80;
-        public static final int turnMotorCurrentLimit = 80;
+        public static final int driveMotorCurrentLimit = 85;
+        public static final int turnMotorCurrentLimit = 75;
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
