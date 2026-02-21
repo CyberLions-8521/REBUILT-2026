@@ -29,4 +29,13 @@ public static final class VisionConstants {
 public static final class CameraConstants{
     public static final String kIntakeCamera = "Cris_IntakeCam";
     }
+
+public static final class TargetProfiles {
+    public static final int kHomePipeline = 0; // for makeshift testing target @ home
+    public static final int kCompetitionPipeline = 1; // for Fuel tartget @ competition
+
+
+    // create and add HSV thresholds for target detection; will need to be determined through testing and may require multiple sets for different lighting conditions
+}
+
 }
