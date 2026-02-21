@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Configs.SwerveConfigs;
 import frc.robot.utils.Constants.SwerveConstants;
@@ -22,7 +23,7 @@ import frc.robot.utils.Constants.SwerveConstants;
 public class SwerveModule {
     private TalonFX m_driveMotor;
     private TalonFX m_turnMotor; 
-    private CANcoder m_CANcoder;
+    private DutyCycleEncoder m_SRXEncoder;
 
     private VelocityVoltage m_driveRequest;
     private PositionVoltage m_turnRequest;
@@ -30,27 +31,22 @@ public class SwerveModule {
     private SwerveModuleState m_desiredState = new SwerveModuleState();
 
 
-    public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
+    public SwerveModule(int driveMotorPort, int turnMotorPort, int AbsEncoderPort, double magnetOffset) {
         m_driveMotor = new TalonFX(driveMotorPort);
         m_turnMotor  = new TalonFX(turnMotorPort);
-        m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANCoderBus);
+        m_SRXEncoder = new DutyCycleEncoder(AbsEncoderPort, 1, magnetOffset);
 
         m_driveRequest = new VelocityVoltage(0);
         m_turnRequest = new PositionVoltage(0);
 
-        configMotors(CANCoderPort);
+        configMotors();
         zeroDriveEncoder();
-        configMagnets(magnetOffset);
+        resetTurnEncoder();
     }
 
-    public void configMagnets(double kCANCoderMagnetOffset) {
-        m_CANcoder.getConfigurator().apply(SwerveConfigs.m_magnetConfigs.withMagnetOffset(kCANCoderMagnetOffset));
-    }
-
-    public void configMotors(int CANCoderID) {
+    public void configMotors() {
         m_driveMotor.getConfigurator().apply(SwerveConfigs.m_driveConfig);
         m_turnMotor.getConfigurator().apply(SwerveConfigs.m_turnConfig);
-        m_turnMotor.getConfigurator().apply(SwerveConfigs.m_turnConfig.Feedback.withFeedbackRemoteSensorID(CANCoderID));
     }
 
     public double getDriveDistance() {
@@ -65,20 +61,12 @@ public class SwerveModule {
         return m_turnMotor.getPosition().getValueAsDouble();
     }
 
-    public double getCANCoderPosition() {
-        return m_CANcoder.getAbsolutePosition().getValueAsDouble();
+    public double getAbsoluteEncoderPosition() {
+        return m_SRXEncoder.get(); //rotations
     }
 
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude() % 360 - 180);
-        SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble()*SwerveConstants.kAngleConversion);
-        SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
-
-        SmartDashboard.putNumber(motor + " drive position", m_driveMotor.getPosition().getValue().baseUnitMagnitude());
-        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude());
-
-        SmartDashboard.putNumber(motor + " drive velocity", m_driveMotor.getVelocity().getValue().baseUnitMagnitude());
-        SmartDashboard.putNumber(motor + " turn velocity", m_turnMotor.getVelocity().getValue().baseUnitMagnitude());
+        SmartDashboard.putNumber(motor + " turn position", getAbsoluteEncoderPosition());
     }
 
     public SwerveModuleState getState() {
@@ -86,11 +74,15 @@ public class SwerveModule {
     }
 
     public void zeroTurnEncoder() {
-        m_driveMotor.setPosition(0);
+        m_turnMotor.setPosition(0);
     }
 
     public void zeroDriveEncoder() {
         m_driveMotor.setPosition(0);
+    }
+
+    public void resetTurnEncoder() {
+        m_turnMotor.setPosition((m_SRXEncoder.get()) * (SwerveConstants.kAngleConversion));  //degrees
     }
 
     public void setDesiredState(SwerveModuleState targetState) {

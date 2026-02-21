@@ -42,10 +42,10 @@ public class Constants {
         public static final int kBackRightDriveID  = 7; 
         public static final int kBackRightTurnID   = 8; 
 
-        public static final int kFrontLeftCANCoderID  = 11;
-        public static final int kFrontRightCANCoderID = 12;
-        public static final int kBackLeftCANCoderID   = 13;
-        public static final int kBackRightCANCoderID  = 14;
+        public static final int kFrontLeftAbsEncoderID  = 11;
+        public static final int kFrontRightAbsEncoderID = 12;
+        public static final int kBackLeftAbsEncoderID   = 13;
+        public static final int kBackRightAbsEncoderID  = 14;
 
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
@@ -53,11 +53,10 @@ public class Constants {
         public static final double kMaxMetersPerSecond = 4.0; //tune later
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
-        public static final double kCANcoderAbsDiscontPoint = 0.5;
-        public static final double kFrontLeftCANCoderMagnetOffset  = 0;     // set later
-        public static final double kFrontRightCANCoderMagnetOffset = 0;     // set later
-        public static final double kBackLeftCANCoderMagnetOffset   = 0;     // set later
-        public static final double kBackRightCANCoderMagnetOffset  = 0;     // set later
+        public static final double kFrontLeftAbsEncoderMagnetOffset  = 0;     // set later
+        public static final double kFrontRightAbsEncoderMagnetOffset = 0;     // set later
+        public static final double kBackLeftAbsEncoderMagnetOffset   = 0;     // set later
+        public static final double kBackRightAbsEncoderMagnetOffset  = 0;     // set later
     }
 
     public static final class LimelightConstants {

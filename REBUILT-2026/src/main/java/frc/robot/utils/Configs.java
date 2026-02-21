@@ -20,8 +20,6 @@ public class Configs {
         public static final TalonFXConfiguration m_driveConfig = new TalonFXConfiguration();
         public static final TalonFXConfiguration m_turnConfig = new TalonFXConfiguration();
 
-        public static final MagnetSensorConfigs m_magnetConfigs = new MagnetSensorConfigs();
-
         static {
             m_driveConfig.Slot0
                 .withKP(SwerveConstants.driveP)
@@ -49,16 +47,9 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
             m_turnConfig.Feedback
-                .withSensorToMechanismRatio(SwerveConstants.kTurnConversionFactor)   
-                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
-
-            m_magnetConfigs
-                .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
-                .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
-                
-            
-        
-
+                .withSensorToMechanismRatio(SwerveConstants.kTurnConversionFactor);
+            m_turnConfig.ClosedLoopGeneral
+                .withContinuousWrap(true);
         }
     }
 }

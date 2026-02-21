@@ -43,29 +43,29 @@ public class SwerveDrivebase extends SubsystemBase {
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
       SwerveConstants.kFrontLeftTurnID,
-      SwerveConstants.kFrontLeftCANCoderID,
-      SwerveConstants.kFrontLeftCANCoderMagnetOffset
+      SwerveConstants.kFrontLeftAbsEncoderID,
+      SwerveConstants.kFrontLeftAbsEncoderMagnetOffset
     );
 
     m_frontRight = new SwerveModule(
       SwerveConstants.kFrontRightDriveID,
       SwerveConstants.kFrontRightTurnID,
-      SwerveConstants.kFrontRightCANCoderID,
-      SwerveConstants.kFrontRightCANCoderMagnetOffset
+      SwerveConstants.kFrontRightAbsEncoderID,
+      SwerveConstants.kFrontRightAbsEncoderMagnetOffset
     );
 
     m_backLeft = new SwerveModule(
       SwerveConstants.kBackLeftDriveID,
       SwerveConstants.kBackLeftTurnID,
-      SwerveConstants.kBackLeftCANCoderID,
-      SwerveConstants.kBackLeftCANCoderMagnetOffset
+      SwerveConstants.kBackLeftAbsEncoderID,
+      SwerveConstants.kBackLeftAbsEncoderMagnetOffset
     );
 
     m_backRight = new SwerveModule(
       SwerveConstants.kBackRightDriveID,
       SwerveConstants.kBackRightTurnID,
-      SwerveConstants.kBackRightCANCoderID,
-      SwerveConstants.kBackRightCANCoderMagnetOffset
+      SwerveConstants.kBackRightAbsEncoderID,
+      SwerveConstants.kBackRightAbsEncoderMagnetOffset
     );
 
     m_kinematics = new SwerveDriveKinematics(
@@ -79,6 +79,10 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public void logData() {
     SmartDashboard.putNumber("gyro", -m_gyro.getAngle());
+    m_frontLeft.logData("Front Left");
+    m_frontRight.logData("Front Right");
+    m_backLeft.logData("Back Left");
+    m_backRight.logData("Back Right");
   }
 
   public void drive(double vx, double vy, double omega, boolean fieldRelative) {
