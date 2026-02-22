@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.LEDLights;
@@ -23,15 +24,20 @@ import frc.robot.subsystems.SwerveDrivebase;
 
 public class RobotContainer {
 
-
-  CommandXboxController m_controller = new CommandXboxController(0);
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  CommandXboxController m_controller = new CommandXboxController(0);
   LEDLights m_LEDLights = new LEDLights();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-  
+  // public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
+  // public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName));
+  public final Trigger seesTagLeftBumperNotPressed = m_controller.x(); //placeholder since the limelight is on the real bot, testing on demo bot
+  public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper(); //place holder since limelight is on the real bot, testing on demo bot
+  public final Trigger shootFail = m_controller.y(); //placeholder for the real condtition check (will do later)
+
+
   public RobotContainer() {
     configureBindings();
   }
@@ -48,15 +54,14 @@ public class RobotContainer {
     //   getJoystickValues(m_controller::getLeftY, vx_limiter),
     //   getJoystickValues(m_controller::getLeftX, vy_limiter),
     //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
-    //   () -> false));
-    m_LEDLights.setDefaultCommand(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Idle), m_LEDLights));
-    m_controller.leftBumper().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.SeesApriltag), m_LEDLights));
-    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.TargetingApriltag), m_LEDLights));
-    
-    //these require a full shooter to work. These current activation methods are placeholders until we get a shooter
-    m_controller.a().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Charging), m_LEDLights));
-    m_controller.b().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Shooting), m_LEDLights));    
-    m_controller.x().onTrue(new StartEndCommand(() -> m_LEDLights.setMode(LEDMode.ShootFail), () -> m_LEDLights.setMode(LEDMode.Idle), m_LEDLights).withTimeout(2));
+    //   () -> false));f
+
+    m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
+    seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
+    seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
+    // m_controller.x().whileTrue(m_LEDLights.setLEDCommandTimed(LEDMode.Charging, LEDMode.Shooting, 2));
+    shootFail.onTrue(m_LEDLights.setLEDCommandTimed(LEDMode.ShootFail, 1));
+
 }
 
   //  private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {

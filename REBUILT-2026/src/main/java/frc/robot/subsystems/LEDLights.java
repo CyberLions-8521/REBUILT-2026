@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.hardware.CANdle;
@@ -31,8 +34,10 @@ public class LEDLights extends SubsystemBase {
     ShootFail //the shooter can't find a possible combo of velocity/angle to shoot into the target. may or may not get implemented
   }
 
-  CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("rio"));
-  LEDMode currentMode;
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("rio"));
+  private LEDMode currentMode;
+  private LEDMode previousMode = null;
+
 
   public LEDLights() {
     currentMode = LEDMode.Idle;
@@ -43,23 +48,47 @@ public class LEDLights extends SubsystemBase {
     currentMode = mode;
   }
   
+  public Command setLEDCommand(LEDMode newMode) {
+    return new RunCommand(() -> setMode(newMode), this);
+  }
+
+  public Command setLEDCommandTimed(LEDMode mode1, double time) {
+    return new StartEndCommand(() -> setMode(mode1) , () -> setMode(LEDMode.Idle), this).withTimeout(time);
+  }
+
+  public Command setLEDCommandTimed(LEDMode mode1, LEDMode mode2, double time) {
+    return new StartEndCommand(() -> setMode(mode1) , () -> setMode(mode2), this).withTimeout(time).andThen(setLEDCommand(mode2));
+  }
+
+  
   public void updateMode() {
-    switch (currentMode) {
-      case Idle: 
-        m_CANdle.setControl(new FireAnimation(0, CANdleConstants.ledCount - 1));
-        break;
-      case SeesApriltag:
-        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(124, 252, 0)));
-        break;
-      case TargetingApriltag:
-        m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0)));
-        break;
-      case Charging:
-        m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
-      case Shooting:
-        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
-      case ShootFail:
-        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 36, 0)));
+    if (currentMode != previousMode) {
+      switch (currentMode) {
+        case Idle:
+          previousMode = currentMode;
+          m_CANdle.setControl(new FireAnimation(0, CANdleConstants.ledCount - 1));
+          break;
+        case SeesApriltag:
+          previousMode = currentMode;      
+          m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(124, 252, 0)));
+          break;
+        case TargetingApriltag:
+          previousMode = currentMode;     
+          m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0)));
+          break;
+        case Charging:
+          previousMode = currentMode;      
+          m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
+          break;
+        case Shooting:
+          previousMode = currentMode;      
+          m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
+          break;
+        case ShootFail:
+          previousMode = currentMode;      
+          m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 36, 0)));
+          break;
+      }
     }
   }
   
