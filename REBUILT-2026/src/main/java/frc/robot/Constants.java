@@ -79,4 +79,9 @@ public class Constants {
         public static final double outpostShootingRadiusTolerance = 0; //set later
         
     }
+
+    public static final class CANdleConstants {
+        public static final int ledCount = 240;
+        public static final int CANdleID = 20;
+    }
 }

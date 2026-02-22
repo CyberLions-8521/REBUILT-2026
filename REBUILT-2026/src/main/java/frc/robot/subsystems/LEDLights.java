@@ -5,35 +5,66 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
 
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StripTypeValue;
-import com.ctre.phoenix6.configs.CANdleConfiguration;
+import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
-import frc.robot.Constants.LimelightConstants;
+import frc.robot.Configs.CANdleConfigs;
+import frc.robot.Constants.CANdleConstants;
+import com.ctre.phoenix6.controls.RainbowAnimation;
 
 public class LEDLights extends SubsystemBase {
 
-  CANdle lights = new CANdle(0, new CANBus("Ryan"));
-
-  public LEDLights() {
-    CANdleConfiguration CANdleConfigs = new CANdleConfiguration();
-    CANdleConfigs.LED.withStripType(StripTypeValue.GRB)
-                     .withBrightnessScalar(0.5);
-    lights.getConfigurator().apply(CANdleConfigs);
+  public enum LEDMode {
+    Idle, //nothing is happening
+    SeesApriltag, //limelight can see the apriltag
+    TargetingApriltag, //limelight is targeting the tag
+    Charging, //buidling up speed before shooting;
+    Shooting, //fuel is being shot
+    ShootFail //the shooter can't find a possible combo of velocity/angle to shoot into the target. may or may not get implemented
   }
 
+  CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("rio"));
+  LEDMode currentMode;
+
+  public LEDLights() {
+    currentMode = LEDMode.Idle;
+    m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfig);
+  }
+
+  public void setMode(LEDMode mode) {
+    currentMode = mode;
+  }
+  
+  public void updateMode() {
+    switch (currentMode) {
+      case Idle: 
+        m_CANdle.setControl(new FireAnimation(0, CANdleConstants.ledCount - 1));
+        break;
+      case SeesApriltag:
+        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(124, 252, 0)));
+        break;
+      case TargetingApriltag:
+        m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0)));
+        break;
+      case Charging:
+        m_CANdle.setControl(new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
+      case Shooting:
+        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255)));
+      case ShootFail:
+        m_CANdle.setControl(new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 36, 0)));
+    }
+  }
+  
   @Override
   public void periodic() {
-    if (LimelightHelpers.getTV(LimelightConstants.limelightName)) {
-      lights.setControl(new SolidColor(0, 120).withColor(new RGBWColor(124, 252, 0)));
-    } else {
-      lights.setControl(new SolidColor(0, 120).withColor(new RGBWColor(255, 0, 0)));
-    }
-    SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(""));
+    updateMode();
   }
 }

@@ -11,62 +11,71 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.LEDLights;
+import frc.robot.subsystems.LEDLights.LEDMode;
 import frc.robot.subsystems.SwerveDrivebase;
 
 public class RobotContainer {
 
 
   CommandXboxController m_controller = new CommandXboxController(0);
-  SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  // SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  LEDLights m_LEDLights = new LEDLights();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-
-  // AutoAlign align = new AutoAlign(m_drivebase, 0, 0.5);
-  // LEDLights m_LEDLights = new LEDLights();
   
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-    m_drivebase.setDefaultCommand(this.getDriveCommand(
-      1,
-      getJoystickValues(m_controller::getLeftY, vx_limiter),
-      getJoystickValues(m_controller::getLeftX, vy_limiter),
-      getJoystickValues(m_controller::getRightX, omega_limiter),
-      () -> true));
-    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-      1,
-      getJoystickValues(m_controller::getLeftY, vx_limiter),
-      getJoystickValues(m_controller::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter),
-      () -> false));
-  }
+    // m_drivebase.setDefaultCommand(this.getDriveCommand(
+    //   1,
+    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
+    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
+    //   getJoystickValues(m_controller::getRightX, omega_limiter),
+    //   () -> true));
+    // m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+    //   1,
+    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
+    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
+    //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
+    //   () -> false));
+    m_LEDLights.setDefaultCommand(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Idle), m_LEDLights));
+    m_controller.leftBumper().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.SeesApriltag), m_LEDLights));
+    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.TargetingApriltag), m_LEDLights));
+    
+    //these require a full shooter to work. These current activation methods are placeholders until we get a shooter
+    m_controller.a().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Charging), m_LEDLights));
+    m_controller.b().whileTrue(new RunCommand(() -> m_LEDLights.setMode(LEDMode.Shooting), m_LEDLights));    
+    m_controller.x().onTrue(new StartEndCommand(() -> m_LEDLights.setMode(LEDMode.ShootFail), () -> m_LEDLights.setMode(LEDMode.Idle), m_LEDLights).withTimeout(2));
+}
 
-   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
-    return new RunCommand(
-      () -> m_drivebase.drive(
-        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        -omega.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        fieldRelative.get()),
-      m_drivebase);    
-  }
+  //  private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
+  //   return new RunCommand(
+  //     () -> m_drivebase.drive(
+  //       -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+  //       -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+  //       -omega.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+  //       fieldRelative.get()),
+  //     m_drivebase);    
+  // }
 
-  public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
-    return () -> {
-      double deadBandValue = MathUtil.applyDeadband(controller.get(), 0.2);
-      double squaredValue = Math.copySign(deadBandValue * deadBandValue, deadBandValue);
-      return limiter.calculate(squaredValue);
-    };
-  }
+  // public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
+  //   return () -> {
+  //     double deadBandValue = MathUtil.applyDeadband(controller.get(), 0.2);
+  //     double squaredValue = Math.copySign(deadBandValue * deadBandValue, deadBandValue);
+  //     return limiter.calculate(squaredValue);
+  //   };
+  // }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");

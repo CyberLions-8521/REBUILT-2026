@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.CANdleConfiguration;
+import com.ctre.phoenix6.signals.StripTypeValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -47,6 +49,16 @@ public class Configs {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0, SwerveConstants.kAngleConversion); 
+        }
+    }
+
+    public final static class CANdleConfigs {
+        public static final CANdleConfiguration CANdleConfig = new CANdleConfiguration();
+
+        static {
+            CANdleConfig.LED
+                .withStripType(StripTypeValue.GRB)
+                .withBrightnessScalar(0.5);
         }
     }
 }
