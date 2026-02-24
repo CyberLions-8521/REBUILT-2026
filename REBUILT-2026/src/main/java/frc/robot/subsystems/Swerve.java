@@ -166,6 +166,22 @@ public class Swerve extends SubsystemBase {
     m_backRight.setDesiredState(m_swerveModuleStates[3]);
   }
 
+  //overloaded drive command for AutoBuilder
+  public void drive(ChassisSpeeds speeds) {
+    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(speeds);
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(
+      states, 
+      SwerveDrivebaseConstants.kMaxMetersPerSecond
+    );
+
+    m_frontLeft.setDesiredState(states[0]);
+    m_frontRight.setDesiredState(states[1]);
+    m_backLeft.setDesiredState(states[2]);
+    m_backRight.setDesiredState(states[3]);
+
+  }
+
   public FunctionalCommand getDriveCommand(double distance) {
     return new FunctionalCommand (
       () -> this.resetEncoders(),

@@ -9,6 +9,8 @@ import frc.robot.Constants.SwerveConstants;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+
+
 public class Configs {
     public static class SwerveModuleConfigs{
         public static final SparkMaxConfig m_configDrive = new SparkMaxConfig();
@@ -51,5 +53,9 @@ public class Configs {
             
                 
         }
+    }
+
+    public static class PathPlannerConfigs{
+        
     }
 }
