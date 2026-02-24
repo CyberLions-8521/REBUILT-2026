@@ -79,6 +79,10 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public void logData() {
     SmartDashboard.putNumber("gyro", -m_gyro.getAngle());
+    m_frontLeft.logData("Front Left");
+    m_frontRight.logData("Front Right");
+    m_backLeft.logData("Back Left");
+    m_backRight.logData("Back Right");
   }
 
   public void drive(double vx, double vy, double omega, boolean fieldRelative) {
