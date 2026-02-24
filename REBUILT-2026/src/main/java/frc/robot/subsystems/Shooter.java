@@ -7,35 +7,34 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import frc.robot.Configs.OutputConfigs;
 
-public class Output extends SubsystemBase {
+import frc.robot.Configs.HoodConfigs;
+import frc.robot.Configs.ShooterConfigs;
+
+import frc.robot.Constants.ShooterConstants;
+
+public class Shooter extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   
-  private TalonFX m_motorBotLeader;
-  private Follower m_motorBotFollower;
+  private TalonFX m_motorShooterLeader;
+  private Follower m_motorShooterFollower;
+  private TalonFX m_motorHood;
 
-  private TalonFX m_motorTopLeader;
-  private Follower m_motorTopFollower;
+  private double m_leaderEnc = m_motorShooterLeader.getPosition().getValueAsDouble();
 
-  private double m_botEnc = m_motorBotLeader.getPosition().getValueAsDouble();
-  private double m_topEnc = m_motorTopLeader.getPosition().getValueAsDouble();
-
-  private OutputConfigs m_configs = new OutputConfigs();
+  private ShooterConfigs m_shooterConfigs = new ShooterConfigs();
+  private HoodConfigs m_hoodConfigs = new HoodConfigs();
   
-  public Output(int motorBotLeadID, int motorBotFolID, int motorTopLeadID, int motorTopFolID) {
-    m_motorBotLeader = new TalonFX(motorBotLeadID);
-    m_motorBotFollower = new Follower(motorBotFolID, MotorAlignmentValue.Opposed);
-    m_motorTopLeader = new TalonFX(motorTopLeadID);
-    m_motorTopFollower = new Follower(motorTopFolID, MotorAlignmentValue.Opposed);
+  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorHoodID) {
+    m_motorShooterLeader = new TalonFX(motorShooterLeadID);
+    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed);
+    m_motorShooterFollower.LeaderID = motorShooterLeadID;
 
-    m_motorBotLeader.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
-    m_motorTopLeader.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
+    m_motorShooterLeader.getConfigurator().apply(m_shooterConfigs.kKrakenLeaderConfig);
   }
 
   public void runMotors(double speed) {
-    m_motorBotLeader.set(speed);
-    m_motorTopLeader.set(speed);
+    m_motorShooterLeader.set(speed);
   }
 
 

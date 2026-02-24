@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 public class Configs {
 
-    public static final class OutputConfigs {
+    public static final class ShooterConfigs {
        public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
 
        static {
@@ -26,8 +26,4 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Brake);
        }
     }
-
-
-
-
 }

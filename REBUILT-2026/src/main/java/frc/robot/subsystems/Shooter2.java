@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.Configs.HoodConfigs;
 
-public class Hood extends SubsystemBase {
+public class Shooter2 extends SubsystemBase {
 
   //v = (R/cos)(sqrt(((R^2)g)/(2(Rtan+h))))
 
@@ -19,7 +19,7 @@ public class Hood extends SubsystemBase {
   private HoodConfigs m_configs = new HoodConfigs();
   
 
-  public Hood(int motorID) {
+  public Shooter2(int motorID) {
     m_motor = new TalonFX(motorID);
     m_motor.getConfigurator().apply(m_configs.kKrakenLeaderConfig);
 
