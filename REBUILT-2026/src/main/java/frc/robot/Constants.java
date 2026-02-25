@@ -7,11 +7,9 @@ public class Constants {
         public static final double kDeadband = 0.2;
     }
     
-    public static class SwerveConstants {
-        public static final int turnMotorFreeLimit = 20;    // current limits in amps
-        public static final int turnMotorStallLimit = 20;   // current limits in amps
-        public static final int driveMotorFreeLimit = 40;   // current limits in amps
-        public static final int driveMotorStallLimit = 40;  // current limits in amps
+    public static final class SwerveConstants {
+        public static final int driveMotorCurrentLimit = 85;
+        public static final int turnMotorCurrentLimit = 75;
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
@@ -24,50 +22,56 @@ public class Constants {
 
         private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static final double driveFF = 1.0 / kDriveWheelFreeSpeedRps;
-        public static final double driveP = 0.025;
-        public static final double driveI = 0;
-        public static final double driveD = 0;
-        public static final double turnP = 0.04;
-        public static final double turnI = 0;
-        public static final double turnD = 0.01;        
+        public static final double driveP = 0; //set later
+        public static final double driveD = 0; //set later
+        public static final double driveV = 0; //used for feedforward
+        public static final double driveS = 0; //set later
+        public static final double turnP = 0; //set later
+        public static final double turnD = 0; //set ;ater
+        public static final double turnS = 0; //set later
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
-    }
 
-    public static class SwerveDrivebaseConstants {
         public static final double kSlewRateLimiter = 3.0;
-        public static final int kFrontLeftDriveID  = 6;
-        public static final int kFrontLeftTurnID   = 4;
-        public static final int kFrontRightDriveID = 3;
-        public static final int kFrontRightTurnID  = 14;
-        public static final int kBackLeftDriveID   = 50;
-        public static final int kBackLeftTurnID    = 2;
-        public static final int kBackRightDriveID  = 8;
-        public static final int kBackRightTurnID   = 7;
+        public static final int kFrontLeftDriveID  = 1; 
+        public static final int kFrontLeftTurnID   = 2; 
+        public static final int kFrontRightDriveID = 3; 
+        public static final int kFrontRightTurnID  = 4; 
+        public static final int kBackLeftDriveID   = 5; 
+        public static final int kBackLeftTurnID    = 6; 
+        public static final int kBackRightDriveID  = 7; 
+        public static final int kBackRightTurnID   = 8; 
 
-        // Note: CANcoder CAN IDs are on a separate CAN bus than SparkMAXs
-        // allowing for duplicates between CANcoders and SparkMAXs
-        public static final int kFrontLeftCANCoderID  = 10;
-        public static final int kFrontRightCANCoderID = 11;
-        public static final int kBackLeftCANCoderID   = 9;
-        public static final int kBackRightCANCoderID  = 12;
+        public static final int kFrontLeftAbsEncoderID  = 2;
+        public static final int kFrontRightAbsEncoderID = 3;
+        public static final int kBackLeftAbsEncoderID   = 0;
+        public static final int kBackRightAbsEncoderID  = 1;
 
-        public static final double kWheelBase = Units.inchesToMeters(23.25);    // x-direction of robot
-        public static final double kTrackWidth = Units.inchesToMeters(23.25);   // y-direction of robot
+        public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
+        public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 3.0;
+        public static final double kMaxMetersPerSecond = 4.0; //tune later
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
-        public static final double kCANcoderAbsDiscontPoint = 0.5;
-        public static final double kFrontLeftCANCoderMagnetOffset  = -0.175049;     // measured in Phoenix Tuner X
-        public static final double kFrontRightCANCoderMagnetOffset = -0.603516;     // measured in Phoenix Tuner X
-        public static final double kBackLeftCANCoderMagnetOffset   = -0.645508;     // measured in Phoenix Tuner X
-        public static final double kBackRightCANCoderMagnetOffset  = -0.271484;     // measured in Phoenix Tuner X
+        public static final double kFrontLeftAbsEncoderMagnetOffset  = 0.141319;     // set later
+        public static final double kFrontRightAbsEncoderMagnetOffset = 0.288254;     // set later
+        public static final double kBackLeftAbsEncoderMagnetOffset   = 0.190155;     // set later
+        public static final double kBackRightAbsEncoderMagnetOffset  = 0.094242;     // set later
 
-        public static final double kStrafeP = 0.0;
-        public static final double kStrafeI = 0.0;
-        public static final double kStrafeD = 0.0;
+        //Dimensions for PathPlanner
+        public static final double kDriveBaseRadius = 0.0; // need to measure
     }
+
+    public static final class PathPlannerConstants {
+        // PID for PathPlanner position correction
+        public static final double translationP = 0;
+        public static final double translationI = 0;
+        public static final double translationD = 0;
+
+        public static final double rotationP = 0;
+        public static final double rotationI = 0;
+        public static final double rotationD = 0;
+    }
+
 
     public static class OperatorConstants {
         public static final int kDriveControllerPort = 0;

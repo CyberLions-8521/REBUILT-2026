@@ -5,9 +5,14 @@ package frc.robot;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.PathPlannerConstants;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import com.pathplanner.lib.auto.HolonomicDriveController;
+import com.pathplanner.lib.auto.ReplanningConfig;
+import com.pathplanner.lib.config.PIDConstants;
 
 
 
@@ -56,6 +61,21 @@ public class Configs {
     }
 
     public static class PathPlannerConfigs{
-        
+        public static final HolonomicDriveController kPathFollowerConfig = 
+            new HolonomicDriveController(
+                new PIDConstants(
+                        PathPlannerConstants.translationP, 
+                        PathPlannerConstants.translationI, 
+                        PathPlannerConstants.translationD
+                    ),
+                new PIDConstants(
+                        PathPlannerConstants.rotationP,
+                        PathPlannerConstants.rotationI,
+                        PathPlannerConstants.rotationD
+                    ),
+                SwerveConstants.kMaxMetersPerSecond,
+                SwerveConstants.kDriveBaseRadius,
+                new ReplanningConfig()
+            );
     }
 }

@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.Constants.SwerveDrivebaseConstants;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.SwerveModule;
@@ -47,7 +47,7 @@ public class Swerve extends SubsystemBase {
   private final SwerveDrivePoseEstimator m_poseEstimator;
   private final SwerveDriveKinematics m_kinematics;
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
-  private final SlewRateLimiter filter = new SlewRateLimiter(SwerveDrivebaseConstants.kSlewRateLimiter);
+  private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   
   private final PIDController m_alignPID = 
     new PIDController(0,0,0);
@@ -56,42 +56,38 @@ public class Swerve extends SubsystemBase {
     m_gyro.reset();
 
     m_frontLeft = new SwerveModule(
-      SwerveDrivebaseConstants.kFrontLeftDriveID,
-      SwerveDrivebaseConstants.kFrontLeftTurnID,
-      SwerveDrivebaseConstants.kFrontLeftCANCoderID,
-      SwerveDrivebaseConstants.kFrontLeftCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontLeftDriveID,
+      SwerveConstants.kFrontLeftTurnID,
+      SwerveConstants.kFrontLeftAbsEncoderID,
+      SwerveConstants.kFrontLeftAbsEncoderMagnetOffset
     );
 
     m_frontRight = new SwerveModule(
-      SwerveDrivebaseConstants.kFrontRightDriveID,
-      SwerveDrivebaseConstants.kFrontRightTurnID,
-      SwerveDrivebaseConstants.kFrontRightCANCoderID,
-      SwerveDrivebaseConstants.kFrontRightCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kFrontRightDriveID,
+      SwerveConstants.kFrontRightTurnID,
+      SwerveConstants.kFrontRightAbsEncoderID,
+      SwerveConstants.kFrontRightAbsEncoderMagnetOffset
     );
 
     m_backLeft = new SwerveModule(
-      SwerveDrivebaseConstants.kBackLeftDriveID,
-      SwerveDrivebaseConstants.kBackLeftTurnID,
-      SwerveDrivebaseConstants.kBackLeftCANCoderID,
-      SwerveDrivebaseConstants.kBackLeftCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackLeftDriveID,
+      SwerveConstants.kBackLeftTurnID,
+      SwerveConstants.kBackLeftAbsEncoderID,
+      SwerveConstants.kBackLeftAbsEncoderMagnetOffset
     );
 
     m_backRight = new SwerveModule(
-      SwerveDrivebaseConstants.kBackRightDriveID,
-      SwerveDrivebaseConstants.kBackRightTurnID,
-      SwerveDrivebaseConstants.kBackRightCANCoderID,
-      SwerveDrivebaseConstants.kBackRightCANCoderMagnetOffset,
-      SwerveDrivebaseConstants.kCANcoderAbsDiscontPoint
+      SwerveConstants.kBackRightDriveID,
+      SwerveConstants.kBackRightTurnID,
+      SwerveConstants.kBackRightAbsEncoderID,
+      SwerveConstants.kBackRightAbsEncoderMagnetOffset
     );
 
     m_kinematics = new SwerveDriveKinematics(
-      new Translation2d(SwerveDrivebaseConstants.kWheelBase / 2, SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(SwerveDrivebaseConstants.kWheelBase / 2, -SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(-SwerveDrivebaseConstants.kWheelBase / 2, SwerveDrivebaseConstants.kTrackWidth / 2),
-      new Translation2d(-SwerveDrivebaseConstants.kWheelBase / 2, -SwerveDrivebaseConstants.kTrackWidth / 2)
+      new Translation2d(SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
+      new Translation2d(SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2),
+      new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
+      new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
     logData();
 
@@ -159,7 +155,7 @@ public class Swerve extends SubsystemBase {
     }
 
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        m_swerveModuleStates, SwerveDrivebaseConstants.kMaxMetersPerSecond);
+        m_swerveModuleStates, SwerveConstants.kMaxMetersPerSecond);
     m_frontLeft.setDesiredState(m_swerveModuleStates[0]);
     m_frontRight.setDesiredState(m_swerveModuleStates[1]);
     m_backLeft.setDesiredState(m_swerveModuleStates[2]);
@@ -172,7 +168,7 @@ public class Swerve extends SubsystemBase {
 
     SwerveDriveKinematics.desaturateWheelSpeeds(
       states, 
-      SwerveDrivebaseConstants.kMaxMetersPerSecond
+      SwerveConstants.kMaxMetersPerSecond
     );
 
     m_frontLeft.setDesiredState(states[0]);
@@ -298,7 +294,7 @@ public class Swerve extends SubsystemBase {
       double targetingAngularVelocity = tx * LimelightConstants.kAimP;
 
       //conversion to radians/second
-      targetingAngularVelocity *= SwerveDrivebaseConstants.kMaxAngularSpeed;
+      targetingAngularVelocity *= SwerveConstants.kMaxAngularSpeed;
       //invert since tx is positive to the right
       targetingAngularVelocity *= -1.0;
 
@@ -307,7 +303,7 @@ public class Swerve extends SubsystemBase {
 
   double getTargetingForwardSpeed() { // ranging control
       double targetingForwardSpeed = LimelightHelpers.getTY(LimelightConstants.kName) * LimelightConstants.kRangeP;
-      targetingForwardSpeed *= SwerveDrivebaseConstants.kMaxMetersPerSecond;
+      targetingForwardSpeed *= SwerveConstants.kMaxMetersPerSecond;
       targetingForwardSpeed *= -1.0; //invert since ty is positive when target is above crosshair
       return targetingForwardSpeed;
   }
