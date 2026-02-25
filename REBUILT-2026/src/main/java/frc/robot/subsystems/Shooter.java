@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -29,8 +30,8 @@ public class Shooter extends SubsystemBase {
   public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomID, int motorHoodID) {
 
     m_motorShooterLeader = new TalonFX(motorShooterLeadID);
-    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed)
-                                .LeaderID(motorShooterLeadID);
+    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed);
+    m_motorShooterFollower.LeaderID = motorShooterLeadID;
     m_motorBottom = new TalonFX(motorBottomID);
     m_motorHood = new TalonFX(motorHoodID);
 
@@ -50,6 +51,16 @@ public class Shooter extends SubsystemBase {
     return (R / Math.cos(angle)) * (Math.sqrt((((R * R * 10) / (2 * (R * Math.tan(angle) + h)))))); //Henry's equation (for static)
   }
 
+  public Command hoodLift(double speed) {
+    return new FunctionalCommand(
+    () -> {},
+    () -> {
+      runHoodMotor(speed);
+    },
+    interrupted -> runHoodMotor(0.0),
+    () -> false,
+    this);
+  }
 
 
 
