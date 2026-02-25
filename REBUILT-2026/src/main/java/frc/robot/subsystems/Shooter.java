@@ -18,6 +18,7 @@ public class Shooter extends SubsystemBase {
   
   private TalonFX m_motorShooterLeader;
   private Follower m_motorShooterFollower;
+  private TalonFX m_motorBottom;
   private TalonFX m_motorHood;
 
   private double m_leaderEnc = m_motorShooterLeader.getPosition().getValueAsDouble();
@@ -25,16 +26,28 @@ public class Shooter extends SubsystemBase {
   private ShooterConfigs m_shooterConfigs = new ShooterConfigs();
   private HoodConfigs m_hoodConfigs = new HoodConfigs();
   
-  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorHoodID) {
+  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomID, int motorHoodID) {
+
     m_motorShooterLeader = new TalonFX(motorShooterLeadID);
-    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed);
-    m_motorShooterFollower.LeaderID = motorShooterLeadID;
+    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed)
+                                .LeaderID(motorShooterLeadID);
+    m_motorBottom = new TalonFX(motorBottomID);
+    m_motorHood = new TalonFX(motorHoodID);
 
     m_motorShooterLeader.getConfigurator().apply(m_shooterConfigs.kKrakenLeaderConfig);
   }
 
-  public void runMotors(double speed) {
-    m_motorShooterLeader.set(speed);
+  public void runShooterMotors(double leaderSpeed, double bottomSpeed) {
+    m_motorShooterLeader.set(leaderSpeed);
+    m_motorBottom.set(bottomSpeed);
+  }
+
+  public void runHoodMotor(double speed) {
+    m_motorHood.set(speed);
+  }
+
+  public double getVelocity(double angle, double R, double h) {
+    return (R / Math.cos(angle)) * (Math.sqrt((((R * R * 10) / (2 * (R * Math.tan(angle) + h)))))); //Henry's equation (for static)
   }
 
 
