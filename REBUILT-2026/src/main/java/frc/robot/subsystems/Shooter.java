@@ -14,6 +14,8 @@ import frc.robot.Configs.ShooterConfigs;
 
 import frc.robot.Constants.ShooterConstants;
 
+import frc.robot.LimelightHelpers;
+
 public class Shooter extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   
@@ -21,8 +23,6 @@ public class Shooter extends SubsystemBase {
   private Follower m_motorShooterFollower;
   private TalonFX m_motorBottom;
   private TalonFX m_motorHood;
-
-  private double m_leaderEnc = m_motorShooterLeader.getPosition().getValueAsDouble();
 
   private ShooterConfigs m_shooterConfigs = new ShooterConfigs();
   private HoodConfigs m_hoodConfigs = new HoodConfigs();
@@ -34,6 +34,9 @@ public class Shooter extends SubsystemBase {
     m_motorShooterFollower.LeaderID = motorShooterLeadID;
     m_motorBottom = new TalonFX(motorBottomID);
     m_motorHood = new TalonFX(motorHoodID);
+
+    // Sets the mechanism position of the device in mechanism rotations.
+    m_motorHood.getConfigurator().setPosition(0);
 
     m_motorShooterLeader.getConfigurator().apply(m_shooterConfigs.kKrakenLeaderConfig);
   }
@@ -65,32 +68,60 @@ public class Shooter extends SubsystemBase {
     return (R / cosTheta) * Math.sqrt(g / denominator);
   }
 
-  public double[] getAngle(double velocity, double R) {
-      double g = ShooterConstants.kGravity;
-      double h = ShooterConstants.deltaHeight;
-      double v2 = velocity * velocity;
-      double v4 = v2 * v2;
+  public double getAngle(double velocity, double R) {
+    double g = ShooterConstants.kGravity;
+    double h = ShooterConstants.deltaHeight;
+    double v2 = velocity * velocity;
+    double v4 = v2 * v2;
 
-      double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+    if (withinBounds(velocity, R)) {
+        double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+        double root = Math.sqrt(discriminant);
 
-      if (discriminant < 0) {
-          return new double[] { Double.NaN, Double.NaN };
-      }
+        // only high-angle solution
+        double sol = Math.atan((v2 + root) / (g * R));
+        double solDeg = Math.toDegrees(sol);
+        if (solDeg > 30 && solDeg < 90) {
+          return solDeg;
+        } else {
+          return Double.NaN;
+        }
+    } else {
+        return Double.NaN;
+    }
+  }
 
-      double root = Math.sqrt(discriminant);
+  public boolean withinBounds(double velocity, double R){
+    double g = ShooterConstants.kGravity;
+    double h = ShooterConstants.deltaHeight;
+    double v2 = velocity * velocity;
+    double v4 = v2 * v2;
 
-      double sol1 = Math.atan((v2 - root) / (g * R));
-      double sol2 = Math.atan((v2 + root) / (g * R));
+    // max horizontal distance
+    double maxDist = Math.sqrt(v4 - 2 * g * h * v2) / g;
 
-      return new double[] { Math.toDegrees(sol1), Math.toDegrees(sol2) };
+    // discriminant for high-angle solution
+    double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+
+    return (R <= maxDist) && (discriminant >= 0);
   }
 
   public Command shoot(double range){
     return new FunctionalCommand(
       () -> {},
       () -> {
-        double[] angles = getAngle();
-        if(angles[1] == NaN & angles[2] == NaN){
+        double angle = getAngle(8.0, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
+        if(Double.isNaN(angle)){
+          // fallback for when is invalid
+          runShooterMotors(0.0, 0.0);
+          runHoodMotor(0.0);
+        } else {
+        
+          /* 
+          given required angle:
+          set hood motor position to that angle
+          (account for offset and bounds)
+          */ 
 
         }
       },
@@ -108,33 +139,6 @@ public class Shooter extends SubsystemBase {
     interrupted -> runHoodMotor(0.0),
     () -> false,
     this);
-  }
-
-
-
-
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
-  }
-
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
   }
 
   @Override

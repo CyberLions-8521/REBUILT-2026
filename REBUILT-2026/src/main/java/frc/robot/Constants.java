@@ -10,11 +10,13 @@ public class Constants {
         public static final int kLeaderId = 12;
         public static final int kFollowerId = 11;
 
+        public static final Angle kHoodInitialPosition = 0.0;
+
         public static final double kGravity = 9.807;
         
-        // Linear Regression: y = ax * b, where y = velocity and x = motor speed
-        public static final double kA = 8.682;
-        public static final double kB = -0.4498;
+        // Linear Regression: y = a + bx, where y = velocity and x = motor speed
+        public static final double kA = -0.4498;
+        public static final double kB = 8.682;
 
         // in meters
         public static final double ballHeight = 0.5842; // without robot
