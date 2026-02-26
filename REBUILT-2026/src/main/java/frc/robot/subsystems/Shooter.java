@@ -47,8 +47,56 @@ public class Shooter extends SubsystemBase {
     m_motorHood.set(speed);
   }
 
-  public double getVelocity(double angle, double R, double h) {
-    return (R / Math.cos(angle)) * (Math.sqrt((((R * R * 10) / (2 * (R * Math.tan(angle) + h)))))); //Henry's equation (for static)
+  public double velocityToMotor(double velocity){
+    return ((velocity + ShooterConstants.kB) / ShooterConstants.kA);
+  }
+
+  // for static angle
+  public double getVelocity(double angleDegrees, double R) {
+    double angleRads = Math.toRadians(angleDegrees);
+    double g = ShooterConstants.kGravity;
+    double h = ShooterConstants.deltaHeight;
+    
+    double cosTheta = Math.cos(angleRads);
+    double denominator = 2 * (R * Math.tan(angleRads) + h);
+    
+    if (denominator <= 0) return Double.NaN; 
+
+    return (R / cosTheta) * Math.sqrt(g / denominator);
+  }
+
+  public double[] getAngle(double velocity, double R) {
+      double g = ShooterConstants.kGravity;
+      double h = ShooterConstants.deltaHeight;
+      double v2 = velocity * velocity;
+      double v4 = v2 * v2;
+
+      double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+
+      if (discriminant < 0) {
+          return new double[] { Double.NaN, Double.NaN };
+      }
+
+      double root = Math.sqrt(discriminant);
+
+      double sol1 = Math.atan((v2 - root) / (g * R));
+      double sol2 = Math.atan((v2 + root) / (g * R));
+
+      return new double[] { Math.toDegrees(sol1), Math.toDegrees(sol2) };
+  }
+
+  public Command shoot(double range){
+    return new FunctionalCommand(
+      () -> {},
+      () -> {
+        double[] angles = getAngle();
+        if(angles[1] == NaN & angles[2] == NaN){
+
+        }
+      },
+      interrupted -> runShooterMotors(0.0, 0.0),
+      () -> false,
+      this);
   }
 
   public Command hoodLift(double speed) {
