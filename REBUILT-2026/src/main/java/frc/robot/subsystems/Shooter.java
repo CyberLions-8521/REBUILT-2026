@@ -46,8 +46,8 @@ public class Shooter extends SubsystemBase {
     m_motorBottom.set(bottomSpeed);
   }
 
-  public void runHoodMotor(double speed) {
-    m_motorHood.set(speed);
+  public void runHoodMotor(double solDeg) {
+    m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * solDeg) /*- insert motor encoder value variable here*/ );
   }
 
   public double velocityToMotor(double velocity){
@@ -81,7 +81,7 @@ public class Shooter extends SubsystemBase {
         // only high-angle solution
         double sol = Math.atan((v2 + root) / (g * R));
         double solDeg = Math.toDegrees(sol);
-        if (solDeg > 30 && solDeg < 90) {
+        if (true) {
           return solDeg;
         } else {
           return Double.NaN;
@@ -130,11 +130,11 @@ public class Shooter extends SubsystemBase {
       this);
   }
 
-  public Command hoodLift(double speed) {
+  public Command setHood(double pos) {
     return new FunctionalCommand(
     () -> {},
     () -> {
-      runHoodMotor(speed);
+      runHoodMotor(pos);
     },
     interrupted -> runHoodMotor(0.0),
     () -> false,
