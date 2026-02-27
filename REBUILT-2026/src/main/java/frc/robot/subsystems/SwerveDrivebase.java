@@ -40,6 +40,8 @@ public class SwerveDrivebase extends SubsystemBase {
   public SwerveDrivebase() {
     m_gyro.reset();
 
+    putPID();
+
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
       SwerveConstants.kFrontLeftTurnID,
@@ -193,7 +195,7 @@ public class SwerveDrivebase extends SubsystemBase {
   @Override
   public void periodic() {
     tunePID();
-    tuneTXController();
+    // tuneTXController();
     logData();
   }
 
@@ -206,17 +208,38 @@ public class SwerveDrivebase extends SubsystemBase {
     double driveD = SmartDashboard.getNumber("driveD", 0);
     double driveS = SmartDashboard.getNumber("driveS", 0);
     double driveV = SmartDashboard.getNumber("driveV", 0);
+    if (turnP != SwerveConstants.turnP || turnD != SwerveConstants.turnD || turnS != SwerveConstants.turnS) {
+          m_frontLeft.configTurnPID(turnP, turnD, turnS);
+          m_frontRight.configTurnPID(turnP, turnD, turnS);
+          m_backLeft.configTurnPID(turnP, turnD, turnS);
+          m_backRight.configTurnPID(turnP, turnD, turnS);
+          SwerveConstants.turnP = turnP;
+          SwerveConstants.turnD = turnD;
+          SwerveConstants.turnS = turnS;
+    }
 
-    m_frontLeft.configDrivePID(driveP, driveD, driveV, driveS);
-    m_frontRight.configDrivePID(driveP, driveD, driveV, driveS);
-    m_backLeft.configDrivePID(driveP, driveD, driveV, driveS);
-    m_backRight.configDrivePID(driveP, driveD, driveV, driveS);
+    if (driveP != SwerveConstants.driveP || driveD != SwerveConstants.driveD || driveS != SwerveConstants.driveS || driveV != SwerveConstants.driveV) {
+          m_frontLeft.configDrivePID(driveP, driveD, driveV, driveS);
+          m_frontRight.configDrivePID(driveP, driveD, driveV, driveS);
+          m_backLeft.configDrivePID(driveP, driveD, driveV, driveS);
+          m_backRight.configDrivePID(driveP, driveD, driveV, driveS);
+          SwerveConstants.driveP = driveP;
+          SwerveConstants.driveD = driveD;
+          SwerveConstants.driveS = driveS;
+          SwerveConstants.driveV = driveV;
+    }
 
-    m_frontLeft.configTurnPID(turnP, turnD, turnS);
-    m_frontRight.configTurnPID(turnP, turnD, turnS);
-    m_backLeft.configTurnPID(turnP, turnD, turnS);
-    m_backRight.configTurnPID(turnP, turnD, turnS);
+  }
 
+  public void putPID() {
+    SmartDashboard.putNumber("driveP", 0);
+    SmartDashboard.putNumber("driveD", 0);
+    SmartDashboard.putNumber("driveS", 0);
+    SmartDashboard.putNumber("driveV", 0);
+
+    SmartDashboard.putNumber("turnP", 0);
+    SmartDashboard.putNumber("turnD", 0);
+    SmartDashboard.putNumber("turnS", 0);
   }
 
   public void tuneTXController() {

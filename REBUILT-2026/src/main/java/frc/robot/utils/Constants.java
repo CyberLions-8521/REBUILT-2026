@@ -23,14 +23,14 @@ public class Constants {
 
         private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static final double driveP = 0; //set later
-        public static final double driveD = 0; //set later
-        public static final double driveV = 0; //used for feedforward
-        public static final double driveS = 0; //set later
-        public static final double turnP = 0; //set later
-        public static final double turnD = 0; //set ;ater
-        public static final double turnS = 0; //set later
-        public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
+        public static  double driveP = 0; //set later
+        public static  double driveD = 0; //set later
+        public static  double driveV = 0; //used for feedforward
+        public static  double driveS = 0; //set later
+        public static  double turnP = 0; //set later
+        public static  double turnD = 0; //set ;ater
+        public static  double turnS = 0; //set later
+        public static final String kCANCoderBus = "rio";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
         public static final int kFrontLeftDriveID  = 1; 
