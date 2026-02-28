@@ -15,21 +15,18 @@ public class Constants {
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
         private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4i
-        public static final double kDriveConversionFactor = kWheelCircumference / kDriveGearRatio;  // meters (of robot travel)
+        public static final double kDriveConversionFactor = kDriveGearRatio / kWheelCircumference;  // meters (of robot travel)
 
         private static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
         public static final double kAngleConversion = 360;              // degrees
-        public static final double kTurnConversionFactor = kAngleConversion / kTurnGearRatio;       // degrees (of output shaft)
+        public static final double kTurnConversionFactor = kTurnGearRatio / kAngleConversion;       // degrees (of output shaft)
 
-        private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
+        private static final double kDrivingMotorFreeSpeedRps = 6000 / 60.0;      // kraken free rpm = 6000 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static  double driveP = 0; //set later
-        public static  double driveD = 0; //set later
-        public static  double driveV = 0; //used for feedforward
-        public static  double driveS = 0; //set later
+        public static  double driveP = 3.5; //set later
+        public static  double driveV = 2.4; //used for feedforward
         public static  double turnP = 0; //set later
         public static  double turnD = 0; //set ;ater
-        public static  double turnS = 0; //set later
         public static final String kCANCoderBus = "rio";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
@@ -50,7 +47,7 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 4.0; //tune later
+        public static final double kMaxMetersPerSecond = 1.0; //tune later
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kFrontLeftAbsEncoderMagnetOffset  = 0.141319;     // set later

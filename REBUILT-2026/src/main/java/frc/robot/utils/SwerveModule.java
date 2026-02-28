@@ -66,7 +66,7 @@ public class SwerveModule {
     }
 
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " turn position", getAbsoluteEncoderPosition());
+        SmartDashboard.putNumber(motor + "abs encoder position", m_SRXEncoder.get());
     }
 
     public SwerveModuleState getState() {
@@ -75,6 +75,10 @@ public class SwerveModule {
 
     public void zeroTurnEncoder() {
         m_turnMotor.setPosition(0);
+    }
+
+    public TalonFX getDriveMotor() {
+        return m_driveMotor;
     }
 
     public void zeroDriveEncoder() {
@@ -104,20 +108,18 @@ public class SwerveModule {
         m_turnMotor.set(0);
     }
 
-    public void configDrivePID(double kP, double kD, double kS, double kV){
+    public void configDrivePID(double kP, double kD, double kV){
           Slot0Configs m_driveConfig = new Slot0Configs();
           m_driveConfig.kP = kP;
           m_driveConfig.kD = kD;
-          m_driveConfig.kS = kS;
           m_driveConfig.kV = kV;
           m_driveMotor.getConfigurator().apply(m_driveConfig);
      }
 
-    public void configTurnPID(double kP, double kD, double kS){ 
+    public void configTurnPID(double kP, double kD){ 
           Slot0Configs m_turnConfig = new Slot0Configs();
           m_turnConfig.kP = kP;
           m_turnConfig.kD = kD;
-          m_turnConfig.kS = kS;
           m_turnMotor.getConfigurator().apply(m_turnConfig);
      }
 

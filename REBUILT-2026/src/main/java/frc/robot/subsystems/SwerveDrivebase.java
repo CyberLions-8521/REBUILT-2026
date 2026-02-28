@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -39,6 +40,11 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public SwerveDrivebase() {
     m_gyro.reset();
+
+    SmartDashboard.putNumber("front left desired speed",0);
+    SmartDashboard.putNumber("front right desired speed", 0);
+    SmartDashboard.putNumber("back left desired speed", 0);
+    SmartDashboard.putNumber("back right desired speed", 0);
 
     putPID();
 
@@ -102,6 +108,10 @@ public class SwerveDrivebase extends SubsystemBase {
     m_frontRight.setDesiredState(m_swerveModuleStates[1]);
     m_backLeft.setDesiredState(m_swerveModuleStates[2]);
     m_backRight.setDesiredState(m_swerveModuleStates[3]);
+    SmartDashboard.putNumber("front left desired speed", m_swerveModuleStates[0].speedMetersPerSecond);
+    SmartDashboard.putNumber("front right desired speed", m_swerveModuleStates[1].speedMetersPerSecond);
+    SmartDashboard.putNumber("back left desired speed", m_swerveModuleStates[2].speedMetersPerSecond);
+    SmartDashboard.putNumber("back right desired speed", m_swerveModuleStates[3].speedMetersPerSecond);
   }
 
   public FunctionalCommand getDriveCommand(double distance) {
@@ -202,44 +212,37 @@ public class SwerveDrivebase extends SubsystemBase {
   public void tunePID () {
     double turnP = SmartDashboard.getNumber("turnP", 0);
     double turnD = SmartDashboard.getNumber("turnD", 0);
-    double turnS = SmartDashboard.getNumber("turnS", 0);
 
-    double driveP = SmartDashboard.getNumber("driveP", 0);
-    double driveD = SmartDashboard.getNumber("driveD", 0);
-    double driveS = SmartDashboard.getNumber("driveS", 0);
-    double driveV = SmartDashboard.getNumber("driveV", 0);
-    if (turnP != SwerveConstants.turnP || turnD != SwerveConstants.turnD || turnS != SwerveConstants.turnS) {
-          m_frontLeft.configTurnPID(turnP, turnD, turnS);
-          m_frontRight.configTurnPID(turnP, turnD, turnS);
-          m_backLeft.configTurnPID(turnP, turnD, turnS);
-          m_backRight.configTurnPID(turnP, turnD, turnS);
+    // double driveP = SmartDashboard.getNumber("driveP", 0);
+    // double driveD = SmartDashboard.getNumber("driveD", 0);
+    // double driveV = SmartDashboard.getNumber("driveV", 0);
+    if (turnP != SwerveConstants.turnP || turnD != SwerveConstants.turnD) {
+          m_frontLeft.configTurnPID(turnP, turnD);
+          m_frontRight.configTurnPID(turnP, turnD);
+          m_backLeft.configTurnPID(turnP, turnD);
+          m_backRight.configTurnPID(turnP, turnD);
           SwerveConstants.turnP = turnP;
           SwerveConstants.turnD = turnD;
-          SwerveConstants.turnS = turnS;
     }
 
-    if (driveP != SwerveConstants.driveP || driveD != SwerveConstants.driveD || driveS != SwerveConstants.driveS || driveV != SwerveConstants.driveV) {
-          m_frontLeft.configDrivePID(driveP, driveD, driveV, driveS);
-          m_frontRight.configDrivePID(driveP, driveD, driveV, driveS);
-          m_backLeft.configDrivePID(driveP, driveD, driveV, driveS);
-          m_backRight.configDrivePID(driveP, driveD, driveV, driveS);
-          SwerveConstants.driveP = driveP;
-          SwerveConstants.driveD = driveD;
-          SwerveConstants.driveS = driveS;
-          SwerveConstants.driveV = driveV;
-    }
+    // if (driveP != SwerveConstants.driveP || driveV != SwerveConstants.driveV) {
+    //       m_frontLeft.configDrivePID(driveP, driveD, driveV);
+    //       m_frontRight.configDrivePID(driveP, driveD, driveV);
+    //       m_backLeft.configDrivePID(driveP, driveD, driveV);
+    //       m_backRight.configDrivePID(driveP, driveD, driveV);
+    //       SwerveConstants.driveP = driveP;
+    //       SwerveConstants.driveV = driveV;
+    // }
 
   }
 
   public void putPID() {
-    SmartDashboard.putNumber("driveP", 0);
-    SmartDashboard.putNumber("driveD", 0);
-    SmartDashboard.putNumber("driveS", 0);
-    SmartDashboard.putNumber("driveV", 0);
+    // SmartDashboard.putNumber("driveP", 0);
+    // SmartDashboard.putNumber("driveD", 0);
+    // SmartDashboard.putNumber("driveV", 0);
 
     SmartDashboard.putNumber("turnP", 0);
     SmartDashboard.putNumber("turnD", 0);
-    SmartDashboard.putNumber("turnS", 0);
   }
 
   public void tuneTXController() {
