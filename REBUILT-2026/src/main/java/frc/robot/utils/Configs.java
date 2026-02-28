@@ -25,8 +25,6 @@ public class Configs {
         static {
             m_driveConfig.Slot0
                 .withKP(SwerveConstants.driveP)
-                .withKD(SwerveConstants.driveD)
-                .withKS(SwerveConstants.driveS)
                 .withKD(SwerveConstants.driveV);
             m_driveConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
@@ -35,13 +33,11 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
             m_driveConfig.Feedback
-                .withSensorToMechanismRatio(SwerveConstants.kDriveConversionFactor)
-                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+                .withSensorToMechanismRatio(SwerveConstants.kDriveConversionFactor);
 
             m_turnConfig.Slot0
                 .withKP(SwerveConstants.turnP)
-                .withKD(SwerveConstants.driveD)
-                .withKS(SwerveConstants.turnS);
+                .withKD(SwerveConstants.turnD);
             m_turnConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.turnMotorCurrentLimit);
@@ -56,9 +52,6 @@ public class Configs {
                 .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
                 .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
                 
-            
-        
-
         }
     }
 }

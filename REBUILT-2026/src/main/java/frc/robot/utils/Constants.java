@@ -9,28 +9,23 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public class Constants {
     public static final class SwerveConstants {
-        public static final int driveMotorCurrentLimit = 80;
-        public static final int turnMotorCurrentLimit = 80;
+        public static final int driveMotorCurrentLimit = 85;
+        public static final int turnMotorCurrentLimit = 75;
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
         private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4i
-        public static final double kDriveConversionFactor = kWheelCircumference / kDriveGearRatio;  // meters (of robot travel)
+        public static final double kDriveConversionFactor = kDriveGearRatio / kWheelCircumference;  // meters (of robot travel)
 
         private static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
         public static final double kAngleConversion = 360;              // degrees
-        public static final double kTurnConversionFactor = kAngleConversion / kTurnGearRatio;       // degrees (of output shaft)
+        public static final double kTurnConversionFactor = 1;     // degrees (of output shaft)
 
-        private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
-        private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static final double driveP = 0; //set later
-        public static final double driveD = 0; //set later
-        public static final double driveV = 0; //used for feedforward
-        public static final double driveS = 0; //set later
-        public static final double turnP = 0; //set later
-        public static final double turnD = 0; //set ;ater
-        public static final double turnS = 0; //set later
-        public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
+        public static final double driveP = 3.5; //set later
+        public static final double driveV = 2.4; //used for feedforward
+        public static  double turnP = 0; //set later
+        public static  double turnD = 0; //set ;ater
+        public static final String kCANCoderBus = "rio";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
         public static final int kFrontLeftDriveID  = 1; 

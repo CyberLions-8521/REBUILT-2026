@@ -61,7 +61,7 @@ public class SwerveModule {
         return m_driveMotor.getVelocity().getValueAsDouble();
     }
 
-    public double getTurnEncoderValueDegrees() {
+    public double getTurnEncoderValueRotations() {
         return m_turnMotor.getPosition().getValueAsDouble();
     }
 
@@ -70,19 +70,13 @@ public class SwerveModule {
     }
 
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude() % 360 - 180);
-        SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble()*SwerveConstants.kAngleConversion);
-        SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
-
-        SmartDashboard.putNumber(motor + " drive position", m_driveMotor.getPosition().getValue().baseUnitMagnitude());
-        SmartDashboard.putNumber(motor + " turn position", m_turnMotor.getPosition().getValue().baseUnitMagnitude());
-
-        SmartDashboard.putNumber(motor + " drive velocity", m_driveMotor.getVelocity().getValue().baseUnitMagnitude());
-        SmartDashboard.putNumber(motor + " turn velocity", m_turnMotor.getVelocity().getValue().baseUnitMagnitude());
+        SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber(motor + " actual turn position", getTurnEncoderValueRotations());
+        SmartDashboard.putNumber(motor + " desired turn position", m_desiredState.angle.getDegrees());
     }
 
     public SwerveModuleState getState() {
-        return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromDegrees(getTurnEncoderValueDegrees()));
+        return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromDegrees(getTurnEncoderValueRotations()));
     }
 
     public void zeroTurnEncoder() {
@@ -94,11 +88,11 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState targetState) {
-        Rotation2d currentRotation = Rotation2d.fromDegrees(getTurnEncoderValueDegrees());
+        Rotation2d currentRotation = Rotation2d.fromRotations(getTurnEncoderValueRotations());
         targetState.optimize(currentRotation);
 
         m_driveMotor.setControl(m_driveRequest.withVelocity(targetState.speedMetersPerSecond));
-        m_turnMotor.setControl(m_turnRequest.withPosition(targetState.angle.getDegrees()));
+        m_turnMotor.setControl(m_turnRequest.withPosition(targetState.angle.getRotations()));
 
         m_desiredState = targetState; 
     }
@@ -112,20 +106,17 @@ public class SwerveModule {
         m_turnMotor.set(0);
     }
 
-    public void configDrivePID(double kP, double kD, double kS, double kV){
+    public void configDrivePID(double kP, double kV){
           Slot0Configs m_driveConfig = new Slot0Configs();
           m_driveConfig.kP = kP;
-          m_driveConfig.kD = kD;
-          m_driveConfig.kS = kS;
           m_driveConfig.kV = kV;
           m_driveMotor.getConfigurator().apply(m_driveConfig);
      }
 
-    public void configTurnPID(double kP, double kD, double kS){ 
+    public void configTurnPID(double kP, double kD){ 
           Slot0Configs m_turnConfig = new Slot0Configs();
           m_turnConfig.kP = kP;
           m_turnConfig.kD = kD;
-          m_turnConfig.kS = kS;
           m_turnMotor.getConfigurator().apply(m_turnConfig);
      }
 

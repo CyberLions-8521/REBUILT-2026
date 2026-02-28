@@ -122,15 +122,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public void resetGyro() {
     m_gyro.reset();
-    this.setGyro(0);
-  }
-
-  public void setGyro(double angle){
-    m_gyro.setAngleAdjustment(angle);
-  }
-
-  public Command setGyroCommand(double angle) {
-    return this.runOnce(() -> this.setGyro(angle));
+    m_gyro.setAngleAdjustment(0);
   }
 
   public void stopModules() {
@@ -144,20 +136,8 @@ public class SwerveDrivebase extends SubsystemBase {
     return Rotation2d.fromDegrees(-m_gyro.getAngle());
   }
 
-  public double getTurnRate() {
-    return -m_gyro.getRate();
-  }
-
   public void zeroHeading() {
     m_gyro.reset();
-  }
-
-  public double getPitch() {
-    return m_gyro.getPitch();
-  }
-
-  public double getRoll() {
-    return m_gyro.getRoll();
   }
   
   public Command resetEncodersCommand() {
@@ -193,30 +173,22 @@ public class SwerveDrivebase extends SubsystemBase {
   @Override
   public void periodic() {
     tunePID();
-    tuneTXController();
+    // tuneTXController();
     logData();
   }
 
   public void tunePID () {
     double turnP = SmartDashboard.getNumber("turnP", 0);
     double turnD = SmartDashboard.getNumber("turnD", 0);
-    double turnS = SmartDashboard.getNumber("turnS", 0);
 
-    double driveP = SmartDashboard.getNumber("driveP", 0);
-    double driveD = SmartDashboard.getNumber("driveD", 0);
-    double driveS = SmartDashboard.getNumber("driveS", 0);
-    double driveV = SmartDashboard.getNumber("driveV", 0);
-
-    m_frontLeft.configDrivePID(driveP, driveD, driveV, driveS);
-    m_frontRight.configDrivePID(driveP, driveD, driveV, driveS);
-    m_backLeft.configDrivePID(driveP, driveD, driveV, driveS);
-    m_backRight.configDrivePID(driveP, driveD, driveV, driveS);
-
-    m_frontLeft.configTurnPID(turnP, turnD, turnS);
-    m_frontRight.configTurnPID(turnP, turnD, turnS);
-    m_backLeft.configTurnPID(turnP, turnD, turnS);
-    m_backRight.configTurnPID(turnP, turnD, turnS);
-
+    if (SwerveConstants.turnP != turnP || SwerveConstants.turnD != turnD) {
+        m_frontLeft.configTurnPID(turnP, turnD);
+        m_frontRight.configTurnPID(turnP, turnD);
+        m_backLeft.configTurnPID(turnP, turnD);
+        m_backRight.configTurnPID(turnP, turnD);
+        SwerveConstants.turnP = turnP;
+        SwerveConstants.turnD = turnD;
+    }
   }
 
   public void tuneTXController() {
