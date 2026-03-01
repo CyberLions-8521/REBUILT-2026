@@ -21,10 +21,12 @@ public class Constants {
         public static final double kAngleConversion = 360;              // degrees
         public static final double kTurnConversionFactor = 1;     // degrees (of output shaft)
 
-        public static final double driveP = 3.5; //set later
-        public static final double driveV = 2.4; //used for feedforward
-        public static  double turnP = 0; //set later
-        public static  double turnD = 0; //set ;ater
+        public static double driveP = 3.5; //set later 3.5 (oriingal)
+        public static double driveV = 2.4; //used for feed forward 2.4 (original)
+
+        public static  double kTurnP = 0; //set later
+        public static  double kTurnD = 0; //set ;ater
+
         public static final String kCANCoderBus = "rio";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
@@ -49,10 +51,11 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
-        public static final double kFrontLeftCANCoderMagnetOffset  = 0;     // set later
-        public static final double kFrontRightCANCoderMagnetOffset = 0;     // set later
-        public static final double kBackLeftCANCoderMagnetOffset   = 0;     // set later
-        public static final double kBackRightCANCoderMagnetOffset  = 0;     // set later
+        
+        public static final double kFrontLeftCANCoderMagnetOffset  = 0.132568;     // set later
+        public static final double kFrontRightCANCoderMagnetOffset = -0.048096;     // set later
+        public static final double kBackLeftCANCoderMagnetOffset   = 0.069002;     // set later
+        public static final double kBackRightCANCoderMagnetOffset  = 0.175049;     // set later
     }
 
     public static final class LimelightConstants {

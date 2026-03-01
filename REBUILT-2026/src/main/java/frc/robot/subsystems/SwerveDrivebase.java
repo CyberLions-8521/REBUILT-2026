@@ -74,6 +74,10 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
+
+    SmartDashboard.putNumber("turnP", 0);
+    SmartDashboard.putNumber("turnD", 0);
+
   }
 
 
@@ -83,6 +87,7 @@ public class SwerveDrivebase extends SubsystemBase {
     m_frontRight.logData("Front Right");
     m_backLeft.logData("Back Left");
     m_backRight.logData("Back Right");
+
   }
 
   public void drive(double vx, double vy, double omega, boolean fieldRelative) {
@@ -180,14 +185,15 @@ public class SwerveDrivebase extends SubsystemBase {
   public void tunePID () {
     double turnP = SmartDashboard.getNumber("turnP", 0);
     double turnD = SmartDashboard.getNumber("turnD", 0);
+  
 
-    if (SwerveConstants.turnP != turnP || SwerveConstants.turnD != turnD) {
+    if (SwerveConstants.kTurnP != turnP || SwerveConstants.kTurnD != turnD) {
         m_frontLeft.configTurnPID(turnP, turnD);
         m_frontRight.configTurnPID(turnP, turnD);
         m_backLeft.configTurnPID(turnP, turnD);
         m_backRight.configTurnPID(turnP, turnD);
-        SwerveConstants.turnP = turnP;
-        SwerveConstants.turnD = turnD;
+        SwerveConstants.kTurnP = turnP;
+        SwerveConstants.kTurnD = turnD;
     }
   }
 
