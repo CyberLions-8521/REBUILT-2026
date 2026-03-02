@@ -110,18 +110,22 @@ public class Shooter extends SubsystemBase {
     return new FunctionalCommand(
       () -> {},
       () -> {
-        double angle = getAngle(8.0, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
-        if(Double.isNaN(angle)){
-          // fallback for when is invalid
-          runShooterMotors(0.0, 0.0);
-          runHoodMotor(0.0);
-        } else {
-        
+        double angle = getAngle(ShooterConstants.kDefaultShooterSpeed, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
+        if(!Double.isNaN(angle)){
+
           /* 
           given required angle:
           set hood motor position to that angle
           (account for offset and bounds)
           */ 
+
+
+
+        } else {
+
+          // fallback for when is invalid
+          runShooterMotors(0.0, 0.0);
+          runHoodMotor(0.0);
 
         }
       },

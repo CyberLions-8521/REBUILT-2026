@@ -13,6 +13,7 @@ public class Constants {
         public static final int kFollowerId = 11;
 
         public static final double kHoodInitialPosition = 0.0;
+        public static final double kDefaultShooterSpeed = 7.0;
 
         public static final double kGravity = 9.807;
         
