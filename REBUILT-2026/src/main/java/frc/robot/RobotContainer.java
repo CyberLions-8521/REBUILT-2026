@@ -33,8 +33,6 @@ public class RobotContainer {
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
   public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName));
-  //public final Trigger seesTagLeftBumperNotPressed = m_controller.x(); //placeholder since the limelight is on the real bot, testing on demo bot
-  //public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper(); //place holder since limelight is on the real bot, testing on demo bot
   public final Trigger shootFail = m_controller.y(); //placeholder for the real condtition check (will do later)
 
 
@@ -59,8 +57,8 @@ public class RobotContainer {
     m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
     seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
     seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
-    // m_controller.x().whileTrue(m_LEDLights.setLEDCommandTimed(LEDMode.Charging, LEDMode.Shooting, 2));
-    shootFail.onTrue(m_LEDLights.setLEDCommandTimed(LEDMode.ShootFail, 1));
+    m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging).withTimeout(2).andThen(m_LEDLights.setLEDCommand(LEDMode.Shooting)));
+    shootFail.onTrue(m_LEDLights.setLEDCommand(LEDMode.ShootFail).withTimeout(1));
 
 }
 
