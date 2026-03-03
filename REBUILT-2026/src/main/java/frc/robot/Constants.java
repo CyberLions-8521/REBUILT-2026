@@ -12,7 +12,7 @@ public class Constants {
         public static final int kLeaderId = 12;
         public static final int kFollowerId = 11;
 
-        public static final double kHoodInitialPosition = 0.0;
+        public static final double kHoodOffset = 0.0;
         public static final double kDefaultShooterSpeed = 7.0;
 
         public static final double kGravity = 9.807;
@@ -28,6 +28,6 @@ public class Constants {
 
         // in rotations
         public static final double hoodMobility = 3.465; // ratio from motor to all range of motion on hood 
-        public static final double hoodMobilityRatio = hoodMobility / 13.772; // IMPORTANT: RANGE OF MOTION IS NOT 60, WE ARE WORKING TO UPDATE THAT
+        public static final double hoodMobilityRatio = hoodMobility / 35.7; // approximate 
     }
 }

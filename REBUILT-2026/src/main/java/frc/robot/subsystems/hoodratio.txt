@@ -1,8 +1,0 @@
-constant needed to go thoruhg all hood = 3.465
-encoder = 0 (start of hood)
-
-move hood to (certain degrees)
-	rotate motor (constant * (certain degrees / 60)
-
-encoder update to new value (PID)
-

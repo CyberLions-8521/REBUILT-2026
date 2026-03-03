@@ -11,7 +11,6 @@ public class Configs {
 
     public static final class ShooterConfigs {
        public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
-
        static {
             kKrakenLeaderConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast);

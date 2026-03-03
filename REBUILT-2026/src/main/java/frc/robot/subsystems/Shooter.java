@@ -20,26 +20,25 @@ public class Shooter extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   
   private TalonFX m_motorShooterLeader;
-  private Follower m_motorShooterFollower;
+  private TalonFX m_motorShooterFollower;
   private TalonFX m_motorBottom;
   private TalonFX m_motorHood;
-
-  private ShooterConfigs m_shooterConfigs = new ShooterConfigs();
-  private HoodConfigs m_hoodConfigs = new HoodConfigs();
+  private Follower followShooter;
   
   public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomID, int motorHoodID) {
 
     m_motorShooterLeader = new TalonFX(motorShooterLeadID);
-    m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed);
-    m_motorShooterFollower.LeaderID = motorShooterLeadID;
+    m_motorShooterFollower = new TalonFX(motorShooterFolID);
+
+    followShooter = new Follower(motorShooterLeadID, MotorAlignmentValue.Opposed);
+    m_motorShooterFollower.setControl(followShooter.withUpdateFreqHz(50));
+
     m_motorBottom = new TalonFX(motorBottomID);
     m_motorHood = new TalonFX(motorHoodID);
-
-    // Sets the mechanism position of the device in mechanism rotations.
-    m_motorHood.getConfigurator().setPosition(0);
-
-    m_motorShooterLeader.getConfigurator().apply(m_shooterConfigs.kKrakenLeaderConfig);
-  }
+    
+    m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+    m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+}
 
   public void runShooterMotors(double leaderSpeed, double bottomSpeed) {
     m_motorShooterLeader.set(leaderSpeed);
@@ -47,7 +46,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void runHoodMotor(double solDeg) {
-    m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * solDeg) /*- insert motor encoder value variable here*/ );
+    m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * solDeg) - ShooterConstants.kHoodOffset); // 0.0 right now
   }
 
   public double velocityToMotor(double velocity){
@@ -112,6 +111,7 @@ public class Shooter extends SubsystemBase {
       () -> {
         double angle = getAngle(ShooterConstants.kDefaultShooterSpeed, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
         if(!Double.isNaN(angle)){
+          // try angle
 
           /* 
           given required angle:
@@ -122,6 +122,7 @@ public class Shooter extends SubsystemBase {
 
 
         } else {
+          // try velocity
 
           // fallback for when is invalid
           runShooterMotors(0.0, 0.0);
