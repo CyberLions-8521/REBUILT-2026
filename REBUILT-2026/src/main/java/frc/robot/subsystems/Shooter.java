@@ -4,7 +4,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.DifferentialDutyCycle;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -21,34 +24,49 @@ public class Shooter extends SubsystemBase {
   
   private TalonFX m_motorShooterLeader;
   private Follower m_motorShooterFollower;
-  private TalonFX m_motorBottom;
+  private Follower m_motorShooterBottomFollower;
   private TalonFX m_motorHood;
 
   private ShooterConfigs m_shooterConfigs = new ShooterConfigs();
   private HoodConfigs m_hoodConfigs = new HoodConfigs();
-  
-  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomID, int motorHoodID) {
+  private Slot0Configs slot0 = new Slot0Configs();
+
+  // c_ for control mode
+  final DifferentialDutyCycle c_motorShooterLeader;
+  final Follower c_motorShooterFollower;
+
+  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomFolID, int motorHoodID) {
+
+    c_motorShooterLeader = new DifferentialDutyCycle(0.0, 0);
+    c_motorShooterFollower = new Follower(motorShooterLeadID, MotorAlignmentValue.Opposed);
 
     m_motorShooterLeader = new TalonFX(motorShooterLeadID);
+    m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+
     m_motorShooterFollower = new Follower(motorShooterFolID, MotorAlignmentValue.Opposed);
     m_motorShooterFollower.LeaderID = motorShooterLeadID;
-    m_motorBottom = new TalonFX(motorBottomID);
+
+    m_motorShooterBottomFollower = new Follower(motorBottomFolID, MotorAlignmentValue.Opposed);
+
     m_motorHood = new TalonFX(motorHoodID);
 
-    // Sets the mechanism position of the device in mechanism rotations.
-    m_motorHood.getConfigurator().setPosition(0);
+    slot0.kP = 0;
+    slot0.kI = 0;
+    slot0.kD = 0;
 
-    m_motorShooterLeader.getConfigurator().apply(m_shooterConfigs.kKrakenLeaderConfig);
+    m_motorHood.getConfigurator().apply(slot0);
+    
   }
 
   public void runShooterMotors(double leaderSpeed, double bottomSpeed) {
     m_motorShooterLeader.set(leaderSpeed);
-    m_motorBottom.set(bottomSpeed);
+    // m_motorShooterBottomFollower.set(bottomSpeed); it's supposed to follow at a lower speed
   }
 
-  public void runHoodMotor(double solDeg) {
-    m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * solDeg) /*- insert motor encoder value variable here*/ );
-  }
+  // disabled until PID is set up
+  // public void runHoodMotor(double deg) {
+  //   m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * deg) /*- insert motor encoder value variable here*/ );
+  // }
 
   public double velocityToMotor(double velocity){
     return ((velocity + ShooterConstants.kB) / ShooterConstants.kA);
@@ -80,12 +98,8 @@ public class Shooter extends SubsystemBase {
 
         // only high-angle solution
         double sol = Math.atan((v2 + root) / (g * R));
-        double solDeg = Math.toDegrees(sol);
-        if (true) {
-          return solDeg;
-        } else {
-          return Double.NaN;
-        }
+        double deg = Math.toDegrees(sol);
+        return deg;
     } else {
         return Double.NaN;
     }
@@ -110,11 +124,11 @@ public class Shooter extends SubsystemBase {
     return new FunctionalCommand(
       () -> {},
       () -> {
-        double angle = getAngle(8.0, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
+        double angle = getAngle(8.0, range);
         if(Double.isNaN(angle)){
           // fallback for when is invalid
           runShooterMotors(0.0, 0.0);
-          runHoodMotor(0.0);
+          // runHoodMotor(0.0);
         } else {
         
           /* 

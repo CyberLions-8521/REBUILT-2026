@@ -4,13 +4,14 @@
 
 package frc.robot;
 
-import edu.wpi.first.units.measure.Angle;
-
 /** Add your docs here. */
 public class Constants {
     public static final class ShooterConstants {
-        public static final int kLeaderId = 12;
-        public static final int kFollowerId = 11;
+        
+        public static final int kHoodID = 20;
+        public static final int kShooterTopLeftID = 21;
+        public static final int kShooterTopRightID = 22;
+        public static final int kShooterBottomRightID = 23;
 
         public static final double kHoodInitialPosition = 0.0;
 
@@ -21,12 +22,16 @@ public class Constants {
         public static final double kB = 8.682;
 
         // in meters
-        public static final double ballHeight = 0.5842; // without robot
+        public static final double shooterHeight = 0.5842; // 23 in to m
+        public static final double drivebaseHeight = 0.1778; // 7 in
+        public static final double startHeight = shooterHeight + drivebaseHeight;
         public static final double hubHeight = 1.8288; // 72in (per game manual)
-        public static final double deltaHeight = hubHeight - ballHeight; 
+        public static final double deltaHeight = hubHeight - startHeight; 
 
-        // in rotations
-        public static final double hoodMobility = 3.465; // ratio from motor to all range of motion on hood 
-        public static final double hoodMobilityRatio = hoodMobility / 13.772; // IMPORTANT: RANGE OF MOTION IS NOT 60, WE ARE WORKING TO UPDATE THAT
+        // add the new gear ratios and stuff
+
+        // public static final double hoodMobility = 3.465;
+        // public static final double hoodMobilityRatio = hoodMobility / 13.772;
+        
     }
 }

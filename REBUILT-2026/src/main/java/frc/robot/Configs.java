@@ -5,7 +5,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 public class Configs {
 
@@ -14,7 +13,8 @@ public class Configs {
 
        static {
             kKrakenLeaderConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Coast);
+                .withNeutralMode(NeutralModeValue.Coast)
+                .withInverted(InvertedValue.Clockwise_Positive);
        }
     }
 
