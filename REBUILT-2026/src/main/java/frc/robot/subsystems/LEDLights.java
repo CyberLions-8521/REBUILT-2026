@@ -13,6 +13,10 @@ import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import com.ctre.phoenix6.controls.FireAnimation;
+import com.ctre.phoenix6.controls.ColorFlowAnimation;
+import com.ctre.phoenix6.controls.RgbFadeAnimation;
+import com.ctre.phoenix6.controls.SingleFadeAnimation;
+import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.StrobeAnimation;
 
@@ -32,8 +36,16 @@ public class LEDLights extends SubsystemBase {
     TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0))), //limelight is targeting the tag
     Charging (new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255))), //buidling up speed before shooting;
     Shooting (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255))), //fuel is being shot
-    ShootFail (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 36, 0))); //the shooter can't find a possible combo of velocity/angle to shoot into the target. may or may not get implemented
- 
+    ShootFail (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 0))), //the shooter can't find a possible combo of velocity/angle to shoot into the target. may or may not get implemented
+    
+    ColorFlow(new ColorFlowAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
+    RGBFade(new RgbFadeAnimation(0, CANdleConstants.ledCount-1)),
+    SingleFade(new SingleFadeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
+    Twinkle( new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0)));
+    // RedSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,0,0))),
+    // BlueSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0,255,0))),
+    // GreenSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0,0,255)));
+    
     public final ControlRequest animation;
 
     private LEDMode (ControlRequest animation) {
@@ -41,21 +53,19 @@ public class LEDLights extends SubsystemBase {
     }
   }
 
-  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("rio"));
-  private LEDMode currentMode;
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("Ryan"));
 
 
   public LEDLights() {
-    currentMode = LEDMode.Idle;
     m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfig);
   }
 
-  
   public Command setLEDCommand(LEDMode newMode) {
     return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
   
   @Override
   public void periodic() {
+
   }
 }

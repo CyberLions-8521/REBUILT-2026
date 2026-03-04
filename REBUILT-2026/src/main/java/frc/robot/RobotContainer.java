@@ -31,9 +31,8 @@ public class RobotContainer {
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-  public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
-  public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName));
-  public final Trigger shootFail = m_controller.y(); //placeholder for the real condtition check (will do later)
+  //public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
+  //public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)); //placeholder for the real condtition check (will do later)
 
 
   public RobotContainer() {
@@ -54,11 +53,19 @@ public class RobotContainer {
     //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
     //   () -> false));f
 
-    m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
-    seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
-    seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
-    m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging).withTimeout(2).andThen(m_LEDLights.setLEDCommand(LEDMode.Shooting)));
-    shootFail.onTrue(m_LEDLights.setLEDCommand(LEDMode.ShootFail).withTimeout(1));
+    // m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
+    // //m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Shooting));
+    // //seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
+    // //seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
+    // m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
+    // m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.ShootFail));
+    m_controller.x().onTrue(m_LEDLights.setLEDCommand(LEDMode.ColorFlow));
+    m_controller.y().onTrue(m_LEDLights.setLEDCommand(LEDMode.RGBFade));
+    m_controller.b().onTrue(m_LEDLights.setLEDCommand(LEDMode.SingleFade));
+    m_controller.a().onTrue(m_LEDLights.setLEDCommand(LEDMode.Twinkle));
+    
+    
+    
 
 }
 
