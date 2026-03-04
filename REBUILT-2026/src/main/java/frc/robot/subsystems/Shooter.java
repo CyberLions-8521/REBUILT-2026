@@ -23,6 +23,7 @@ public class Shooter extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   
   private TalonFX m_motorShooterLeader;
+<<<<<<< HEAD
   private Follower m_motorShooterFollower;
   private Follower m_motorShooterBottomFollower;
   private TalonFX m_motorHood;
@@ -57,16 +58,43 @@ public class Shooter extends SubsystemBase {
     m_motorHood.getConfigurator().apply(slot0);
     
   }
+=======
+  private TalonFX m_motorShooterFollower;
+  private TalonFX m_motorBottom;
+  private TalonFX m_motorHood;
+  private Follower followShooter;
+  
+  public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomID, int motorHoodID) {
+
+    m_motorShooterLeader = new TalonFX(motorShooterLeadID);
+    m_motorShooterFollower = new TalonFX(motorShooterFolID);
+
+    followShooter = new Follower(motorShooterLeadID, MotorAlignmentValue.Opposed);
+    m_motorShooterFollower.setControl(followShooter.withUpdateFreqHz(50));
+
+    m_motorBottom = new TalonFX(motorBottomID);
+    m_motorHood = new TalonFX(motorHoodID);
+    
+    m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+    m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+}
+>>>>>>> 6445bf703dbf6aebea4e9e0c02df50f586dcf264
 
   public void runShooterMotors(double leaderSpeed, double bottomSpeed) {
     m_motorShooterLeader.set(leaderSpeed);
     // m_motorShooterBottomFollower.set(bottomSpeed); it's supposed to follow at a lower speed
   }
 
+<<<<<<< HEAD
   // disabled until PID is set up
   // public void runHoodMotor(double deg) {
   //   m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * deg) /*- insert motor encoder value variable here*/ );
   // }
+=======
+  public void runHoodMotor(double solDeg) {
+    m_motorHood.setPosition((ShooterConstants.hoodMobilityRatio * solDeg) - ShooterConstants.kHoodOffset); // 0.0 right now
+  }
+>>>>>>> 6445bf703dbf6aebea4e9e0c02df50f586dcf264
 
   public double velocityToMotor(double velocity){
     return ((velocity + ShooterConstants.kB) / ShooterConstants.kA);
@@ -124,6 +152,7 @@ public class Shooter extends SubsystemBase {
     return new FunctionalCommand(
       () -> {},
       () -> {
+<<<<<<< HEAD
         double angle = getAngle(8.0, range);
         if(Double.isNaN(angle)){
           // fallback for when is invalid
@@ -131,11 +160,26 @@ public class Shooter extends SubsystemBase {
           // runHoodMotor(0.0);
         } else {
         
+=======
+        double angle = getAngle(ShooterConstants.kDefaultShooterSpeed, LimelightHelpers.getTargetPose3d_RobotSpace("").getX());
+        if(!Double.isNaN(angle)){
+          // try angle
+
+>>>>>>> 6445bf703dbf6aebea4e9e0c02df50f586dcf264
           /* 
           given required angle:
           set hood motor position to that angle
           (account for offset and bounds)
           */ 
+
+
+
+        } else {
+          // try velocity
+
+          // fallback for when is invalid
+          runShooterMotors(0.0, 0.0);
+          runHoodMotor(0.0);
 
         }
       },

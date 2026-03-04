@@ -13,7 +13,8 @@ public class Constants {
         public static final int kShooterTopRightID = 22;
         public static final int kShooterBottomRightID = 23;
 
-        public static final double kHoodInitialPosition = 0.0;
+        public static final double kHoodOffset = 0.0;
+        public static final double kDefaultShooterSpeed = 7.0;
 
         public static final double kGravity = 9.807;
         
