@@ -63,6 +63,8 @@ public class RobotContainer {
     m_controller.y().onTrue(m_LEDLights.setLEDCommand(LEDMode.RGBFade));
     m_controller.b().onTrue(m_LEDLights.setLEDCommand(LEDMode.SingleFade));
     m_controller.a().onTrue(m_LEDLights.setLEDCommand(LEDMode.Twinkle));
+
+    m_controller.rightTrigger().whileTrue(m_LEDLights.letsGetLitty(m_controller.getRightTriggerAxis()));
     
     
     

@@ -31,7 +31,7 @@ import com.ctre.phoenix6.controls.ControlRequest;
 public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
-    Idle (new FireAnimation(0, CANdleConstants.ledCount - 1)), //nothing is happening
+    Idle (new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 0))), //nothing is happening
     SeesApriltag (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(124, 252, 0))), //limelight can see the apriltag
     TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0))), //limelight is targeting the tag
     Charging (new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255))), //buidling up speed before shooting;
@@ -51,6 +51,15 @@ public class LEDLights extends SubsystemBase {
     private LEDMode (ControlRequest animation) {
       this.animation = animation;
     }
+  }
+
+  void letsGetLitty(double strength) {
+    for (int i = ledCount - 1; i > 0; i--) {
+      strength = strength / (ledCount - 1);
+      new ColorFlowAnimation(0, strength).withColor(new RGBWColor(255, 0, 0));
+    }
+
+
   }
 
   private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("Ryan"));
