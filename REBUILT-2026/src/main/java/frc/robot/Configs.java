@@ -22,7 +22,8 @@ public class Configs {
 
        static {
             kKrakenHoodConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake);
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
        }
     }
 }
