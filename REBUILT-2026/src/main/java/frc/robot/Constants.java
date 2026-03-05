@@ -21,7 +21,7 @@ public class Constants {
         // 0.296 rot ~~ 1deg
         public static final double kMaxRot = 8.8;
         public static final double kHoodDegsToRot = 0.296;
-        public static final double kHoodP = 0.0;
+        public static double kHoodP = 0.0; // final later
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
 

@@ -15,6 +15,11 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.Clockwise_Positive);
        }
+       public static final TalonFXConfiguration kKrakenFollowerConfig = new TalonFXConfiguration();
+       static {
+            kKrakenLeaderConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Coast);
+       }
     }
 
     public static final class HoodConfigs {

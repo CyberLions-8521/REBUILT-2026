@@ -29,9 +29,17 @@ public class RobotContainer {
     m_controller.y().whileTrue(
       m_shooter.hoodOnlySmartDashboard()
     );
+    m_controller.x().whileTrue(
+      m_shooter.runHood(0.05)
+    );
+    m_controller.a().whileTrue(
+      m_shooter.runHood(-0.05)
+    );
     m_controller.b().onTrue(
       m_shooter.zeroHood()
     );
+
+    m_shooter.setDefaultCommand(m_shooter.runHood(0));
   }
 
   public Command getAutonomousCommand() {
