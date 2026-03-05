@@ -52,6 +52,8 @@ public class Shooter extends SubsystemBase {
         debugInit();
     }
 
+    // -------------------- METHODS --------------------
+
     public void runShooterMotors(double leaderSpeed) {
         m_motorShooterLeader.setControl(new DutyCycleOut(leaderSpeed));
         double bottomSpeed = leaderSpeed * ShooterConstants.kBottomMotorRatio;
@@ -64,6 +66,8 @@ public class Shooter extends SubsystemBase {
       m_motorHood.setControl(new PositionDutyCycle(rotations));
     }
   
+    // -------------------- MATH --------------------
+
     public double velocityToMotor(double velocity) {
         return ((velocity + ShooterConstants.kB) / ShooterConstants.kA);
     }
@@ -108,6 +112,8 @@ public class Shooter extends SubsystemBase {
 
         return (R <= maxDist) && (discriminant >= 0);
     }
+
+    // -------------------- COMMANDS --------------------
 
     public Command zeroHood(){
       return new FunctionalCommand(
