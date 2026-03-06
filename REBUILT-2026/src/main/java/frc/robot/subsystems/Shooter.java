@@ -3,19 +3,19 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.HoodConfigs;
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter extends SubsystemBase {
 
@@ -25,6 +25,7 @@ public class Shooter extends SubsystemBase {
     private TalonFX m_motorHood;
 
     private Slot0Configs slot0 = new Slot0Configs();
+    private PositionVoltage m_request;
 
     public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomFolID, int motorHoodID) {
 
@@ -42,12 +43,16 @@ public class Shooter extends SubsystemBase {
         m_motorShooterBottomFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
 
         m_motorHood = new TalonFX(motorHoodID, "Circus Circle");
+
+        // create a position closed-loop request, voltage output, slot 0 configs     
         
         // set these constants after tuning hood PID
-        // slot0.kP = ShooterConstants.kHoodP;
-        // slot0.kI = ShooterConstants.kHoodI;
-        // slot0.kD = ShooterConstants.kHoodD;
-        // m_motorHood.getConfigurator().apply(slot0);
+        slot0.kP = ShooterConstants.kHoodP;
+        slot0.kI = ShooterConstants.kHoodI;
+        slot0.kD = ShooterConstants.kHoodD;
+        m_motorHood.getConfigurator().apply(slot0);
+
+        m_request = new PositionVoltage(0);   
 
         m_motorHood.getConfigurator().apply(HoodConfigs.kKrakenHoodConfig);
         m_motorHood.setPosition(0.0);
@@ -65,11 +70,25 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runHoodMotor(double deg) {
-      double rotations = deg * ShooterConstants.kHoodDegsToRot;
-      rotations = MathUtil.clamp(rotations, 0.0, ShooterConstants.kMaxRot);
-      m_motorHood.setControl(new PositionVoltage(rotations));
+        double rotations = deg * ShooterConstants.kHoodDegsToRot;
+        SmartDashboard.putNumber("Hood Position (rot) [DESIRED]", rotations);
+        rotations = MathUtil.clamp(rotations, 0.0, ShooterConstants.kMaxRot);
+        double feedForwardFlip = 1;
+        double motorHoodPos = m_motorHood.getPosition().getValueAsDouble();
+        if(motorHoodPos < rotations){
+            feedForwardFlip = 1;
+        } else {
+            feedForwardFlip = -1.5;
+        }
+        m_motorHood.setControl(m_request.withPosition(rotations).withFeedForward(ShooterConstants.kHoodFeedForward * feedForwardFlip));
+      
     }
 
+    // public Command runHoodMotorButSimple(){
+    //     return this.run(() -> m_motorHood.setControl(m_request.withPosition(5)));
+    // }
+
+    
     public Command runHood(double speed){
         return this.run(() -> m_motorHood.setControl(new DutyCycleOut(speed)));
     }
@@ -128,6 +147,7 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> {
               m_motorHood.setPosition(0.0);
+              
             },
             interrupted -> m_motorHood.setPosition(0.0),
             () -> false,
@@ -142,7 +162,7 @@ public class Shooter extends SubsystemBase {
               double targetDeg = SmartDashboard.getNumber("Hood Target Deg", 0.0);
               runHoodMotor(targetDeg);
             },
-            interrupted -> runHoodMotor(0.0),
+            interrupted -> {},
             () -> false,
             this
         );
@@ -177,22 +197,18 @@ public class Shooter extends SubsystemBase {
     }
 
     public void debugInit(){
-      SmartDashboard.putNumber("Hood Target Deg", 0.0);
-      SmartDashboard.putNumber("Hood P", 0.0);
-      SmartDashboard.putNumber("Hood I", 0.0);
-      SmartDashboard.putNumber("Hood D", 0.0);
+        SmartDashboard.putNumber("Hood Target Deg", 0.0);
+        SmartDashboard.putNumber("Hood Position (rot) [DESIRED]", 0.0);
+        /* 
+        SmartDashboard.putNumber("Hood P", 0.0);
+        SmartDashboard.putNumber("Hood I", 0.0);
+        SmartDashboard.putNumber("Hood D", 0.0);
+        SmartDashboard.putNumber("Hood FF", 0.0);
+        */
     }
 
     @Override
     public void periodic() {
-        slot0.kP = SmartDashboard.getNumber("Hood P", 0.0);
-        slot0.kI = SmartDashboard.getNumber("Hood I", 0.0);
-        slot0.kD = SmartDashboard.getNumber("Hood D", 0.0);
-        if (slot0.kP != ShooterConstants.kHoodP)
-        {
-            ShooterConstants.kHoodP = slot0.kP;
-            m_motorHood.getConfigurator().apply(slot0); 
-        }
     }
 
     @Override
