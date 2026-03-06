@@ -4,44 +4,39 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import com.ctre.phoenix6.hardware.CANdle;
-import com.ctre.phoenix6.signals.RGBWColor;
-import com.ctre.phoenix6.signals.StripTypeValue;
-import com.ctre.phoenix6.controls.FireAnimation;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.EmptyAnimation;
+import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.controls.RgbFadeAnimation;
 import com.ctre.phoenix6.controls.SingleFadeAnimation;
-import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.hardware.CANdle;
+import com.ctre.phoenix6.signals.RGBWColor;
 
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.CANdleConfigs;
 import frc.robot.Constants.CANdleConstants;
-import com.ctre.phoenix6.controls.RainbowAnimation;
-import com.ctre.phoenix6.controls.ControlRequest;
 
 public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
-    Idle (new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 0))), //nothing is happening
-    SeesApriltag (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(124, 252, 0))), //limelight can see the apriltag
-    TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(124, 252, 0))), //limelight is targeting the tag
-    Charging (new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255))), //buidling up speed before shooting;
-    Shooting (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 255))), //fuel is being shot
-    ShootFail (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0, 0))), //the shooter can't find a possible combo of velocity/angle to shoot into the target. may or may not get implemented
+    Off (new EmptyAnimation(0)),
+    SeesApriltag (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0, 255, 0))), //limelight can see the apriltag
+    TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
+    Shooting (new FireAnimation(0, CANdleConstants.ledCount - 1).withBrightness(1.0)),
+    Charging (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 35, 0))),
+    Intaking (new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,115,0)));
     
-    ColorFlow(new ColorFlowAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
-    RGBFade(new RgbFadeAnimation(0, CANdleConstants.ledCount-1)),
-    SingleFade(new SingleFadeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
-    Twinkle( new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0)));
+    // ColorFlow(new ColorFlowAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0)).withSlot(0)),
+    // RGBFade(new RgbFadeAnimation(0, CANdleConstants.ledCount-1)),
+    // SingleFade(new SingleFadeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
+    // Twinkle( new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0))),
     // RedSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,0,0))),
     // BlueSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0,255,0))),
     // GreenSolid( new SolidColor(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0,0,255)));
@@ -53,14 +48,13 @@ public class LEDLights extends SubsystemBase {
     }
   }
 
-  void letsGetLitty(double strength) {
-    for (int i = ledCount - 1; i > 0; i--) {
-      strength = strength / (ledCount - 1);
-      new ColorFlowAnimation(0, strength).withColor(new RGBWColor(255, 0, 0));
-    }
+  // void letsGetLitty(int strength) {
+  //   for (int i = CANdleConstants.ledCount - 1; i > 0; i--) {
+  //     strength = strength / (CANdleConstants.ledCount - 1);
+  //     new ColorFlowAnimation(0, strength).withColor(new RGBWColor(255, 0, 0));
+  //   }
 
-
-  }
+  // }
 
   private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, new CANBus("Ryan"));
 
@@ -72,9 +66,10 @@ public class LEDLights extends SubsystemBase {
   public Command setLEDCommand(LEDMode newMode) {
     return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
+
   
   @Override
   public void periodic() {
-
+   
   }
 }

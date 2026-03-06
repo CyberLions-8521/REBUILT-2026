@@ -4,23 +4,13 @@
 
 package frc.robot;
 
-import java.util.function.Supplier;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.LEDLights.LEDMode;
-import frc.robot.subsystems.SwerveDrivebase;
 
 public class RobotContainer {
 
@@ -59,15 +49,20 @@ public class RobotContainer {
     // //seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
     // m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
     // m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.ShootFail));
-    m_controller.x().onTrue(m_LEDLights.setLEDCommand(LEDMode.ColorFlow));
-    m_controller.y().onTrue(m_LEDLights.setLEDCommand(LEDMode.RGBFade));
-    m_controller.b().onTrue(m_LEDLights.setLEDCommand(LEDMode.SingleFade));
-    m_controller.a().onTrue(m_LEDLights.setLEDCommand(LEDMode.Twinkle));
+    //m_LEDLights.setDefaultCommand(m_LEDLights.setLEDComma nd(LEDMode.RedSolid));
+    
 
-    m_controller.rightTrigger().whileTrue(m_LEDLights.letsGetLitty(m_controller.getRightTriggerAxis()));
-    
-    
-    
+    //m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.ColorFlow));
+    //m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.RedSolid));
+    //m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.GreenSolid));
+   // m_controller.a().whileTrue(m_LEDLights.setLEDCommand(LEDMode.BlueSolid));]
+
+    m_controller.a().whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
+    m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
+    m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
+    m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Shooting));
+    m_controller.leftBumper().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Intaking));
+    m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Off));
 
 }
 

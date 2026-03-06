@@ -57,7 +57,7 @@ public class Configs {
 
         static {
             CANdleConfig.LED
-                .withStripType(StripTypeValue.BRG)
+                .withStripType(StripTypeValue.GRB)
                 .withBrightnessScalar(0.3);
         }
     }
