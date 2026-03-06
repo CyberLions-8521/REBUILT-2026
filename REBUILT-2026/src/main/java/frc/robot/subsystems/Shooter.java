@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
@@ -64,6 +63,7 @@ public class Shooter extends SubsystemBase {
     // -------------------- METHODS --------------------
 
     public void runShooterMotors(double leaderSpeed) {
+        leaderSpeed = MathUtil.clamp(leaderSpeed, 0, 0.85);
         m_motorShooterLeader.setControl(new DutyCycleOut(leaderSpeed));
         double bottomSpeed = leaderSpeed * ShooterConstants.kBottomMotorRatio;
         m_motorShooterBottomFollower.setControl(new DutyCycleOut(bottomSpeed));
@@ -83,20 +83,20 @@ public class Shooter extends SubsystemBase {
         m_motorHood.setControl(m_request.withPosition(rotations).withFeedForward(ShooterConstants.kHoodFeedForward * feedForwardFlip));
       
     }
-
-    // public Command runHoodMotorButSimple(){
-    //     return this.run(() -> m_motorHood.setControl(m_request.withPosition(5)));
-    // }
-
     
     public Command runHood(double speed){
         return this.run(() -> m_motorHood.setControl(new DutyCycleOut(speed)));
     }
   
+    public void stopHood() {
+        m_motorHood.setControl(new DutyCycleOut(0.0));
+    }
+
     // -------------------- MATH --------------------
 
     public double velocityToMotor(double velocity) {
-        return ((velocity + ShooterConstants.kB) / ShooterConstants.kA);
+        double motorPower = (velocity - ShooterConstants.kA) / ShooterConstants.kB;
+        return motorPower;
     }
 
     public double getVelocity(double angleDegrees, double R) {
@@ -169,35 +169,32 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command shoot(double range) {
-        return new FunctionalCommand(
-            () -> {},
-            () -> {
-                double angle = getAngle(ShooterConstants.kDefaultShooterSpeed, range);
-                if (!Double.isNaN(angle)) {
-                    // try angle
-                } else {
-                    runShooterMotors(0.0);
-                    runHoodMotor(0.0);
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+            double angle = getAngle(ShooterConstants.kDefaultShooterSpeed, range);
+            if (!Double.isNaN(angle) && (angle > 40) && (angle < 70)) {
+                runHoodMotor(angle - ShooterConstants.kHoodLowDegFromHorizontal);
+                double hoodError = Math.abs(m_motorHood.getPosition().getValueAsDouble() 
+                                 - (angle - ShooterConstants.kHoodLowDegFromHorizontal) 
+                                 * ShooterConstants.kHoodDegsToRot);
+                if (hoodError < 0.05) { // settled within 0.05 rot
+                    runShooterMotors(velocityToMotor(ShooterConstants.kDefaultShooterSpeed));
                 }
-            },
-            interrupted -> runShooterMotors(0.0),
-            () -> false,
-            this
-        );
-    }
-
-    public Command setHood(double pos) {
-        return new FunctionalCommand(
-            () -> {},
-            () -> runHoodMotor(pos),
-            interrupted -> runHoodMotor(0.0),
-            () -> false,
-            this
-        );
-    }
+            }
+        },
+        interrupted -> {
+            runShooterMotors(0.0);
+            stopHood();
+        },
+        () -> false,
+        this
+    );
+}
 
     public void debugInit(){
         SmartDashboard.putNumber("Hood Target Deg", 0.0);
+        SmartDashboard.putNumber("Hood Position (rot) [ACTUAL]", 0.0);
         SmartDashboard.putNumber("Hood Position (rot) [DESIRED]", 0.0);
         /* 
         SmartDashboard.putNumber("Hood P", 0.0);
@@ -209,6 +206,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Hood Position (rot) [ACTUAL]", m_motorHood.getPosition().getValueAsDouble());
     }
 
     @Override

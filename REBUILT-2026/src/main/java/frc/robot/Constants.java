@@ -25,7 +25,7 @@ public class Constants {
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
         public static final double kHoodFeedForward = 0.229; // final later
-
+        public static final double kHoodLowDegFromHorizontal = 40;
 
         public static final double kGravity = 9.807;
         

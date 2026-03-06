@@ -17,7 +17,7 @@ public class Configs {
        }
        public static final TalonFXConfiguration kKrakenFollowerConfig = new TalonFXConfiguration();
        static {
-            kKrakenLeaderConfig.MotorOutput
+            kKrakenFollowerConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast);
        }
     }

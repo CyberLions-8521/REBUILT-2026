@@ -27,7 +27,6 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_controller.y().whileTrue(
-      // m_shooter.hoodOnlySmartDashboard()
       m_shooter.hoodOnlySmartDashboard()
     );
     m_controller.x().whileTrue(
@@ -39,9 +38,9 @@ public class RobotContainer {
     m_controller.b().onTrue(
       m_shooter.zeroHood()
     );
-
     m_shooter.setDefaultCommand(
-      m_shooter.runHood(0.0));
+      m_shooter.runHood(0.0)
+    );
   }
 
   public Command getAutonomousCommand() {
