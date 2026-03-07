@@ -13,15 +13,16 @@ public class Constants {
         public static final int kShooterTopRightID = 22;
         public static final int kShooterBottomRightID = 23;
 
-        public static final double kDefaultShooterSpeed = 7.0;
-        public static final double kBottomMotorRatio = -0.8; // run the bottom hood slower for backspin (stabler shot)
+        public static final double kDefaultShooterSpeed = 0.0;
+        public static final double kDefaultShooterMotorSpeed = 0.2;
+        public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
 
         // PositionDutyCycle takes inputs in rotations.
         // 8.88 rotations for 30 degrees (~40-70deg from the horizontal)
         // 0.296 rot ~~ 1deg
         public static final double kMaxRot = 8.8;
         public static final double kHoodDegsToRot = 0.296;
-        public static final double kHoodP = 1.5;
+        public static final double kHoodP = 0.3; //original: 0.5
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
         public static final double kHoodFeedForward = 0.229; // final later

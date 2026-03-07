@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DifferentialDutyCycle;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -32,18 +33,23 @@ public class Shooter extends SubsystemBase {
     private boolean m_debugValidShot = false;
     private boolean m_debugShooterReady = false;
 
+    //global consts (for readability)
+    private static final double g = ShooterConstants.kGravity;
+    private static final double h = ShooterConstants.deltaHeight;
+
     public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomFolID, int motorHoodID) {
-        m_motorShooterLeader = new TalonFX(motorShooterLeadID, "Circus Circle");
+        // main motors
+        m_motorShooterLeader = new TalonFX(motorShooterLeadID, "Ryan");
         m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
 
-        m_motorShooterFollower = new TalonFX(motorShooterFolID, "Circus Circle");
+        m_motorShooterFollower = new TalonFX(motorShooterFolID, "Ryan");
         m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
         m_motorShooterFollower.setControl(new Follower(m_motorShooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
 
-        m_motorShooterBottomFollower = new TalonFX(motorBottomFolID, "Circus Circle");
+        m_motorShooterBottomFollower = new TalonFX(motorBottomFolID, "Ryan");
         m_motorShooterBottomFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
 
-        m_motorHood = new TalonFX(motorHoodID, "Circus Circle");
+        m_motorHood = new TalonFX(motorHoodID, "Ryan");
         m_motorHood.getConfigurator().apply(HoodConfigs.kKrakenHoodConfig);
 
         Slot0Configs slot0 = new Slot0Configs();
@@ -60,15 +66,17 @@ public class Shooter extends SubsystemBase {
 
     public void runShooterMotors(double leaderSpeed) {
         leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 0.85);
+
         m_motorShooterLeader.setControl(new DutyCycleOut(leaderSpeed));
         m_motorShooterBottomFollower.setControl(new DutyCycleOut(leaderSpeed * ShooterConstants.kBottomMotorRatio));
     }
 
     public void runHoodMotor(double deg) {
-        double rotations = MathUtil.clamp(deg * ShooterConstants.kHoodDegsToRot, 0.0, ShooterConstants.kMaxRot);
-        SmartDashboard.putNumber("Hood Position (rot) [DESIRED]", rotations);
+        double rotations = MathUtil.clamp(deg * ShooterConstants.kHoodDegsToRot, 0.0, ShooterConstants.kMaxRot);        
         double motorHoodPos = m_motorHood.getPosition().getValueAsDouble();
-        double feedForwardFlip = (motorHoodPos < rotations) ? 1.0 : -1.5;
+        double feedForwardFlip = (motorHoodPos < rotations) ? 1.025 : -1.0;
+
+        SmartDashboard.putNumber("Hood Position (rot) [DESIRED]", rotations);
         m_motorHood.setControl(m_request.withPosition(rotations).withFeedForward(ShooterConstants.kHoodFeedForward * feedForwardFlip));
     }
 
@@ -84,32 +92,28 @@ public class Shooter extends SubsystemBase {
 
     public double getVelocity(double angleDegrees, double R) {
         double angleRads = Math.toRadians(angleDegrees);
-        double g = ShooterConstants.kGravity;
-        double h = ShooterConstants.deltaHeight;
         double denominator = 2 * (R * Math.tan(angleRads) + h);
+
         if (denominator <= 0) return Double.NaN;
         return (R / Math.cos(angleRads)) * Math.sqrt(g / denominator);
     }
 
     public double getAngle(double velocity, double R) {
         if (!withinBounds(velocity, R)) return Double.NaN;
-        double g = ShooterConstants.kGravity;
-        double h = ShooterConstants.deltaHeight;
-        double v2 = velocity * velocity;
-        double v4 = v2 * v2;
-        double discriminant = v4 - g * (g * R * R + 2 * h * v2);
-        return Math.toDegrees(Math.atan((v2 + Math.sqrt(discriminant)) / (g * R)));
+            double v2 = velocity * velocity;
+            double v4 = v2 * v2;
+            double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+
+             return Math.toDegrees(Math.atan((v2 + Math.sqrt(discriminant)) / (g * R)));
     }
 
     public boolean withinBounds(double velocity, double R) {
-        double g = ShooterConstants.kGravity;
-        double h = ShooterConstants.deltaHeight;
         double v2 = velocity * velocity;
         double v4 = v2 * v2;
         double inner = v4 - 2 * g * h * v2;
         if (inner < 0) return false;
-        double maxDist = Math.sqrt(inner) / g;
-        double discriminant = v4 - g * (g * R * R + 2 * h * v2);
+            double maxDist = Math.sqrt(inner) / g;
+            double discriminant = v4 - g * (g * R * R + 2 * h * v2);
         return (R <= maxDist) && (discriminant >= 0);
     }
 
@@ -124,6 +128,21 @@ public class Shooter extends SubsystemBase {
             this
         );
     }
+
+    public Command runFlywheel(double speed) {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+            runShooterMotors(speed);
+            //SmartDashboard.putNumber("desired speed", speed);
+        },
+        interrupted -> {
+            runShooterMotors(0.0);
+        },
+        () -> false,
+        this
+    );
+}
 
     public Command runHood(double speed) {
         return this.run(() -> m_motorHood.setControl(new DutyCycleOut(speed)));
@@ -200,6 +219,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Hood Error (rot)", 0.0);
         SmartDashboard.putBoolean("Valid Shot", false);
         SmartDashboard.putBoolean("Shooter Ready", false);
+        SmartDashboard.putNumber("Flywheel Speed [DESIRED]", 0.0);
     }
 
     @Override

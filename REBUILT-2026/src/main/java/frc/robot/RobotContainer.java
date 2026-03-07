@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.math.MathUtil;
 
 public class RobotContainer {
 
@@ -52,6 +53,12 @@ public class RobotContainer {
         m_shooter.runHoodMotor(angleDegs - ShooterConstants.kHoodLowDegFromHorizontal);
       }, m_shooter)
     );
+    m_controller.povUp().whileTrue(m_shooter.setHoodDeg(15));
+
+    m_controller.povDown().whileTrue(m_shooter.runFlywheel(
+      ShooterConstants.kDefaultShooterMotorSpeed
+    ));
+
     m_controller.x().whileTrue(m_shooter.runHood(0.05));
     m_controller.a().whileTrue(m_shooter.runHood(-0.05));
     m_controller.b().onTrue(m_shooter.zeroHood());
