@@ -13,8 +13,7 @@ public class Constants {
         public static final int kShooterTopRightID = 22;
         public static final int kShooterBottomRightID = 23;
 
-        public static final double kDefaultShooterSpeed = 0.0;
-        public static final double kDefaultShooterMotorSpeed = 0.2;
+        public static double kDefaultShooterVelocity = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
 
         // PositionDutyCycle takes inputs in rotations.
@@ -28,13 +27,22 @@ public class Constants {
         public static final double kHoodFeedForward = 0.229; // final later
         public static final double kHoodLowDegFromHorizontal = 40;
 
+        // set vars to final once tuned
+        // otherwise changed through SmartDashboard
+        public static double kShooterP = 0.0;
+        public static double kShooterI = 0.0;
+        public static double kShooterD = 0.0;
+        public static double kShooterS = 0.0;
+        public static double kShooterV = 0.0;
+
         public static final double kGravity = 9.807;
         
         // Linear Regression (from testing): 
         // y = a + bx, where y = velocity and x = motor speed
         // should test again since these were prototype numbers
-        public static final double kA = -0.4498;
-        public static final double kB = 8.682;
+        // NOT USED IF VELOCITY VOLTAGE IS USED INSTEAD OF DUTYCYCLEOUT
+        // public static final double kA = -0.4498;
+        // public static final double kB = 8.682;
 
         // in meters
         public static final double shooterHeight = 0.5842; // 23 in to m

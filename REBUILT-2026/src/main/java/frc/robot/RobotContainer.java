@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.math.MathUtil;
 
 public class RobotContainer {
 
@@ -48,15 +47,15 @@ public class RobotContainer {
           Math.pow(targetPoseRobot.getX(), 2) + 
           Math.pow(targetPoseRobot.getY(), 2)
         );
-        double angleDegs = m_shooter.getAngle(ShooterConstants.kDefaultShooterSpeed, range);
+        double angleDegs = m_shooter.getAngle(ShooterConstants.kDefaultShooterVelocity, range);
         if (Double.isNaN(angleDegs) || angleDegs < 40 || angleDegs > 70) return;
-        m_shooter.runHoodMotor(angleDegs - ShooterConstants.kHoodLowDegFromHorizontal);
+        m_shooter.setHoodAngle(angleDegs - ShooterConstants.kHoodLowDegFromHorizontal);
       }, m_shooter)
     );
     m_controller.povUp().whileTrue(m_shooter.setHoodDeg(15));
 
     m_controller.povDown().whileTrue(m_shooter.runFlywheel(
-      ShooterConstants.kDefaultShooterMotorSpeed
+      () -> ShooterConstants.kDefaultShooterVelocity
     ));
 
     m_controller.x().whileTrue(m_shooter.runHood(0.05));
