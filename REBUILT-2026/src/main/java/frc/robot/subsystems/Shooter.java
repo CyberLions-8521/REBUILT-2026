@@ -245,11 +245,11 @@ public class Shooter extends SubsystemBase {
 
     private void debugInit() {
         // FLYWHEEL STATS
-        SmartDashboard.putNumber("1) Flywheel kP", 0.0);
-        SmartDashboard.putNumber("2) Flywheel kI", 0.0);
-        SmartDashboard.putNumber("3) Flywheel kD", 0.0);
-        SmartDashboard.putNumber("4) Flywheel kS", 0.0);
-        SmartDashboard.putNumber("5) Flywheel kV", 0.0);
+        // SmartDashboard.putNumber("1) Flywheel kP", 0.0);
+        // SmartDashboard.putNumber("2) Flywheel kI", 0.0);
+        // SmartDashboard.putNumber("3) Flywheel kD", 0.0);
+        // SmartDashboard.putNumber("4) Flywheel kS", 0.0);
+        // SmartDashboard.putNumber("5) Flywheel kV", 0.0);
         SmartDashboard.putNumber("6) VelocityVoltage Input (RPS)", 0.0);
         SmartDashboard.putNumber("6.5) DutyCycleOut Input (V%)", 0.0);
         SmartDashboard.putNumber("7) Real Velocity (Leader)", 0.0);
@@ -271,20 +271,20 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         
         // FLYWHEEL STATS
-        Slot1Configs shooterSlot1 = new Slot1Configs();
-        ShooterConstants.kShooterP = SmartDashboard.getNumber("1) Flywheel kP", 0.0);
-        ShooterConstants.kShooterI = SmartDashboard.getNumber("2) Flywheel kI", 0.0);
-        ShooterConstants.kShooterD = SmartDashboard.getNumber("3) Flywheel kD", 0.0);
-        ShooterConstants.kShooterS = SmartDashboard.getNumber("4) Flywheel kS", 0.0);
-        ShooterConstants.kShooterV = SmartDashboard.getNumber("5) Flywheel kV", 0.0);
+        // Slot1Configs shooterSlot1 = new Slot1Configs();
+        // ShooterConstants.kShooterP = SmartDashboard.getNumber("1) Flywheel kP", 0.0);
+        // ShooterConstants.kShooterI = SmartDashboard.getNumber("2) Flywheel kI", 0.0);
+        // ShooterConstants.kShooterD = SmartDashboard.getNumber("3) Flywheel kD", 0.0);
+        // ShooterConstants.kShooterS = SmartDashboard.getNumber("4) Flywheel kS", 0.0);
+        // ShooterConstants.kShooterV = SmartDashboard.getNumber("5) Flywheel kV", 0.0);
 
-        shooterSlot1.kP = ShooterConstants.kShooterP;
-        shooterSlot1.kI = ShooterConstants.kShooterI;
-        shooterSlot1.kD = ShooterConstants.kShooterD;
-        shooterSlot1.kS = ShooterConstants.kShooterS;
-        shooterSlot1.kV = ShooterConstants.kShooterV;
-        m_motorShooterLeader.getConfigurator().apply(shooterSlot1);
-        m_motorShooterBottomFollower.getConfigurator().apply(shooterSlot1);
+        // shooterSlot1.kP = ShooterConstants.kShooterP;
+        // shooterSlot1.kI = ShooterConstants.kShooterI;
+        // shooterSlot1.kD = ShooterConstants.kShooterD;
+        // shooterSlot1.kS = ShooterConstants.kShooterS;
+        // shooterSlot1.kV = ShooterConstants.kShooterV;
+        // m_motorShooterLeader.getConfigurator().apply(shooterSlot1);
+        // m_motorShooterBottomFollower.getConfigurator().apply(shooterSlot1);
 
         ShooterConstants.kDefaultShooterVelocity = SmartDashboard.getNumber("6) VelocityVoltage Input (RPS)", 0.0);
         ShooterConstants.kDutyCycleOutInput = SmartDashboard.getNumber("6.5) DutyCycleOut Input (V%)", 0.0);

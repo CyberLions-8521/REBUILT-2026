@@ -31,11 +31,11 @@ public class Constants {
 
         // set vars to final once tuned
         // otherwise changed through SmartDashboard
-        public static double kShooterP = 0.0;
-        public static double kShooterI = 0.0;
-        public static double kShooterD = 0.0;
-        public static double kShooterS = 0.0;
-        public static double kShooterV = 0.0;
+        public static final double kShooterP = 0.0;
+        public static final double kShooterI = 0.0;
+        public static final double kShooterD = 0.0;
+        public static final double kShooterS = 0.0;
+        public static final double kShooterV = 0.0;
 
         public static final double kGravity = 9.807;
         
