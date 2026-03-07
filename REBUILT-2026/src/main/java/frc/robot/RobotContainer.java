@@ -19,8 +19,7 @@ public class RobotContainer {
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
   CommandXboxController m_controller = new CommandXboxController(0);
   LEDLights m_LEDLights = new LEDLights();
-  DigitalInput m_leftLimitSwitch = new DigitalInput(LimitSwitchConstants.kLeftLimitSwitchID);
-  DigitalInput m_rightLimitSwith = new DigitalInput(LimitSwitchConstants.kRightLimitSwitchID);
+
 
 
 
@@ -68,16 +67,6 @@ public class RobotContainer {
     m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
     m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Shooting));
     m_controller.leftBumper().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Intaking));
-    m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Off));
-
-    
-    if(m_rightLimitSwith.get() && m_leftLimitSwitch.get()){
-	    m_LEDLights.setLEDCommand(LEDMode.LimitSwitchDetected);
-    }
-    else 
-    {
-	    m_LEDLights.setLEDCommand(LEDMode.Off);
-    }
 
 }
 
