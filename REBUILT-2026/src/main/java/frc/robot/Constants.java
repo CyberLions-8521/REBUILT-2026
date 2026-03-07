@@ -80,6 +80,11 @@ public class Constants {
         
     }
 
+    public static final class LimitSwitchConstants {
+        public static final int kLeftLimitSwitchID = 0; 
+        public static final int kRightLimitSwitchID = 4; 
+    }
+
     public static final class CANdleConstants {
         public static final int ledCount = 240;
         public static final int CANdleID = 4;

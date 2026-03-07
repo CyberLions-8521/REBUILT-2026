@@ -31,7 +31,9 @@ public class LEDLights extends SubsystemBase {
     TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
     Shooting (new FireAnimation(0, CANdleConstants.ledCount - 1).withBrightness(1.0)),
     Charging (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 35, 0))),
-    Intaking (new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,115,0)));
+    Intaking (new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,115,0))),
+    LimitSwitchDetected (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0,255,0)));
+
     
     // ColorFlow(new ColorFlowAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 0 ,0)).withSlot(0)),
     // RGBFade(new RgbFadeAnimation(0, CANdleConstants.ledCount-1)),

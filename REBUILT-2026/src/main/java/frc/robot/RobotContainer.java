@@ -5,9 +5,11 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.LimitSwitchConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.LEDLights.LEDMode;
@@ -17,6 +19,10 @@ public class RobotContainer {
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
   CommandXboxController m_controller = new CommandXboxController(0);
   LEDLights m_LEDLights = new LEDLights();
+  DigitalInput m_leftLimitSwitch = new DigitalInput(LimitSwitchConstants.kLeftLimitSwitchID);
+  DigitalInput m_rightLimitSwith = new DigitalInput(LimitSwitchConstants.kRightLimitSwitchID);
+
+
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -63,6 +69,15 @@ public class RobotContainer {
     m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Shooting));
     m_controller.leftBumper().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Intaking));
     m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Off));
+
+    
+    if(m_rightLimitSwith.get() && m_leftLimitSwitch.get()){
+	    m_LEDLights.setLEDCommand(LEDMode.LimitSwitchDetected);
+    }
+    else 
+    {
+	    m_LEDLights.setLEDCommand(LEDMode.Off);
+    }
 
 }
 
