@@ -16,6 +16,8 @@ public class Constants {
         public static double kDefaultShooterVelocity = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
 
+        public static double kDutyCycleOutInput = 0.0;
+
         // PositionDutyCycle takes inputs in rotations.
         // 8.88 rotations for 30 degrees (~40-70deg from the horizontal)
         // 0.296 rot ~~ 1deg

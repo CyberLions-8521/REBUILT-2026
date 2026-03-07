@@ -58,6 +58,10 @@ public class RobotContainer {
       () -> ShooterConstants.kDefaultShooterVelocity
     ));
 
+    m_controller.povRight().whileTrue(m_shooter.runFlywheelDCO(
+      () -> ShooterConstants.kDutyCycleOutInput
+    ));
+
     m_controller.x().whileTrue(m_shooter.runHood(0.05));
     m_controller.a().whileTrue(m_shooter.runHood(-0.05));
     m_controller.b().onTrue(m_shooter.zeroHood());

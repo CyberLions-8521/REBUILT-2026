@@ -31,7 +31,6 @@ public class Shooter extends SubsystemBase {
     private final VelocityVoltage m_requestFlywheel = new VelocityVoltage(0).withSlot(1);
     private final VelocityVoltage m_requestFlywheelBottom = new VelocityVoltage(0).withSlot(1);
 
-
     // debug state  
     private double m_debugResolvedAngle = 0.0;
     private double m_debugResolvedVelocity = 0.0;
@@ -87,6 +86,13 @@ public class Shooter extends SubsystemBase {
 
         m_motorShooterLeader.setControl(m_requestFlywheel.withVelocity(leaderSpeed));
         m_motorShooterBottomFollower.setControl(m_requestFlywheelBottom.withVelocity(leaderSpeed * ShooterConstants.kBottomMotorRatio));
+    }
+
+    public void runShooterMotorsDCO(double leaderSpeed) {
+        leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 0.85);
+
+        m_motorShooterLeader.setControl(new DutyCycleOut(leaderSpeed));
+        m_motorShooterBottomFollower.setControl(new DutyCycleOut(leaderSpeed * ShooterConstants.kBottomMotorRatio));
     }
 
     public void setHoodAngle(double deg) {
@@ -152,6 +158,17 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> runShooterMotors(speed.getAsDouble()),
             interrupted -> runShooterMotors(0.0),
+            () -> false,
+            this
+        );
+    }
+
+    // DUTY CYCLE OUT
+    public Command runFlywheelDCO(DoubleSupplier speed) {
+        return new FunctionalCommand(
+            () -> {},
+            () -> runShooterMotorsDCO(speed.getAsDouble()),
+            interrupted -> runShooterMotorsDCO(0.0),
             () -> false,
             this
         );
@@ -234,6 +251,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("4) Flywheel kS", 0.0);
         SmartDashboard.putNumber("5) Flywheel kV", 0.0);
         SmartDashboard.putNumber("6) VelocityVoltage Input (RPS)", 0.0);
+        SmartDashboard.putNumber("6.5) DutyCycleOut Input (V%)", 0.0);
         SmartDashboard.putNumber("7) Real Velocity (Leader)", 0.0);
         SmartDashboard.putNumber("8) Real Velocity (Bottom)", 0.0);
         SmartDashboard.putNumber("9) Requested Velocity (Bottom)", 0.0);
@@ -269,6 +287,7 @@ public class Shooter extends SubsystemBase {
         m_motorShooterBottomFollower.getConfigurator().apply(shooterSlot1);
 
         ShooterConstants.kDefaultShooterVelocity = SmartDashboard.getNumber("6) VelocityVoltage Input (RPS)", 0.0);
+        ShooterConstants.kDutyCycleOutInput = SmartDashboard.getNumber("6.5) DutyCycleOut Input (V%)", 0.0);
 
         SmartDashboard.putNumber("7) Real Velocity (Leader)", m_motorShooterLeader.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("8) Real Velocity (Bottom)", m_motorShooterBottomFollower.getVelocity().getValueAsDouble());
