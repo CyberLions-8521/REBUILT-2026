@@ -74,7 +74,18 @@ public class LEDLights extends SubsystemBase {
   public Command setLEDCommand(LEDMode newMode) {
     return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
-  
+
+  public boolean isLimitSwitchPressed(){
+    return !m_leftLimitSwitch.get() && !m_rightLimitSwith.get();
+  }
+
+  public Command limitSwitchLEDCommand() {
+    return new RunCommand(() -> {
+      m_CANdle.setControl(isLimitSwitchPressed() ? LEDMode.LimitSwitchDetected.animation : LEDMode.Off.animation);
+    }, this);
+  }
+
+ 
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("LimitSwitchStatus", !m_leftLimitSwitch.get());

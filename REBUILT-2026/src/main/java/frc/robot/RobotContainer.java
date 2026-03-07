@@ -19,6 +19,7 @@ public class RobotContainer {
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
   CommandXboxController m_controller = new CommandXboxController(0);
   LEDLights m_LEDLights = new LEDLights();
+  
 
 
 
@@ -31,6 +32,7 @@ public class RobotContainer {
 
 
   public RobotContainer() {
+    m_LEDLights.setDefaultCommand(m_LEDLights.limitSwitchLEDCommand());
     configureBindings();
   }
 
@@ -38,7 +40,7 @@ public class RobotContainer {
     // m_drivebase.setDefaultCommand(this.getDriveCommand(
     //   1,
     //   getJoystickValues(m_controller::getLeftY, vx_limiter),
-    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
+    //   getJoystickValues(m_controller::getLeftX, vy_limiter),de
     //   getJoystickValues(m_controller::getRightX, omega_limiter),
     //   () -> true));
     // m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
@@ -62,11 +64,11 @@ public class RobotContainer {
     //m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.GreenSolid));
    // m_controller.a().whileTrue(m_LEDLights.setLEDCommand(LEDMode.BlueSolid));]
 
-    m_controller.a().whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
-    m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
-    m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
-    m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Shooting));
-    m_controller.leftBumper().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Intaking));
+    // m_controller.a().whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
+    // m_controller.x().whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
+    // m_controller.y().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Charging));
+    // m_controller.b().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Shooting));
+    // m_controller.leftBumper().whileTrue(m_LEDLights.setLEDCommand(LEDMode.Intaking));
 
 }
 
