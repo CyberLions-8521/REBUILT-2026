@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Shooter;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
 
-  CommandXboxController m_controller = new CommandXboxController(0);
+  // CommandXboxController m_controller = new CommandXboxController(0);
+  CommandPS4Controller m_controller = new CommandPS4Controller(0);
 
   Shooter m_shooter = new Shooter(ShooterConstants.kShooterTopLeftID, 
                                   ShooterConstants.kShooterTopRightID, 
@@ -36,7 +38,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_controller.y().whileTrue(
+    m_controller.triangle().whileTrue(
       Commands.run(() -> {
         if (!LimelightHelpers.getTV("limelight")) return;
         Pose3d targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace("limelight");
@@ -62,9 +64,9 @@ public class RobotContainer {
       () -> ShooterConstants.kDutyCycleOutInput
     ));
 
-    m_controller.x().whileTrue(m_shooter.runHood(0.05));
-    m_controller.a().whileTrue(m_shooter.runHood(-0.05));
-    m_controller.b().onTrue(m_shooter.zeroHood());
+    m_controller.square().whileTrue(m_shooter.runHood(0.05));
+    m_controller.cross().whileTrue(m_shooter.runHood(-0.05));
+    m_controller.circle().onTrue(m_shooter.zeroHood());
     m_shooter.setDefaultCommand(m_shooter.runHood(0.0));
   }
 
