@@ -83,9 +83,15 @@ public class Shooter extends SubsystemBase {
 
     public void runShooterMotors(double leaderSpeed) {
         leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 100.0);
+        SmartDashboard.putNumber("10) Requested Velocity", leaderSpeed);
 
         m_motorShooterLeader.setControl(m_requestFlywheel.withVelocity(leaderSpeed));
         m_motorShooterBottomFollower.setControl(m_requestFlywheelBottom.withVelocity(leaderSpeed * ShooterConstants.kBottomMotorRatio));
+    }
+
+    public void stopShooterMotors(){
+        m_motorShooterLeader.setControl(new DutyCycleOut(0.0));
+        m_motorShooterBottomFollower.setControl(new DutyCycleOut(0.0));
     }
 
     public void runShooterMotorsDCO(double leaderSpeed) {
@@ -153,21 +159,26 @@ public class Shooter extends SubsystemBase {
         );
     }
 
-    public Command runFlywheel(DoubleSupplier speed) {
+    public Command runFlywheel(double speed) {
         return new FunctionalCommand(
             () -> {},
-            () -> runShooterMotors(speed.getAsDouble()),
+            () -> runShooterMotors(speed),
             interrupted -> runShooterMotors(0.0),
             () -> false,
             this
         );
     }
 
+    public Command stopFlywheel(){
+        return this.run(() -> stopShooterMotors());
+    }
+
+
     // DUTY CYCLE OUT
-    public Command runFlywheelDCO(DoubleSupplier speed) {
+    public Command runFlywheelDCO(double speed) {
         return new FunctionalCommand(
             () -> {},
-            () -> runShooterMotorsDCO(speed.getAsDouble()),
+            () -> runShooterMotorsDCO(speed),
             interrupted -> runShooterMotorsDCO(0.0),
             () -> false,
             this
@@ -255,6 +266,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("7) Real Velocity (Leader)", 0.0);
         SmartDashboard.putNumber("8) Real Velocity (Bottom)", 0.0);
         SmartDashboard.putNumber("9) Requested Velocity (Bottom)", 0.0);
+        SmartDashboard.putNumber("10) Requested Velocity", 0.0);
 
         // HOOD STATS
         // SmartDashboard.putNumber("Hood Target Deg", 0.0);

@@ -57,17 +57,17 @@ public class RobotContainer {
     m_controller.povUp().whileTrue(m_shooter.setHoodDeg(15));
 
     m_controller.povDown().whileTrue(m_shooter.runFlywheel(
-      () -> ShooterConstants.kDefaultShooterVelocity
+      55
     ));
 
     m_controller.povRight().whileTrue(m_shooter.runFlywheelDCO(
-      () -> ShooterConstants.kDutyCycleOutInput
+      0.55
     ));
 
     m_controller.square().whileTrue(m_shooter.runHood(0.05));
     m_controller.cross().whileTrue(m_shooter.runHood(-0.05));
     m_controller.circle().onTrue(m_shooter.zeroHood());
-    m_shooter.setDefaultCommand(m_shooter.runHood(0.0));
+    m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
   }
 
   public Command getAutonomousCommand() {

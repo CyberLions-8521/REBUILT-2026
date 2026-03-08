@@ -23,7 +23,7 @@ public class Constants {
         // 0.296 rot ~~ 1deg
         public static final double kMaxRot = 8.8;
         public static final double kHoodDegsToRot = 0.296;
-        public static final double kHoodP = 0.3; //original: 0.5
+        public static final double kHoodP = 0.2; //original: 0.5
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
         public static final double kHoodFeedForward = 0.229; // final later
@@ -31,11 +31,11 @@ public class Constants {
 
         // set vars to final once tuned
         // otherwise changed through SmartDashboard
-        public static final double kShooterP = 0.0;
+        public static final double kShooterP = 0.2;
         public static final double kShooterI = 0.0;
         public static final double kShooterD = 0.0;
         public static final double kShooterS = 0.0;
-        public static final double kShooterV = 0.0;
+        public static final double kShooterV = 0.116;
 
         public static final double kGravity = 9.807;
         
