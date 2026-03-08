@@ -177,25 +177,25 @@ public class SwerveDrivebase extends SubsystemBase {
 
   @Override
   public void periodic() {
-    tunePID();
+    // tunePID();
     // tuneTXController();
     logData();
   }
 
-  public void tunePID () {
-    double turnP = SmartDashboard.getNumber("turnP", 0);
-    double turnD = SmartDashboard.getNumber("turnD", 0);
+  // public void tunePID () {
+  //   double turnP = SmartDashboard.getNumber("turnP", 0);
+  //   double turnD = SmartDashboard.getNumber("turnD", 0);
   
 
-    if (SwerveConstants.kTurnP != turnP || SwerveConstants.kTurnD != turnD) {
-        m_frontLeft.configTurnPID(turnP, turnD);
-        m_frontRight.configTurnPID(turnP, turnD);
-        m_backLeft.configTurnPID(turnP, turnD);
-        m_backRight.configTurnPID(turnP, turnD);
-        SwerveConstants.kTurnP = turnP;
-        SwerveConstants.kTurnD = turnD;
-    }
-  }
+  //   if (SwerveConstants.kTurnP != turnP || SwerveConstants.kTurnD != turnD) {
+  //       m_frontLeft.configTurnPID(turnP, turnD);
+  //       m_frontRight.configTurnPID(turnP, turnD);
+  //       m_backLeft.configTurnPID(turnP, turnD);
+  //       m_backRight.configTurnPID(turnP, turnD);
+  //       SwerveConstants.kTurnP = turnP;
+  //       SwerveConstants.kTurnD = turnD;
+  //   }
+  // }
 
   public void tuneTXController() {
     double P = SmartDashboard.getNumber("TX P", 0);

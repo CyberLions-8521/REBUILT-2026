@@ -17,27 +17,25 @@ public class Constants {
         private static final double kDriveGearRatio = 6.75;     // found on SDS page for MK4i
         public static final double kDriveConversionFactor = kDriveGearRatio / kWheelCircumference;  // meters (of robot travel)
 
-        private static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
-        public static final double kAngleConversion = 360;              // degrees
-        public static final double kTurnConversionFactor = 1;     // degrees (of output shaft)
+        public static final double kTurnGearRatio = (150.0 / 7.0);     // found on SDS page for MK4i
 
-        public static double driveP = 3.5; //set later 3.5 (oriingal)
-        public static double driveV = 2.4; //used for feed forward 2.4 (original)
+        public static final double driveP = 3.5; //set later 3.5 (oriingal)
+        public static final double driveV = 2.4; //used for feed forward 2.4 (original)
 
-        public static  double kTurnP = 0; //set later
-        public static  double kTurnD = 0; //set ;ater
+        public static final double kTurnP = 120; //set later
+        public static final double kTurnD = 1.5; //set later
 
-        public static final String kCANCoderBus = "rio";   // name assigned in Phoenix Tuner X
+        public static final String kCANCoderBus = "Circus Circle";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
         public static final int kFrontLeftDriveID  = 1; 
         public static final int kFrontLeftTurnID   = 2; 
         public static final int kFrontRightDriveID = 3; 
         public static final int kFrontRightTurnID  = 4; 
-        public static final int kBackLeftDriveID   = 5; 
-        public static final int kBackLeftTurnID    = 6; 
-        public static final int kBackRightDriveID  = 7; 
-        public static final int kBackRightTurnID   = 8; 
+        public static final int kBackLeftDriveID   = 7; 
+        public static final int kBackLeftTurnID    = 8; 
+        public static final int kBackRightDriveID  = 5; 
+        public static final int kBackRightTurnID   = 6; 
 
         public static final int kFrontLeftCANCoderID  = 11;
         public static final int kFrontRightCANCoderID = 12;
@@ -47,15 +45,15 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 4.0; //tune later
+        public static final double kMaxMetersPerSecond = 1.0; //tune later
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
         
-        public static final double kFrontLeftCANCoderMagnetOffset  = 0.132568;     // set later
-        public static final double kFrontRightCANCoderMagnetOffset = -0.048096;     // set later
-        public static final double kBackLeftCANCoderMagnetOffset   = 0.069002;     // set later
-        public static final double kBackRightCANCoderMagnetOffset  = 0.175049;     // set later
+        public static final double kFrontLeftCANCoderMagnetOffset  = -0.10620;     // set later
+        public static final double kFrontRightCANCoderMagnetOffset = 0.217285;     // set later
+        public static final double kBackLeftCANCoderMagnetOffset   = -0.06372;     // set later
+        public static final double kBackRightCANCoderMagnetOffset  = -0.17163;     // set later
     }
 
     public static final class LimelightConstants {

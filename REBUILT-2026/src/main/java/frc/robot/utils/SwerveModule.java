@@ -31,8 +31,8 @@ public class SwerveModule {
 
 
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
-        m_driveMotor = new TalonFX(driveMotorPort);
-        m_turnMotor  = new TalonFX(turnMotorPort);
+        m_driveMotor = new TalonFX(driveMotorPort, SwerveConstants.kCANCoderBus);
+        m_turnMotor  = new TalonFX(turnMotorPort, SwerveConstants.kCANCoderBus);
         m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANCoderBus);
 
         m_driveRequest = new VelocityVoltage(0);
@@ -40,7 +40,8 @@ public class SwerveModule {
 
         configMotors(CANCoderPort);
         zeroDriveEncoder();
-        configMagnets(magnetOffset);
+        // calibrateTurnEncoder();
+        configMagnets(-magnetOffset);
     }
 
     public void configMagnets(double kCANCoderMagnetOffset) {
@@ -72,19 +73,23 @@ public class SwerveModule {
     public void logData(String motor){
         SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber(motor + " actual turn position", getTurnEncoderValueRotations());
-        SmartDashboard.putNumber(motor + " desired turn position", m_desiredState.angle.getDegrees());
+        SmartDashboard.putNumber(motor + " desired turn position", m_desiredState.angle.getRotations());
     }
 
     public SwerveModuleState getState() {
         return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromDegrees(getTurnEncoderValueRotations()));
     }
 
-    public void zeroTurnEncoder() {
-        m_driveMotor.setPosition(0);
+    public void calibrateTurnEncoder() {
+        m_turnMotor.setPosition(m_CANcoder.getAbsolutePosition().getValueAsDouble());
     }
 
     public void zeroDriveEncoder() {
         m_driveMotor.setPosition(0);
+    }
+
+    public void resetTurnEncoder() {
+        
     }
 
     public void setDesiredState(SwerveModuleState targetState) {

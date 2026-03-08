@@ -30,7 +30,7 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.driveMotorCurrentLimit);
             m_driveConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake)
+                .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.Clockwise_Positive);
             m_driveConfig.Feedback
                 .withSensorToMechanismRatio(SwerveConstants.kDriveConversionFactor);
@@ -42,11 +42,13 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(SwerveConstants.turnMotorCurrentLimit);
             m_turnConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake)
+                .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.Clockwise_Positive);
             m_turnConfig.Feedback
-                .withSensorToMechanismRatio(SwerveConstants.kTurnConversionFactor)   
                 .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+                // .withSensorToMechanismRatio(SwerveConstants.kTurnGearRatio);
+            m_turnConfig.ClosedLoopGeneral
+                .withContinuousWrap(true);
                 
 
             m_magnetConfigs
