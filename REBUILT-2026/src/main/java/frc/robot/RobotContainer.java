@@ -20,6 +20,7 @@ public class RobotContainer {
                                   ShooterConstants.kHoodID);
 
   public RobotContainer() {
+
     // from a hub's center apriltag to the opening of the hub
     LimelightHelpers.setFiducial3DOffset("limelight", 
         0.5969,    // Forward offset
@@ -27,50 +28,25 @@ public class RobotContainer {
         0.70485    // Height offset
     );
     LimelightHelpers.setCameraPose_RobotSpace("limelight",
-        0.0,  // Forward (m)
+        0.311,  // Forward (m)
         0.0,  // Side (m)
-        0.0,  // Up (m)
+        0.563,  // Up (m)
         0.0,  // Roll (deg)
-        0.0,  // Pitch (deg)
+        60.0,  // Pitch (deg)
         0.0   // Yaw (deg)
     );
+
     configureBindings();
   }
 
   private void configureBindings() {
-    m_controller.triangle().whileTrue(
-      Commands.run(() -> {
-        if (!LimelightHelpers.getTV("limelight")) return;
-        Pose3d targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace("limelight");
-        SmartDashboard.putNumber("Target X (m)", targetPoseRobot.getX());
-        SmartDashboard.putNumber("Target Y (m)", targetPoseRobot.getY());
-        SmartDashboard.putNumber("Target Z (m)", targetPoseRobot.getZ());
-        double range = Math.sqrt(
-          Math.pow(targetPoseRobot.getX(), 2) + 
-          Math.pow(targetPoseRobot.getY(), 2)
-        );
-        double angleDegs = m_shooter.getAngle(ShooterConstants.kDefaultShooterVelocity, range);
-        if (Double.isNaN(angleDegs) || angleDegs < 40 || angleDegs > 70) return;
-        m_shooter.setHoodAngle(angleDegs - ShooterConstants.kHoodLowDegFromHorizontal);
-      }, m_shooter)
-    );
-    m_controller.povUp().whileTrue(m_shooter.setHoodDeg(15));
-
-    m_controller.povDown().whileTrue(m_shooter.runFlywheel(
-      55
-    ));
-
-    m_controller.povRight().whileTrue(m_shooter.runFlywheelDCO(
-      0.55
-    ));
-
-    m_controller.square().whileTrue(m_shooter.runHood(0.05));
-    m_controller.cross().whileTrue(m_shooter.runHood(-0.05));
-    m_controller.circle().onTrue(m_shooter.zeroHood());
+    m_controller.povUp().whileTrue(m_shooter.shoot());
+    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 55));
     m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
   }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
+  
 }
