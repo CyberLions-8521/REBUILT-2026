@@ -5,13 +5,17 @@
 package frc.robot.utils;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.StripTypeValue;
 
+import frc.robot.utils.Constants.IndexerConstants;
+import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 /** Add your docs here. */
@@ -46,7 +50,6 @@ public class Configs {
                 .withInverted(InvertedValue.Clockwise_Positive);
             m_turnConfig.Feedback
                 .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
-                // .withSensorToMechanismRatio(SwerveConstants.kTurnGearRatio);
             m_turnConfig.ClosedLoopGeneral
                 .withContinuousWrap(true);
                 
@@ -57,4 +60,68 @@ public class Configs {
                 
         }
     }
+
+
+    public static final class IntakeConfigs  {
+        public static final TalonFXConfiguration kPivotConfig = new TalonFXConfiguration();
+        public static final TalonFXConfiguration kIntakeConfig = new TalonFXConfiguration();
+
+        static {
+            kPivotConfig.Slot0
+                .withKP(0)
+                .withKD(0)
+                .withKI(0);
+            kPivotConfig.CurrentLimits
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
+            kPivotConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Brake);
+            kPivotConfig.Feedback
+                .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
+        }
+
+         static {
+            kIntakeConfig.Slot0
+                .withKP(0)
+                .withKD(0)
+                .withKI(0);
+            kIntakeConfig.CurrentLimits
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
+            kIntakeConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Brake);
+            kIntakeConfig.Feedback
+                .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
+        }
+    }
+
+    public static final class IndexerConfigs  {
+        public static final TalonFXConfiguration kIndexConfig = new TalonFXConfiguration();
+
+
+        static {
+            kIndexConfig.Slot0
+                .withKP(0)
+                .withKD(0)
+                .withKI(0);
+            kIndexConfig.CurrentLimits
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(IndexerConstants.indexerCurrentLimit);
+            kIndexConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Brake);
+            kIndexConfig.Feedback
+                .withSensorToMechanismRatio(IndexerConstants.kGearRatio / IndexerConstants.kGearCircumference);
+        }
+    }
+
+    public final static class CANdleConfigs {
+        public static final CANdleConfiguration CANdleConfig = new CANdleConfiguration();
+
+        static {
+            CANdleConfig.LED
+                .withStripType(StripTypeValue.GRB)
+                .withBrightnessScalar(0.3);
+        }
+    }
+
 }

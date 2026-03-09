@@ -12,13 +12,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.SwerveDrivebase;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
-  CommandXboxController m_controller = new CommandXboxController(0);
+  CommandXboxController m_driveController = new CommandXboxController(0);
+  CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  Intake m_intake = new Intake();
+  // Indexer m_indexer =new Indexer();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -31,16 +36,20 @@ public class RobotContainer {
   private void configureBindings() {
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
-      getJoystickValues(m_controller::getLeftY, vx_limiter),
-      getJoystickValues(m_controller::getLeftX, vy_limiter),
-      getJoystickValues(m_controller::getRightX, omega_limiter),
+      getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      getJoystickValues(m_driveController::getLeftX, vy_limiter),
+      getJoystickValues(m_driveController::getRightX, omega_limiter),
       () -> true));
-    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-      1,
-      getJoystickValues(m_controller::getLeftY, vx_limiter),
-      getJoystickValues(m_controller::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter),
-      () -> false));
+    // m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+    //   1,
+    //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
+    //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
+    //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
+    //   () -> false));
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_subsystemController.a().onTrue(m_intake.setPivotIn());
+    m_subsystemController.b().onTrue(m_intake.setPivotOut());
+    m_subsystemController.rightBumper().onTrue(m_intake.getIntakeCommand(0.6));
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {

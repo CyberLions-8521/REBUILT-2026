@@ -25,7 +25,7 @@ public class Constants {
         public static final double kTurnP = 120; //set later
         public static final double kTurnD = 1.5; //set later
 
-        public static final String kCANCoderBus = "Circus Circle";   // name assigned in Phoenix Tuner X
+        public static final String kCANBus = "Circus Circle";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
         public static final int kFrontLeftDriveID  = 1; 
@@ -45,7 +45,7 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 1.0; //tune later
+        public static final double kMaxMetersPerSecond = 4.4; 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
@@ -61,4 +61,40 @@ public class Constants {
         public static final double TXControllerP = 0;
         public static final double TXControllerD = 0;
     }
+
+    public static final class LimitSwitchConstants {
+        public static final int kLeftLimitSwitchID = 0; 
+        public static final int kRightLimitSwitchID = 4; 
+    }
+
+    public static final class CANdleConstants {
+        public static final int ledCount = 240;
+        public static final int CANdleID = 4;
+    }
+
+    public static class IntakeConstants {
+        public static final int kPivotID = 21;     //NEED TO CHANGE
+        public static final int kIntakeID = 22;   //NEED TO CHANGE
+
+        public static final double kGearRatio = 14.5;               //NEED TO CHANGE
+        public static final double kGearCircumference = 0;       //NEED TO CHANGE
+
+        public static final int pivotCurrentLimit = 80;
+        public static final int intakeCurrentLimit = 80;
+
+        public static final double extendedEncoderPosition = 0; //set later
+    }
+
+    public static class IndexerConstants {
+        public static final int kIndexerID = 0;     //NEED TO CHANGE
+        public static final int indexerCurrentLimit = 80;
+
+        public static final int kGearRatio = 0;               //NEED TO CHANGE
+        public static final int kGearCircumference = 0;       //NEED TO CHANGE
+    }
+
+    public static class CANBusConstants {
+        public static final String subsystemCANBus = "rio";
+    }
 }
+

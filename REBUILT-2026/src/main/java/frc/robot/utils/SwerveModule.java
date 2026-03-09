@@ -31,9 +31,9 @@ public class SwerveModule {
 
 
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
-        m_driveMotor = new TalonFX(driveMotorPort, SwerveConstants.kCANCoderBus);
-        m_turnMotor  = new TalonFX(turnMotorPort, SwerveConstants.kCANCoderBus);
-        m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANCoderBus);
+        m_driveMotor = new TalonFX(driveMotorPort, SwerveConstants.kCANBus);
+        m_turnMotor  = new TalonFX(turnMotorPort, SwerveConstants.kCANBus);
+        m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANBus);
 
         m_driveRequest = new VelocityVoltage(0);
         m_turnRequest = new PositionVoltage(0);
