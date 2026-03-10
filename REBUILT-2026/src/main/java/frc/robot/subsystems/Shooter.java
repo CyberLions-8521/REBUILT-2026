@@ -75,7 +75,8 @@ public class Shooter extends SubsystemBase {
 
     public void createLookupTable(){
         // distance, velocity
-        velocityTable.put(0.0, 0.0);
+        velocityTable.put(3.0, 75.0);
+        velocityTable.put(3.6, 80.0);
     }
 
     public double lookupVelocity(double distance){
@@ -92,18 +93,18 @@ public class Shooter extends SubsystemBase {
         if (targetPoseRobot == null) return 0.0;
 
         double x = targetPoseRobot.getX();
-        double y = targetPoseRobot.getY();
+        double z = targetPoseRobot.getZ();
 
         m_currentRange = Math.sqrt(
             Math.pow(x, 2) +
-            Math.pow(y, 2)
+            Math.pow(z, 2)
         );
 
         return m_currentRange;
     }
 
     public void runShooterMotors(double leaderSpeed) {
-        leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 100.0);
+        leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 125.0);
         SmartDashboard.putNumber("3) Requested Velocity", leaderSpeed);
 
         m_motorShooterLeader.setControl(m_requestFlywheel.withVelocity(leaderSpeed));

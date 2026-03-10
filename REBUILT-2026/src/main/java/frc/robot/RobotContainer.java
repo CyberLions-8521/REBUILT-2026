@@ -21,16 +21,10 @@ public class RobotContainer {
 
   public RobotContainer() {
 
-    // from a hub's center apriltag to the opening of the hub
-    LimelightHelpers.setFiducial3DOffset("limelight", 
-        0.5969,    // Forward offset
-        0.0,       // Side offset  
-        0.70485    // Height offset
-    );
     LimelightHelpers.setCameraPose_RobotSpace("limelight",
-        0.311,  // Forward (m)
+        0.0,  // Forward (m)
         0.0,  // Side (m)
-        0.563,  // Up (m)
+        0.0,  // Up (m)
         0.0,  // Roll (deg)
         15.0,  // Pitch (deg)
         0.0   // Yaw (deg)
@@ -41,7 +35,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_controller.povUp().whileTrue(m_shooter.shoot());
-    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 50));
+    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 110));
     m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
   }
 
