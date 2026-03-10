@@ -12,9 +12,6 @@ import frc.robot.utils.Constants.CANBusConstants;
 import frc.robot.utils.Constants.IndexerConstants;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
-
-//i stole these imports from last year's climber
-
 public class Indexer extends SubsystemBase{
 
     private TalonFX m_indexer;

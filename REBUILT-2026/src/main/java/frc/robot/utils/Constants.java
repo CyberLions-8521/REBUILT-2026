@@ -73,8 +73,8 @@ public class Constants {
     }
 
     public static class IntakeConstants {
-        public static final int kPivotID = 21;     //NEED TO CHANGE
-        public static final int kIntakeID = 22;   //NEED TO CHANGE
+        public static final int kPivotID = 12;     //NEED TO CHANGE
+        public static final int kIntakeID = 10;   //NEED TO CHANGE
 
         public static final double kGearRatio = 14.5;               //NEED TO CHANGE
         public static final double kGearCircumference = 0;       //NEED TO CHANGE
@@ -86,7 +86,7 @@ public class Constants {
     }
 
     public static class IndexerConstants {
-        public static final int kIndexerID = 0;     //NEED TO CHANGE
+        public static final int kIndexerID = 0;     
         public static final int indexerCurrentLimit = 80;
 
         public static final int kGearRatio = 0;               //NEED TO CHANGE

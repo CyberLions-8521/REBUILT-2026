@@ -23,7 +23,7 @@ public class RobotContainer {
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
   Intake m_intake = new Intake();
-  // Indexer m_indexer =new Indexer();
+  Indexer m_indexer = new Indexer();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -47,9 +47,11 @@ public class RobotContainer {
     //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
     //   () -> false));
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
     m_subsystemController.a().onTrue(m_intake.setPivotIn());
     m_subsystemController.b().onTrue(m_intake.setPivotOut());
     m_subsystemController.rightBumper().onTrue(m_intake.getIntakeCommand(0.6));
+    m_subsystemController.rightBumper().onTrue(m_indexer.runIndexerCommand(0.6));
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
