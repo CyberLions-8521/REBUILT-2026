@@ -32,7 +32,7 @@ public class RobotContainer {
         0.0,  // Side (m)
         0.563,  // Up (m)
         0.0,  // Roll (deg)
-        60.0,  // Pitch (deg)
+        15.0,  // Pitch (deg)
         0.0   // Yaw (deg)
     );
 
@@ -41,7 +41,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_controller.povUp().whileTrue(m_shooter.shoot());
-    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 55));
+    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 50));
     m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
   }
 

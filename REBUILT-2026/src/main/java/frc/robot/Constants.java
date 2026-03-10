@@ -32,8 +32,8 @@ public class Constants {
         public static final double kShooterP = 0.2;
         public static final double kShooterI = 0.0;
         public static final double kShooterD = 0.0;
-        public static final double kShooterS = 0.0;
-        public static final double kShooterV = 0.116;
+        public static final double kShooterS = 0.28;
+        public static final double kShooterV = 0.1115;
 
         public static final double kMinShooterRange = 0.0; //adjust later
         public static final double kMaxShooterRange = 99.0; //adjust later
