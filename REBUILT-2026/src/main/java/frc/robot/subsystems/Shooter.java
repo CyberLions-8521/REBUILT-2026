@@ -75,7 +75,8 @@ public class Shooter extends SubsystemBase {
 
     public void createLookupTable(){
         // distance, velocity
-        velocityTable.put(0.0, 0.0);
+        velocityTable.put(3.0, 75.0);
+        velocityTable.put(3.6, 80.0);
     }
 
     public double lookupVelocity(double distance){
@@ -89,21 +90,24 @@ public class Shooter extends SubsystemBase {
 
     public double getDistance(){
 
-        if (targetPoseRobot == null) return 0.0;
+        if (targetPoseRobot == null) return m_currentRange;
 
         double x = targetPoseRobot.getX();
-        double y = targetPoseRobot.getY();
+        double z = targetPoseRobot.getZ();
 
         m_currentRange = Math.sqrt(
             Math.pow(x, 2) +
-            Math.pow(y, 2)
+            Math.pow(z, 2)
         );
 
         return m_currentRange;
     }
 
     public void runShooterMotors(double leaderSpeed) {
-        leaderSpeed = MathUtil.clamp(leaderSpeed, 0.0, 100.0);
+        leaderSpeed = MathUtil.clamp(leaderSpeed, 
+                                     ShooterConstants.kMinShooterVelocity, 
+                                     ShooterConstants.kMaxShooterVelocity);
+
         SmartDashboard.putNumber("3) Requested Velocity", leaderSpeed);
 
         m_motorShooterLeader.setControl(m_requestFlywheel.withVelocity(leaderSpeed));
@@ -120,6 +124,16 @@ public class Shooter extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> runShooterMotors(speed.getAsDouble()),
+            interrupted -> runShooterMotors(0.0),
+            () -> false,
+            this
+        );
+    }
+
+    public Command runFlywheelDashboard() {
+        return new FunctionalCommand(
+            () -> {},
+            () -> runShooterMotors(ShooterConstants.kFlywheelVelocityInput),
             interrupted -> runShooterMotors(0.0),
             () -> false,
             this
@@ -153,7 +167,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("1) Real Velocity (Leader)", 0.0);
         SmartDashboard.putNumber("2) Real Velocity (Bottom)", 0.0);
         SmartDashboard.putNumber("3) Requested Velocity", 0.0);
-        
+        SmartDashboard.putNumber("4) Flywheel Velocity Input", 0.0);
+
         // LIMELIGHT STATS
         SmartDashboard.putNumber("LL - Target X (m)", 0.0);
         SmartDashboard.putNumber("LL - Target Y (m)", 0.0);
@@ -168,7 +183,7 @@ public class Shooter extends SubsystemBase {
         // FLYWHEEL STATS
         SmartDashboard.putNumber("1) Real Velocity (Leader)", m_motorShooterLeader.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("2) Real Velocity (Bottom)", m_motorShooterBottomFollower.getVelocity().getValueAsDouble());
-        
+        ShooterConstants.kFlywheelVelocityInput = SmartDashboard.getNumber("4) Flywheel Velocity Input", 0.0);
         
         // LIMELIGHT STATS
         SmartDashboard.putBoolean("LL - Target Visible", LimelightHelpers.getTV("limelight"));

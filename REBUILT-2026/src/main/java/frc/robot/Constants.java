@@ -13,7 +13,7 @@ public class Constants {
         public static final int kShooterTopRightID = 22;
         public static final int kShooterBottomRightID = 23;
 
-        public static double kDefaultShooterVelocity = 0.0;
+        public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
 
         // PositionDutyCycle takes inputs in rotations.
@@ -32,11 +32,14 @@ public class Constants {
         public static final double kShooterP = 0.2;
         public static final double kShooterI = 0.0;
         public static final double kShooterD = 0.0;
-        public static final double kShooterS = 0.0;
-        public static final double kShooterV = 0.116;
+        public static final double kShooterS = 0.28;
+        public static final double kShooterV = 0.1115;
 
-        public static final double kMinShooterRange = 0.0; //adjust later
-        public static final double kMaxShooterRange = 99.0; //adjust later
+        // adjust these later
+        public static final double kMinShooterRange = 0.0; // minimum distance the robot can shoot from
+        public static final double kMaxShooterRange = 99.0; // maximum distance the robot can shoot from OR that the limelight can see
+        public static final double kMinShooterVelocity = 0.0; // minimum velocity the robot must be
+        public static final double kMaxShooterVelocity = 125.0; // maximum (or most efficient) velocity the robot can reach
 
         public static final double kGravity = 9.807;
         
