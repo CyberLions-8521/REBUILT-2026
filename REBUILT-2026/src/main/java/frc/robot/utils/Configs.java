@@ -75,12 +75,11 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
             kPivotConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake);
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
             kPivotConfig.Feedback
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
-        }
-
-         static {
+        
             kIntakeConfig.Slot0
                 .withKP(0)
                 .withKD(0)
@@ -89,7 +88,8 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
             kIntakeConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake);
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
             kIntakeConfig.Feedback
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
         }
@@ -108,7 +108,8 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IndexerConstants.indexerCurrentLimit);
             kIndexConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake);
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
             kIndexConfig.Feedback
                 .withSensorToMechanismRatio(IndexerConstants.kGearRatio / IndexerConstants.kGearCircumference);
         }
