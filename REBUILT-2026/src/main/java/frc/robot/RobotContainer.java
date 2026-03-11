@@ -36,8 +36,12 @@ public class RobotContainer {
   private void configureBindings() {
     m_controller.povUp().whileTrue(m_shooter.shoot());
     m_controller.povRight().whileTrue(m_shooter.runFlywheelDashboard());
-    m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> 55));
+    SmartDashboard.putNumber("Shooter Speed", 0);
+
+   // m_controller.povDown().whileTrue(m_shooter.runFlywheel(() -> SmartDashboard.getNumber("Shooter Speed", 0)));
     m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
+
+    m_controller.cross().whileTrue(m_shooter.runFlyWheelPWM(() -> SmartDashboard.getNumber("Shooter Speed", 0)));
   }
 
   public Command getAutonomousCommand() {

@@ -77,6 +77,7 @@ public class Shooter extends SubsystemBase {
         // distance, velocity
         velocityTable.put(3.0, 75.0);
         velocityTable.put(3.6, 80.0);
+
     }
 
     public double lookupVelocity(double distance){
@@ -129,7 +130,8 @@ public class Shooter extends SubsystemBase {
             this
         );
     }
-
+    // We are so cooked and when i mean cooked i mean the gears keep getting cooked + they installed brass fly wheels so you have to alter the S and V values
+// the reason the i hate wdoewrge wodswthe rewasdpmthe the prhrw asdwpthe rkwspthe wtkthe owthoewthsoyw eyhwe ythewa eeasdtwe dthaewsdwthwad sderrdsthwaesadwthasyuo
     public Command runFlywheelDashboard() {
         return new FunctionalCommand(
             () -> {},
@@ -138,6 +140,10 @@ public class Shooter extends SubsystemBase {
             () -> false,
             this
         );
+    }
+
+    public Command runFlyWheelPWM(DoubleSupplier speed) {
+        return this.run(() -> runShooterMotors(speed.getAsDouble()));
     }
 
     public Command stopFlywheel(){
@@ -170,13 +176,13 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("4) Flywheel Velocity Input", 0.0);
 
         // LIMELIGHT STATS
-        SmartDashboard.putNumber("LL - Target X (m)", 0.0);
+        SmartDashboard.putNumber("LL - Target X (m)", 5.26);
         SmartDashboard.putNumber("LL - Target Y (m)", 0.0);
-        SmartDashboard.putNumber("LL - Target Z (m)", 0.0);
-        SmartDashboard.putNumber("LL - Distance (m)", 0.0);
+        SmartDashboard.putNumber("LL - Target Z (m)", 1.26);
+        SmartDashboard.putNumber("LL - Distance (m)", 5.41);
         SmartDashboard.putBoolean("LL - Target Visible", false);
     }
-
+        // 5.41^2 = 1.26^2 + X^2
     @Override
     public void periodic() {
         
