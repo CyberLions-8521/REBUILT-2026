@@ -7,6 +7,8 @@ package frc.robot;
 /** Add your docs here. */
 public class Constants {
     public static final class ShooterConstants {
+
+        public static final String kCanbusName = "rio";
         
         public static final int kHoodID = 20;
         public static final int kShooterTopLeftID = 21;
@@ -32,8 +34,8 @@ public class Constants {
         public static final double kShooterP = 0.2;
         public static final double kShooterI = 0.0;
         public static final double kShooterD = 0.0;
-        public static final double kShooterS = 0.28;
-        public static final double kShooterV = 0.1115;
+        public static final double kShooterS = 0.25;
+        public static final double kShooterV = 0.1185;
 
         // adjust these later
         public static final double kMinShooterRange = 0.0; // minimum distance the robot can shoot from

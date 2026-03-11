@@ -43,14 +43,14 @@ public class Shooter extends SubsystemBase {
     public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomFolID, int motorHoodID) {
         
         // main motors
-        m_motorShooterLeader = new TalonFX(motorShooterLeadID, "Ryan");
+        m_motorShooterLeader = new TalonFX(motorShooterLeadID, ShooterConstants.kCanbusName);
         m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
 
-        m_motorShooterFollower = new TalonFX(motorShooterFolID, "Ryan");
+        m_motorShooterFollower = new TalonFX(motorShooterFolID, ShooterConstants.kCanbusName);
         m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
         m_motorShooterFollower.setControl(new Follower(m_motorShooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
 
-        m_motorShooterBottomFollower = new TalonFX(motorBottomFolID, "Ryan");
+        m_motorShooterBottomFollower = new TalonFX(motorBottomFolID, ShooterConstants.kCanbusName);
         m_motorShooterBottomFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
         
         // slot 1 = flywheel
@@ -75,9 +75,21 @@ public class Shooter extends SubsystemBase {
 
     public void createLookupTable(){
         // distance, velocity
-        velocityTable.put(3.0, 75.0);
-        velocityTable.put(3.6, 80.0);
-
+        velocityTable.put(5.8, 63.0);
+        velocityTable.put(5.45, 62.4);
+        velocityTable.put(4.85,60.0);
+        velocityTable.put(4.35, 57.0);
+        velocityTable.put(4.1, 55.0);
+        velocityTable.put(3.9, 53.5);
+        velocityTable.put(3.5, 52.5);
+        velocityTable.put(3.25, 51.0);
+        velocityTable.put(2.85, 50.0);
+        velocityTable.put(2.585, 49.25);
+        velocityTable.put(2.3, 47.5);  
+        velocityTable.put(2.025, 46.0);
+        velocityTable.put(1.8, 45.0);
+        velocityTable.put(1.53, 44.0);
+        
     }
 
     public double lookupVelocity(double distance){
