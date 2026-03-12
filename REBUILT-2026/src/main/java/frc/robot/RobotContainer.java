@@ -9,13 +9,11 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.SwerveDrivebase;
-import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
@@ -50,8 +48,11 @@ public class RobotContainer {
     m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
     m_subsystemController.a().onTrue(m_intake.setPivotIn().withTimeout(1));
     m_subsystemController.b().onTrue(m_intake.setPivotOut().withTimeout(1));
-    m_subsystemController.rightBumper().onTrue(m_intake.getIntakeCommand(0.3));
-    m_subsystemController.rightBumper().onTrue(m_indexer.runIndexerCommand(0.3));
+    m_subsystemController.rightTrigger().whileTrue(m_intake.getIntakeCommand(0.65));
+    m_subsystemController.rightTrigger().whileTrue(m_indexer.runIndexerCommand(0.4));
+
+  
+    
   }
 
    private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {

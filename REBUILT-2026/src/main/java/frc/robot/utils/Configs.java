@@ -89,7 +89,7 @@ public class Configs {
                 .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
             kIntakeConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
-                .withInverted(InvertedValue.Clockwise_Positive);
+                .withInverted(InvertedValue.CounterClockwise_Positive);
             kIntakeConfig.Feedback
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
         }

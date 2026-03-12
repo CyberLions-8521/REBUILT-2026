@@ -84,6 +84,7 @@ public class Constants {
 
         public static final double extendedEncoderPosition = -4.5; //set later
         public static final double retractedEncoderPosition = -2; //set later
+        public static final double middleEncoderPosition = -2.56; //for after ventura
     }
 
     public static class IndexerConstants {
