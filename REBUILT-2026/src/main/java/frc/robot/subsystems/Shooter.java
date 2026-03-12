@@ -40,8 +40,11 @@ public class Shooter extends SubsystemBase {
     private static final double g = ShooterConstants.kGravity;
     private static final double h = ShooterConstants.deltaHeight;
 
+    private static final int[] validIDs = {2, 5, 4, 10, 18, 21, 20, 26};
+
     public Shooter(int motorShooterLeadID, int motorShooterFolID, int motorBottomFolID, int motorHoodID) {
         
+        LimelightHelpers.SetFiducialIDFiltersOverride("limeilght", validIDs);
         // main motors
         m_motorShooterLeader = new TalonFX(motorShooterLeadID, ShooterConstants.kCanbusName);
         m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
@@ -99,6 +102,12 @@ public class Shooter extends SubsystemBase {
             return 0.0;
         }
         return velocityTable.get(distance);
+    }
+
+    public double calculateVelocity(double distance){
+        double a = ShooterConstants.kA;
+        double b = ShooterConstants.kB;
+        return(a + b * distance);
     }
 
     public double getDistance(){
@@ -166,7 +175,8 @@ public class Shooter extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                double rps = lookupVelocity(getDistance());
+                double rps = calculateVelocity(getDistance());
+                // double rps = lookupVelocity(getDistance());
                 runShooterMotors(rps);
             },
             interrupted -> {
