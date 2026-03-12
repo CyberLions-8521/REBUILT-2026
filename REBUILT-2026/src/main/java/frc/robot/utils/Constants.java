@@ -82,7 +82,8 @@ public class Constants {
         public static final int pivotCurrentLimit = 80;
         public static final int intakeCurrentLimit = 80;
 
-        public static final double extendedEncoderPosition = 0; //set later
+        public static final double extendedEncoderPosition = -4.5; //set later
+        public static final double retractedEncoderPosition = -2; //set later
     }
 
     public static class IndexerConstants {

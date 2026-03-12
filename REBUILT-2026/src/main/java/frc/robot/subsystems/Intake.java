@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.Configs.IntakeConfigs;
@@ -30,18 +31,22 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("Pivot Position", getPivotPosition());
     }
 
+    public Command getResetEncoderPosition() {
+        return new InstantCommand(() -> resetPivotEncoders(), this);
+    }
+
     public Command getIntakeCommand(double speed) {
-        return new RunCommand(() -> setIntakeSpeed(speed));
+        return new RunCommand(() -> setIntakeSpeed(speed), this);
     }
 
     public Command setPivotIn() {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                setPivotSpeed(0.5);
+                setPivotSpeed(0.15);
             },
             interrupted -> setPivotSpeed(0.0),
-            () -> m_pivot.getPosition().getValueAsDouble() <= 0.1,
+            () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.retractedEncoderPosition,
             this);
     }
 
@@ -49,10 +54,10 @@ public class Intake extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                setPivotSpeed(-0.7);
+                setPivotSpeed(-0.15);
             },
             interrupted -> setPivotSpeed(0.0),
-            () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.extendedEncoderPosition, //get actual encoder value later
+            () -> m_pivot.getPosition().getValueAsDouble() <= IntakeConstants.extendedEncoderPosition, //get actual encoder value later
             this);
     }
 
