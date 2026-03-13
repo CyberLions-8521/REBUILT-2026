@@ -8,11 +8,13 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
 import frc.robot.utils.Constants.SwerveConstants;
 
@@ -20,6 +22,7 @@ public class RobotContainer {
   CommandXboxController m_driveController = new CommandXboxController(0);
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
   Indexer m_indexer = new Indexer();
 
@@ -28,6 +31,14 @@ public class RobotContainer {
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
   public RobotContainer() {
+      LimelightHelpers.setCameraPose_RobotSpace("limelight",
+        0.0,  // Forward (m)
+        0.0,  // Side (m)
+        0.0,  // Up (m)
+        0.0,  // Roll (deg)
+        15.0,  // Pitch (deg)
+        0.0   // Yaw (deg)
+    );
     configureBindings();
   }
 
@@ -46,8 +57,12 @@ public class RobotContainer {
     //   () -> false));
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
     m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
-    m_subsystemController.a().onTrue(m_intake.setPivotIn().withTimeout(1));
-    m_subsystemController.b().onTrue(m_intake.setPivotOut().withTimeout(1));
+    m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
+    m_subsystemController.a().whileTrue(m_shooter.shoot());
+    m_subsystemController.b().whileTrue(m_shooter.runFlywheelDashboard());
+    m_subsystemController.x().whileTrue(m_shooter.runFlyWheelPWM(() -> SmartDashboard.getNumber("Shooter Speed", 0)));
+    m_subsystemController.povUp().onTrue(m_intake.setPivotIn().withTimeout(1));
+    m_subsystemController.povDown().onTrue(m_intake.setPivotOut().withTimeout(1));
     m_subsystemController.rightTrigger().whileTrue(m_intake.getIntakeCommand(0.65));
     m_subsystemController.rightTrigger().whileTrue(m_indexer.runIndexerCommand(0.4));
 

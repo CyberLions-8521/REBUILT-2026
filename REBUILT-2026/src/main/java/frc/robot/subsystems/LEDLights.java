@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.Configs.CANdleConfigs;
-import frc.robot.utils.Constants.CANBusConstants;
 import frc.robot.utils.Constants.CANdleConstants;
 import frc.robot.utils.Constants.LimitSwitchConstants;
 
@@ -48,7 +47,7 @@ public class LEDLights extends SubsystemBase {
     }
   }
 
-  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, CANBusConstants.subsystemCANBus);
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, CANdleConstants.kCanbusName);
 
 
   public LEDLights() {

@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.Configs.IntakeConfigs;
-import frc.robot.utils.Constants.CANBusConstants;
 import frc.robot.utils.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
@@ -18,8 +17,8 @@ public class Intake extends SubsystemBase {
     private TalonFX m_pivot;
 
     public Intake(){
-        m_intake = new TalonFX(IntakeConstants.kIntakeID, CANBusConstants.subsystemCANBus);
-        m_pivot = new TalonFX(IntakeConstants.kPivotID, CANBusConstants.subsystemCANBus);
+        m_intake = new TalonFX(IntakeConstants.kIntakeID, IntakeConstants.kCanbusName);
+        m_pivot = new TalonFX(IntakeConstants.kPivotID, IntakeConstants.kCanbusName);
 
         m_intake.getConfigurator().apply(IntakeConfigs.kIntakeConfig);
         m_pivot.getConfigurator().apply(IntakeConfigs.kPivotConfig);

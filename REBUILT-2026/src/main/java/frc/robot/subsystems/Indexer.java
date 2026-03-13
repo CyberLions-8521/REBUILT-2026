@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.Configs.IndexerConfigs;
-import frc.robot.utils.Constants.CANBusConstants;
 import frc.robot.utils.Constants.IndexerConstants;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
@@ -17,7 +16,7 @@ public class Indexer extends SubsystemBase{
     private TalonFX m_indexer;
 
     public Indexer(){
-        m_indexer = new TalonFX(IndexerConstants.kIndexerID, CANBusConstants.subsystemCANBus);
+        m_indexer = new TalonFX(IndexerConstants.kIndexerID, IndexerConstants.kCanbusName);
         m_indexer.getConfigurator().apply(IndexerConfigs.kIndexConfig);
     }
 
