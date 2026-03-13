@@ -61,6 +61,30 @@ public class Configs {
         }
     }
 
+    public static final class ShooterConfigs {
+       public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
+       static {
+            kKrakenLeaderConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Coast)
+                .withInverted(InvertedValue.CounterClockwise_Positive);
+       }
+       public static final TalonFXConfiguration kKrakenFollowerConfig = new TalonFXConfiguration();
+       static {
+            kKrakenFollowerConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Coast);
+       }
+    }
+
+    public static final class HoodConfigs {
+       public static final TalonFXConfiguration kKrakenHoodConfig = new TalonFXConfiguration();
+
+       static {
+            kKrakenHoodConfig.MotorOutput
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
+       }
+    }
+
 
     public static final class IntakeConfigs  {
         public static final TalonFXConfiguration kPivotConfig = new TalonFXConfiguration();

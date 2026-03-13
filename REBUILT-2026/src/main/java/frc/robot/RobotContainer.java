@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import java.util.function.Supplier;
@@ -28,6 +24,16 @@ public class RobotContainer {
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
   public RobotContainer() {
+
+    LimelightHelpers.setCameraPose_RobotSpace("limelight",
+        0.0,  // Forward (m)
+        0.0,  // Side (m)
+        0.0,  // Up (m)
+        0.0,  // Roll (deg)
+        15.0,  // Pitch (deg)
+        0.0   // Yaw (deg)
+    );
+
     configureBindings();
   }
 
@@ -76,4 +82,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return m_intake.getResetEncoderPosition();
   }
+  
 }
