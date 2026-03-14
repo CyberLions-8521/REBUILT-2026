@@ -10,12 +10,15 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
+import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
@@ -49,22 +52,38 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       getJoystickValues(m_driveController::getRightX, omega_limiter),
       () -> true));
-    // m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-    //   1,
-    //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
-    //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
-    //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
-    //   () -> false));
+    m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+      1,
+      getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      getJoystickValues(m_driveController::getLeftX, vy_limiter),
+      m_drivebase.getTXAdujstmentRotation(omega_limiter),
+      () -> false));
+
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
     m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
-    m_subsystemController.a().whileTrue(m_shooter.shoot());
-    m_subsystemController.b().whileTrue(m_shooter.runFlywheelDashboard());
-    m_subsystemController.x().whileTrue(m_shooter.runFlyWheelPWM(() -> SmartDashboard.getNumber("Shooter Speed", 0)));
+
+    //SHOOT
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
+
+    m_subsystemController.y().whileTrue(m_shooter.pass(75));
+
+    //INDEXER
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.4));
+     m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+
+    //INTAKE PIVOT
     m_subsystemController.povUp().onTrue(m_intake.setPivotIn().withTimeout(1));
     m_subsystemController.povDown().onTrue(m_intake.setPivotOut().withTimeout(1));
-    m_subsystemController.rightTrigger().whileTrue(m_intake.getIntakeCommand(0.65));
-    m_subsystemController.rightTrigger().whileTrue(m_indexer.runIndexerCommand(0.4));
+
+    //INTAKE ROLLERS
+    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.65));
+
+    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
+    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    m_subsystemController.x().whileTrue(m_shooter.shoot());
+
+
 
   
     

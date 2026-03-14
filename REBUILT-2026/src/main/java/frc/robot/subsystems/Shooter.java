@@ -175,8 +175,22 @@ public class Shooter extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                double rps = calculateVelocity(getDistance());
-                // double rps = lookupVelocity(getDistance());
+                // double rps = calculateVelocity(getDistance());
+                double rps = lookupVelocity(getDistance());
+                runShooterMotors(rps);
+            },
+            interrupted -> {
+                stopShooterMotors();
+            },
+            () -> false,
+            this
+        );
+    }
+
+    public Command pass(double rps) {
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
                 runShooterMotors(rps);
             },
             interrupted -> {

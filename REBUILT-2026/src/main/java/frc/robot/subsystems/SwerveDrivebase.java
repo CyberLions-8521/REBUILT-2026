@@ -39,6 +39,8 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public SwerveDrivebase() {
     m_gyro.reset();
+    SmartDashboard.putNumber("TXP", 0);
+    SmartDashboard.putNumber("TXD", 0);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -178,7 +180,7 @@ public class SwerveDrivebase extends SubsystemBase {
   @Override
   public void periodic() {
     // tunePID();
-    // tuneTXController();
+    tuneTXController();
     logData();
   }
 
@@ -198,10 +200,10 @@ public class SwerveDrivebase extends SubsystemBase {
   // }
 
   public void tuneTXController() {
-    double P = SmartDashboard.getNumber("TX P", 0);
-    double D = SmartDashboard.getNumber("TX D", 0);
-    m_TXController.setP(P);
-    m_TXController.setD(D);
+    double TXP = SmartDashboard.getNumber("TX P", 0);
+    double TXD = SmartDashboard.getNumber("TX D", 0);
+    m_TXController.setP(TXP);
+    m_TXController.setD(TXD);
   }
 
   public void getLimelightData() {
