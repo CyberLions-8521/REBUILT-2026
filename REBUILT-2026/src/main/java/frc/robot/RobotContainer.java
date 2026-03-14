@@ -46,13 +46,24 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       getJoystickValues(m_driveController::getRightX, omega_limiter),
       () -> true));
-    m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+
+      // brake drive - left trigger
+      m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
+        0.5, 
+        getJoystickValues(m_driveController::getLeftY, vx_limiter),
+        getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+        getJoystickValues(m_driveController::getRightX, omega_limiter), 
+        () -> true));
+
+      // auto align - x
+    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
@@ -66,7 +77,11 @@ public class RobotContainer {
     //SHOOT
     m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
 
-    m_subsystemController.y().whileTrue(m_shooter.pass(75));
+    m_subsystemController.y().whileTrue(m_shooter.pass(70));
+    m_subsystemController.b().whileTrue(m_shooter.pass(65));
+    m_subsystemController.a().whileTrue(m_shooter.pass(60));
+    m_subsystemController.povLeft().whileTrue(m_shooter.pass(55));
+
 
     //INDEXER
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.4));
@@ -77,7 +92,7 @@ public class RobotContainer {
     m_subsystemController.povDown().onTrue(m_intake.setPivotOut().withTimeout(1));
 
     //INTAKE ROLLERS
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.65));
+    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
 
     m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
     m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));

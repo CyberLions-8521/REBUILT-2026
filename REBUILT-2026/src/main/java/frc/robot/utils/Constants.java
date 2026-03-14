@@ -104,6 +104,11 @@ public class Constants {
         public static final double kB = 4.59;
 
         // in meters
+        // field measurements from field dimension drawings pdf (public)
+        public static final double aprilTagToHub = 0.597;
+        public static final double limelightToRobotCenter = 0.305; // 12 in to m
+
+
         public static final double shooterHeight = 0.5842; // 23 in to m
         public static final double drivebaseHeight = 0.1778; // 7 in
         public static final double startHeight = shooterHeight + drivebaseHeight;
@@ -140,8 +145,8 @@ public class Constants {
         public static final double kGearRatio = 14.5;               //NEED TO CHANGE
         public static final double kGearCircumference = 0;       //NEED TO CHANGE
 
-        public static final int pivotCurrentLimit = 80;
-        public static final int intakeCurrentLimit = 80;
+        public static final int pivotCurrentLimit = 20;
+        public static final int intakeCurrentLimit = 20;
 
         public static final double extendedEncoderPosition = -4.5; //set later
         public static final double retractedEncoderPosition = -2; //set later
@@ -152,7 +157,7 @@ public class Constants {
         public static final String kCanbusName = "rio";
 
         public static final int kIndexerID = 0;     
-        public static final int indexerCurrentLimit = 80;
+        public static final int indexerCurrentLimit = 20;
 
         public static final int kGearRatio = 0;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE

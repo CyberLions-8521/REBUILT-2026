@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
     private static final double g = ShooterConstants.kGravity;
     private static final double h = ShooterConstants.deltaHeight;
 
-    private static final int[] validIDs = {2, 5, 4, 10, 18, 21, 20, 26};
+    private static final int[] validIDs = {10};
 
     public Shooter() {
         

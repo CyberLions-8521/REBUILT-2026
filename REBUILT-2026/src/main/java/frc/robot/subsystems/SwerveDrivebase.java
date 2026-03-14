@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,8 +22,10 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.utils.Constants.LimelightConstants;
+import frc.robot.utils.Constants.ShooterConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 import frc.robot.utils.SwerveModule;
+
 
 
 public class SwerveDrivebase extends SubsystemBase {
@@ -37,10 +40,12 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private PIDController m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
 
+  private Pose3d targetPoseRobot;
+
   public SwerveDrivebase() {
     m_gyro.reset();
-    SmartDashboard.putNumber("TXP", 0);
-    SmartDashboard.putNumber("TXD", 0);
+    SmartDashboard.putNumber("TX P", 0);
+    SmartDashboard.putNumber("TX D", 0);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -181,7 +186,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public void periodic() {
     // tunePID();
     tuneTXController();
-    logData();
+    getLimelightData();
   }
 
   // public void tunePID () {
@@ -206,6 +211,20 @@ public class SwerveDrivebase extends SubsystemBase {
     m_TXController.setD(TXD);
   }
 
+  public double calculateAutoAlignSetpoint(){
+    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+
+      double x = targetPoseRobot.getX();
+      double z = targetPoseRobot.getZ();
+      double zc = ShooterConstants.limelightToRobotCenter + ShooterConstants.aprilTagToHub;
+
+      double angle_1 = Math.toDegrees(Math.atan(x/(z+zc)));
+      double angle_2 = Math.toDegrees(Math.atan(x/z));
+      double diff = angle_2 - angle_1;
+
+      return diff;
+  }
+
   public void getLimelightData() {
     SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
     SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
@@ -213,7 +232,14 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
     return () -> {
-      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      double adjustment = -m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      return limiter.calculate(adjustment);
+    };
+  }
+
+  public Supplier<Double> getTXAdujstmentRotation3d(SlewRateLimiter limiter) {
+    return () -> {
+      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), calculateAutoAlignSetpoint());
       return limiter.calculate(adjustment);
     };
   }
