@@ -8,11 +8,8 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
@@ -55,20 +52,24 @@ public class RobotContainer {
       () -> true));
 
       // brake drive - left trigger
-      m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
-        0.5, 
-        getJoystickValues(m_driveController::getLeftY, vx_limiter),
-        getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-        getJoystickValues(m_driveController::getRightX, omega_limiter), 
-        () -> true));
+    m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
+      0.5, 
+      getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+      getJoystickValues(m_driveController::getRightX, omega_limiter), 
+      () -> true));
 
-      // auto align - x
+    // auto align - x
     m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter),
       () -> false));
+
+    m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
+    m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());
+
 
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
     m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
@@ -77,20 +78,25 @@ public class RobotContainer {
     //SHOOT
     m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
 
-    m_subsystemController.y().whileTrue(m_shooter.pass(70));
-    m_subsystemController.b().whileTrue(m_shooter.pass(65));
-    m_subsystemController.a().whileTrue(m_shooter.pass(60));
-    m_subsystemController.povLeft().whileTrue(m_shooter.pass(55));
+    m_subsystemController.y().whileTrue(m_shooter.pass(60));
+    m_subsystemController.b().whileTrue(m_shooter.pass(55));
+    m_subsystemController.a().whileTrue(m_shooter.pass(45));
+
+
+    
 
 
     //INDEXER
-    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.4));
-     m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
 
     //INTAKE PIVOT
     m_subsystemController.povUp().onTrue(m_intake.setPivotIn().withTimeout(1));
     m_subsystemController.povDown().onTrue(m_intake.setPivotOut().withTimeout(1));
 
+    m_subsystemController.povLeft().whileTrue(m_intake.getPivotCommand(0.1));
+    m_subsystemController.povRight().whileTrue(m_intake.getPivotCommand(-0.1));
+    
     //INTAKE ROLLERS
     m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
 
@@ -123,6 +129,10 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return m_intake.getResetEncoderPosition();
+    RunCommand driveBackCommand = new RunCommand(() -> m_drivebase.drive(-0.5, 0, 0, true));
+    return m_intake.getResetEncoderPosition()
+            .andThen(driveBackCommand.withTimeout(4))
+            .andThen(m_intake.setPivotOut())
+            .andThen(m_shooter.shoot().alongWith(m_indexer.runIndexerCommand(0.6)).withTimeout(8));
   }
 }

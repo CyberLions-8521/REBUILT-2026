@@ -68,11 +68,19 @@ public class Configs {
             kKrakenLeaderConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
+
+            kKrakenLeaderConfig.CurrentLimits
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(20);
        }
 
        static {
             kKrakenFollowerConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast);
+
+            kKrakenFollowerConfig.CurrentLimits
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(20);
        }
     }
 

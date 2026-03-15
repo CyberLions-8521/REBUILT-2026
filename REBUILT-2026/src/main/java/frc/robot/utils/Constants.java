@@ -45,7 +45,7 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 4.4; 
+        public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
@@ -120,8 +120,8 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
-        public static final double TXControllerP = 0;
-        public static final double TXControllerD = 0;
+        public static final double TXControllerP = 0.0065;
+        public static final double TXControllerD = 0.004;
     }
 
     public static final class LimitSwitchConstants {
@@ -150,6 +150,7 @@ public class Constants {
 
         public static final double extendedEncoderPosition = -4.5; //set later
         public static final double retractedEncoderPosition = -2; //set later
+        public static final double retractedMiddleEncoderPosition = -2.5;
         public static final double middleEncoderPosition = -2.56; //for after ventura
     }
 

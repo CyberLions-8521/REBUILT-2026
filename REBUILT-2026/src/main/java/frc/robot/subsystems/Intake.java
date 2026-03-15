@@ -38,6 +38,10 @@ public class Intake extends SubsystemBase {
         return new RunCommand(() -> setIntakeSpeed(speed), this);
     }
 
+    public Command getPivotCommand(double speed) {
+        return new RunCommand(() -> setPivotSpeed(speed), this);
+    }
+
     public Command setPivotIn() {
         return new FunctionalCommand(
             () -> {},
