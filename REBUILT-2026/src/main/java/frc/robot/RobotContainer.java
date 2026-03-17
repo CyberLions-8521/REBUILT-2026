@@ -9,7 +9,10 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
@@ -17,6 +20,8 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotContainer {
   CommandXboxController m_driveController = new CommandXboxController(0);
@@ -30,6 +35,8 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
+  private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
+
   public RobotContainer() {
       LimelightHelpers.setCameraPose_RobotSpace("limelight",
         0.0,  // Forward (m)
@@ -40,6 +47,8 @@ public class RobotContainer {
         0.0   // Yaw (deg)
     );
     configureBindings();
+    configureAutos();
+    SmartDashboard.putData(m_chooser);
   }
 
   private void configureBindings() {
@@ -128,11 +137,28 @@ public class RobotContainer {
     };
   }
 
-  public Command getAutonomousCommand() {
-    RunCommand driveBackCommand = new RunCommand(() -> m_drivebase.drive(-0.5, 0, 0, true));
-    return m_intake.getResetEncoderPosition()
-            .andThen(driveBackCommand.withTimeout(4))
-            .andThen(m_intake.setPivotOut())
-            .andThen(m_shooter.shoot().alongWith(m_indexer.runIndexerCommand(0.6)).withTimeout(8));
+  // Sendable Chooser Autos
+
+  public void configureAutos() {
+    Command driveBackCommand = m_drivebase.resetGyroCommand().andThen(new RunCommand(() -> m_drivebase.drive(-0.5, 0, 0, true)));
+    Command stopCommand = new InstantCommand(() -> m_drivebase.drive(0, 0, 0, true));
+    m_chooser.addOption("No Auto", null);
+    m_chooser.addOption("Preload Center", new SequentialCommandGroup(
+        m_intake.getResetEncoderPosition()
+        .andThen(driveBackCommand.withTimeout(3))
+        .andThen(stopCommand)
+        .andThen(m_intake.setPivotOut())
+        .andThen(m_shooter.shoot().alongWith(Commands.waitSeconds(2)
+            .andThen(m_indexer.runIndexerCommand(0.6).alongWith(m_intake.getIntakeCommand(0.6)))).withTimeout(8))
+    ));
   }
+
+  public Command getAutonomousCommand() {
+    return m_chooser.getSelected();
+  }
+
+  // public Command getEthanAutoCommand(){
+  //   //make an auto that 
+  //   return 
+  // }
 }
