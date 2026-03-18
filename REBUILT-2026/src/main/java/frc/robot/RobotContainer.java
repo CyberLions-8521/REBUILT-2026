@@ -4,23 +4,15 @@
 
 package frc.robot;
 
-import java.util.function.Supplier;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.LimelightConstants;
+import frc.robot.Constants.LimitSwitchConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.LEDLights.LEDMode;
-import frc.robot.subsystems.SwerveDrivebase;
 
 public class RobotContainer {
 
@@ -32,14 +24,12 @@ public class RobotContainer {
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
-  // public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
-  // public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName));
-  public final Trigger seesTagLeftBumperNotPressed = m_controller.x(); //placeholder since the limelight is on the real bot, testing on demo bot
-  public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper(); //place holder since limelight is on the real bot, testing on demo bot
-  public final Trigger shootFail = m_controller.y(); //placeholder for the real condtition check (will do later)
+  //public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_controller.leftBumper().getAsBoolean());
+  //public final Trigger seesTagLeftBumperPressed = m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)); //placeholder for the real condtition check (will do later)
 
 
   public RobotContainer() {
+    m_LEDLights.setDefaultCommand(m_LEDLights.limitSwitchLEDCommand());
     configureBindings();
   }
 
