@@ -38,7 +38,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private PIDController m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
+  private PIDController m_TXController = new PIDController(LimelightConstants.kTXControllerP, 0, LimelightConstants.kTXControllerD);
 
   private Pose3d targetPoseRobot;
 
@@ -212,7 +212,7 @@ public class SwerveDrivebase extends SubsystemBase {
   }
 
   public double calculateAutoAlignSetpoint(){
-    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.kLimelightName);
 
       double x = targetPoseRobot.getX();
       double z = targetPoseRobot.getZ();
@@ -226,20 +226,20 @@ public class SwerveDrivebase extends SubsystemBase {
   }
 
   public void getLimelightData() {
-    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
-    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.kLimelightName));
+    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.kLimelightName));
   }
 
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
     return () -> {
-      double adjustment = -m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      double adjustment = -m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.kLimelightName), 0);
       return limiter.calculate(adjustment);
     };
   }
 
   public Supplier<Double> getTXAdujstmentRotation3d(SlewRateLimiter limiter) {
     return () -> {
-      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), calculateAutoAlignSetpoint());
+      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.kLimelightName), calculateAutoAlignSetpoint());
       return limiter.calculate(adjustment);
     };
   }

@@ -13,15 +13,15 @@ import frc.robot.utils.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
     
-    private TalonFX m_intake;
+    private TalonFX m_roller;
     private TalonFX m_pivot;
 
     public Intake(){
-        m_intake = new TalonFX(IntakeConstants.kIntakeID, IntakeConstants.kCanbusName);
+        m_roller = new TalonFX(IntakeConstants.kIntakeID, IntakeConstants.kCanbusName);
         m_pivot = new TalonFX(IntakeConstants.kPivotID, IntakeConstants.kCanbusName);
 
-        m_intake.getConfigurator().apply(IntakeConfigs.kIntakeConfig);
-        m_pivot.getConfigurator().apply(IntakeConfigs.kPivotConfig);
+        m_roller.getConfigurator().apply(IntakeConfigs.rollerConfigs);
+        m_pivot.getConfigurator().apply(IntakeConfigs.pivotConfigs);
 
         resetPivotEncoders();
     }
@@ -49,7 +49,7 @@ public class Intake extends SubsystemBase {
                 setPivotSpeed(0.15);
             },
             interrupted -> setPivotSpeed(0.0),
-            () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.retractedEncoderPosition,
+            () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.kRetractedEncoderPosition,
             this);
     }
 
@@ -60,7 +60,7 @@ public class Intake extends SubsystemBase {
                 setPivotSpeed(-0.15);
             },
             interrupted -> setPivotSpeed(0.0),
-            () -> m_pivot.getPosition().getValueAsDouble() <= IntakeConstants.extendedEncoderPosition, //get actual encoder value later
+            () -> m_pivot.getPosition().getValueAsDouble() <= IntakeConstants.kExtendedEncoderPosition, //get actual encoder value later
             this);
     }
 
@@ -69,7 +69,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setIntakeSpeed(double speed){
-        m_intake.set(speed);
+        m_roller.set(speed);
     }
 
     public void resetPivotEncoders(){

@@ -13,19 +13,19 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 public class Indexer extends SubsystemBase{
 
-    private TalonFX m_indexer;
+    private TalonFX m_roller;
 
     public Indexer(){
-        m_indexer = new TalonFX(IndexerConstants.kIndexerID, IndexerConstants.kCanbusName);
-        m_indexer.getConfigurator().apply(IndexerConfigs.kIndexConfig);
+        m_roller = new TalonFX(IndexerConstants.kIndexerID, IndexerConstants.kCanbusName);
+        m_roller.getConfigurator().apply(IndexerConfigs.rollerConfigs);
     }
 
     public Command runIndexerCommand(double speed) {
-        return this.run(() -> m_indexer.set(speed));
+        return this.run(() -> m_roller.set(speed));
     }
 
     public Command stopIndexerCommand(){
-        return this.run(() -> m_indexer.set(0));
+        return this.run(() -> m_roller.set(0));
     }
 
     public Command runIndexer(double speed){

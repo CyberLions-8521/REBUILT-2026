@@ -45,13 +45,13 @@ public class SwerveModule {
     }
 
     public void configMagnets(double kCANCoderMagnetOffset) {
-        m_CANcoder.getConfigurator().apply(SwerveConfigs.m_magnetConfigs.withMagnetOffset(kCANCoderMagnetOffset));
+        m_CANcoder.getConfigurator().apply(SwerveConfigs.magnetConfigs.withMagnetOffset(kCANCoderMagnetOffset));
     }
 
     public void configMotors(int CANCoderID) {
-        m_driveMotor.getConfigurator().apply(SwerveConfigs.m_driveConfig);
-        m_turnMotor.getConfigurator().apply(SwerveConfigs.m_turnConfig);
-        m_turnMotor.getConfigurator().apply(SwerveConfigs.m_turnConfig.Feedback.withFeedbackRemoteSensorID(CANCoderID));
+        m_driveMotor.getConfigurator().apply(SwerveConfigs.driveConfigs);
+        m_turnMotor.getConfigurator().apply(SwerveConfigs.turnConfigs);
+        m_turnMotor.getConfigurator().apply(SwerveConfigs.turnConfigs.Feedback.withFeedbackRemoteSensorID(CANCoderID));
     }
 
     public double getDriveDistance() {

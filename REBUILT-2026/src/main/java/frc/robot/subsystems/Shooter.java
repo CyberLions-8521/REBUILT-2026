@@ -38,7 +38,7 @@ public class Shooter extends SubsystemBase {
 
     //global consts (for readability)
     private static final double g = ShooterConstants.kGravity;
-    private static final double h = ShooterConstants.deltaHeight;
+    private static final double h = ShooterConstants.kDeltaHeight;
 
     private static final int[] validIDs = {2, 5, 4, 10, 18, 21, 20, 26};
 
@@ -47,14 +47,14 @@ public class Shooter extends SubsystemBase {
         LimelightHelpers.SetFiducialIDFiltersOverride("limeilght", validIDs);
         // main motors
         m_motorShooterLeader = new TalonFX(ShooterConstants.kShooterTopLeftID, ShooterConstants.kCanbusName);
-        m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.kKrakenLeaderConfig);
+        m_motorShooterLeader.getConfigurator().apply(ShooterConfigs.upperFlywheelConfigs);
 
         m_motorShooterFollower = new TalonFX(ShooterConstants.kShooterTopRightID, ShooterConstants.kCanbusName);
-        m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
+        m_motorShooterFollower.getConfigurator().apply(ShooterConfigs.lowerFlywheelConfigs);
         m_motorShooterFollower.setControl(new Follower(m_motorShooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
 
         m_motorShooterBottomFollower = new TalonFX(ShooterConstants.kShooterBottomRightID, ShooterConstants.kCanbusName);
-        m_motorShooterBottomFollower.getConfigurator().apply(ShooterConfigs.kKrakenFollowerConfig);
+        m_motorShooterBottomFollower.getConfigurator().apply(ShooterConfigs.lowerFlywheelConfigs);
         
         // slot 1 = flywheel
         // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html

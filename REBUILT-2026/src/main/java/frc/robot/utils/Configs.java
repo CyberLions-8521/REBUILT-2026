@@ -20,139 +20,136 @@ import frc.robot.utils.Constants.SwerveConstants;
 /** Add your docs here. */
 public class Configs {
     public static final class SwerveConfigs {
-        public static final TalonFXConfiguration m_driveConfig = new TalonFXConfiguration();
-        public static final TalonFXConfiguration m_turnConfig = new TalonFXConfiguration();
+        public static final TalonFXConfiguration driveConfigs = new TalonFXConfiguration();
+        public static final TalonFXConfiguration turnConfigs = new TalonFXConfiguration();
 
-        public static final MagnetSensorConfigs m_magnetConfigs = new MagnetSensorConfigs();
+        public static final MagnetSensorConfigs magnetConfigs = new MagnetSensorConfigs();
 
         static {
-            m_driveConfig.Slot0
-                .withKP(SwerveConstants.driveP)
-                .withKV(SwerveConstants.driveV);
-            m_driveConfig.CurrentLimits
+            driveConfigs.Slot0
+                .withKP(SwerveConstants.kDriveP)
+                .withKV(SwerveConstants.kDriveV);
+            driveConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(SwerveConstants.driveMotorCurrentLimit);
-            m_driveConfig.MotorOutput
+                .withSupplyCurrentLimit(SwerveConstants.kDriveCurrentLimit);
+            driveConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.Clockwise_Positive);
-            m_driveConfig.Feedback
+            driveConfigs.Feedback
                 .withSensorToMechanismRatio(SwerveConstants.kDriveConversionFactor);
 
-            m_turnConfig.Slot0
+            turnConfigs.Slot0
                 .withKP(SwerveConstants.kTurnP)
                 .withKD(SwerveConstants.kTurnD);
-            m_turnConfig.CurrentLimits
+            turnConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(SwerveConstants.turnMotorCurrentLimit);
-            m_turnConfig.MotorOutput
+                .withSupplyCurrentLimit(SwerveConstants.kTurnCurrentLimit);
+            turnConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.Clockwise_Positive);
-            m_turnConfig.Feedback
+            turnConfigs.Feedback
                 .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
-            m_turnConfig.ClosedLoopGeneral
+            turnConfigs.ClosedLoopGeneral
                 .withContinuousWrap(true);
                 
-
-            m_magnetConfigs
+            magnetConfigs
                 .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
                 .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
-                
         }
     }
 
     public static final class ShooterConfigs {
-       public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
-       public static final TalonFXConfiguration kKrakenFollowerConfig = new TalonFXConfiguration();
+       public static final TalonFXConfiguration upperFlywheelConfigs = new TalonFXConfiguration();
+       public static final TalonFXConfiguration lowerFlywheelConfigs = new TalonFXConfiguration();
        
        static {
-            kKrakenLeaderConfig.MotorOutput
+            upperFlywheelConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
 
-            kKrakenLeaderConfig.CurrentLimits
+            upperFlywheelConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(20);
        }
 
        static {
-            kKrakenFollowerConfig.MotorOutput
+            lowerFlywheelConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast);
 
-            kKrakenFollowerConfig.CurrentLimits
+            lowerFlywheelConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(20);
        }
     }
 
     public static final class HoodConfigs {
-       public static final TalonFXConfiguration kKrakenHoodConfig = new TalonFXConfiguration();
+       public static final TalonFXConfiguration hoodConfigs = new TalonFXConfiguration();
 
        static {
-            kKrakenHoodConfig.MotorOutput
+            hoodConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.Clockwise_Positive);
        }
     }
 
-
     public static final class IntakeConfigs  {
-        public static final TalonFXConfiguration kPivotConfig = new TalonFXConfiguration();
-        public static final TalonFXConfiguration kIntakeConfig = new TalonFXConfiguration();
+        public static final TalonFXConfiguration pivotConfigs = new TalonFXConfiguration();
+        public static final TalonFXConfiguration rollerConfigs = new TalonFXConfiguration();
 
         static {
-            kPivotConfig.Slot0
+            pivotConfigs.Slot0
                 .withKP(0)
                 .withKD(0)
                 .withKI(0);
-            kPivotConfig.CurrentLimits
+            pivotConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
-            kPivotConfig.MotorOutput
+                .withSupplyCurrentLimit(IntakeConstants.kPivotCurrentLimit);
+            pivotConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
-            kPivotConfig.Feedback
+            pivotConfigs.Feedback
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
         
-            kIntakeConfig.Slot0
+            rollerConfigs.Slot0
                 .withKP(0)
                 .withKD(0)
                 .withKI(0);
-            kIntakeConfig.CurrentLimits
+            rollerConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
-            kIntakeConfig.MotorOutput
+                .withSupplyCurrentLimit(IntakeConstants.kRollerCurrentLimit);
+            rollerConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
-            kIntakeConfig.Feedback
+            rollerConfigs.Feedback
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
         }
     }
 
     public static final class IndexerConfigs  {
-        public static final TalonFXConfiguration kIndexConfig = new TalonFXConfiguration();
+        public static final TalonFXConfiguration rollerConfigs = new TalonFXConfiguration();
 
 
         static {
-            kIndexConfig.Slot0
+            rollerConfigs.Slot0
                 .withKP(0)
                 .withKD(0)
                 .withKI(0);
-            kIndexConfig.CurrentLimits
+            rollerConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(IndexerConstants.indexerCurrentLimit);
-            kIndexConfig.MotorOutput
+                .withSupplyCurrentLimit(IndexerConstants.kRollerCurrentLimit);
+            rollerConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.Clockwise_Positive);
-            kIndexConfig.Feedback
+            rollerConfigs.Feedback
                 .withSensorToMechanismRatio(1);
         }
     }
 
     public final static class CANdleConfigs {
-        public static final CANdleConfiguration CANdleConfig = new CANdleConfiguration();
+        public static final CANdleConfiguration CANdleConfigs = new CANdleConfiguration();
 
         static {
-            CANdleConfig.LED
+            CANdleConfigs.LED
                 .withStripType(StripTypeValue.GRB)
                 .withBrightnessScalar(0.3);
         }

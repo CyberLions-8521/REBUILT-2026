@@ -33,12 +33,12 @@ public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
     Off (new EmptyAnimation(0)),
-    SeesApriltag (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0, 255, 0))), //limelight can see the apriltag
-    TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
-    Shooting (new FireAnimation(0, CANdleConstants.ledCount - 1).withBrightness(1.0)),
-    Charging (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 35, 0))),
-    Intaking (new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,115,0))),
-    LimitSwitchDetected (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0,255,0)));
+    SeesApriltag (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(0, 255, 0))), //limelight can see the apriltag
+    TargetingApriltag (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
+    Shooting (new FireAnimation(0, CANdleConstants.kLedCount - 1).withBrightness(1.0)),
+    Charging (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255, 35, 0))),
+    Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,115,0))),
+    LimitSwitchDetected (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0,255,0)));
     
     public final ControlRequest animation;
 
@@ -47,11 +47,11 @@ public class LEDLights extends SubsystemBase {
     }
   }
 
-  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, CANdleConstants.kCanbusName);
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, CANdleConstants.kCanbusName);
 
 
   public LEDLights() {
-    m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfig);
+    m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfigs);
   }
 
   public Command setLEDCommand(LEDMode newMode) {

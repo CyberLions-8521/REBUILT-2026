@@ -69,7 +69,7 @@ public class RobotContainer {
       () -> true));
 
     // auto align - x
-    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.kLimelightName)).whileTrue(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
