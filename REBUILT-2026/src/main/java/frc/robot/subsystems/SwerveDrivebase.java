@@ -216,10 +216,10 @@ public class SwerveDrivebase extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // m_frontLeft.logData("frontLeft");
-    // m_frontRight.logData("frontRight");
-    // m_backLeft.logData("backLeft");
-    // m_backRight.logData("backRight");
+    m_frontLeft.logData("frontLeft");
+    m_frontRight.logData("frontRight");
+    m_backLeft.logData("backLeft");
+    m_backRight.logData("backRight");
     // logData();
     getLimelightData();
     tuneTXController();

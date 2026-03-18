@@ -53,27 +53,7 @@ public class SwerveModule {
     //DATA LOGGING
     //for literally everything 
     public void logData(String motor){
-        // SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition() % 360 - 180);
-        // SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get()));
-        // // SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
-
-        // // SmartDashboard.putNumber(motor + " drive position", m_driveEncoder.getPosition());
-        // // SmartDashboard.putNumber(motor + " turn position", m_turnEncoder.getPosition());
-
-        // SmartDashboard.putNumber(motor + " drive velocity", m_driveEncoder.getVelocity());
-        // SmartDashboard.putNumber(motor + " turn velocity", m_turnEncoder.getVelocity());
-
-        // SmartDashboard.putNumber(motor + " drive current", m_driveMotor.getOutputCurrent());
-        // SmartDashboard.putNumber(motor + " turn current", m_turnMotor.getOutputCurrent());
-
-        // SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getAppliedOutput());
-        // SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getAppliedOutput());
-
-        // SmartDashboard.putNumber(motor + " drive temp", m_driveMotor.getMotorTemperature());
-        // SmartDashboard.putNumber(motor + " turn temp", m_turnMotor.getMotorTemperature());
-
-        // SmartDashboard.putNumber(motor + " drive voltage", m_driveMotor.getBusVoltage());
-        // SmartDashboard.putNumber(motor + " turn voltage", m_turnMotor.getBusVoltage());
+        SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get()));
     }
 
     public SwerveModuleState getState() {
