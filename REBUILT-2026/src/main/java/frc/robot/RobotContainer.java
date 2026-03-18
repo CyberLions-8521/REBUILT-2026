@@ -27,6 +27,7 @@ public class RobotContainer {
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
   CommandXboxController m_controller = new CommandXboxController(0);
   LEDLights m_LEDLights = new LEDLights();
+  SwerveDrivebase m_drivebase = new SwerveDrivebase();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -43,44 +44,54 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // m_drivebase.setDefaultCommand(this.getDriveCommand(
-    //   1,
-    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
-    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
-    //   getJoystickValues(m_controller::getRightX, omega_limiter),
-    //   () -> true));
-    // m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-    //   1,
-    //   getJoystickValues(m_controller::getLeftY, vx_limiter),
-    //   getJoystickValues(m_controller::getLeftX, vy_limiter),
-    //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
-    //   () -> false));f
+    m_drivebase.setDefaultCommand(this.getDriveCommand(
+      1,
+      getJoystickValues(m_controller::getLeftY, vx_limiter),
+      getJoystickValues(m_controller::getLeftX, vy_limiter),
+      getJoystickValues(m_controller::getRightX, omega_limiter),
+      () -> true));
+    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
+      0.2,
+      getJoystickValues(m_controller::getLeftY, vx_limiter),
+      getJoystickValues(m_controller::getLeftX, vy_limiter),
+      m_drivebase.getTXAdujstmentRotation(omega_limiter, 0),
+      () -> false));
 
-    m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
-    seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
-    seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
-    // m_controller.x().whileTrue(m_LEDLights.setLEDCommandTimed(LEDMode.Charging, LEDMode.Shooting, 2));
-    shootFail.onTrue(m_LEDLights.setLEDCommandTimed(LEDMode.ShootFail, 1));
+    // m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));
+    // seesTagLeftBumperNotPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.SeesApriltag));
+    // seesTagLeftBumperPressed.whileTrue(m_LEDLights.setLEDCommand(LEDMode.TargetingApriltag));
+    // // m_controller.x().whileTrue(m_LEDLights.setLEDCommandTimed(LEDMode.Charging, LEDMode.Shooting, 2));
+    // shootFail.onTrue(m_LEDLights.setLEDCommandTimed(LEDMode.ShootFail, 1));
 
 }
 
-  //  private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
-  //   return new RunCommand(
-  //     () -> m_drivebase.drive(
-  //       -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-  //       -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-  //       -omega.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-  //       fieldRelative.get()),
-  //     m_drivebase);    
-  // }
+   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
+    return new RunCommand(
+      () -> m_drivebase.drive(
+        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -omega.get() * multiplier * SwerveConstants.kMaxAngularSpeed,
+        fieldRelative.get()),
+      m_drivebase);    
+  }
 
-  // public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
-  //   return () -> {
-  //     double deadBandValue = MathUtil.applyDeadband(controller.get(), 0.2);
-  //     double squaredValue = Math.copySign(deadBandValue * deadBandValue, deadBandValue);
-  //     return limiter.calculate(squaredValue);
-  //   };
-  // }
+  private Command getDriveAutoAlignCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
+    return new RunCommand(
+      () -> m_drivebase.drive(
+        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -omega.get(),
+        fieldRelative.get()),
+      m_drivebase);    
+  }
+
+  public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
+    return () -> {
+      double deadBandValue = MathUtil.applyDeadband(controller.get(), 0.2);
+      double squaredValue = Math.copySign(deadBandValue * deadBandValue, deadBandValue);
+      return limiter.calculate(squaredValue);
+    };
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");

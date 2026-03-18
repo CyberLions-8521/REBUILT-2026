@@ -11,6 +11,7 @@ import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -42,15 +44,14 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final SlewRateLimiter filter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-
-  private PoseEstimator m_poseEstimator;
-
   private Pose3d targetPoseRobot = new Pose3d();
 
-  private PIDController m_TXController;
+  private ProfiledPIDController m_TXController;
   
   public SwerveDrivebase() {
     resetGyro();
+    SmartDashboard.putNumber("TX P", SwerveConstants.TXP);
+    SmartDashboard.putNumber("TX D", SwerveConstants.TXD);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -87,7 +88,8 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
 
-    m_TXController = new PIDController(0, 0, 0);
+    m_TXController = new ProfiledPIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD, SwerveConstants.constraints);
+    m_TXController.setTolerance(Units.degreesToRadians(1));
   }
 
   //DATA LOGGING
@@ -100,8 +102,6 @@ public class SwerveDrivebase extends SubsystemBase {
 
     // //not necessary but can be useful for debugging
     SmartDashboard.putNumber("gyro", -m_gyro.getAngle());
-    SmartDashboard.putNumber("Limelight TX", LimelightHelpers.getTX(LimelightConstants.limelightName));
-    SmartDashboard.putNumber("Limelight TY", LimelightHelpers.getTY(LimelightConstants.limelightName));
     // SmartDashboard.putNumber("gyro rate", m_gyro.getRate());
     // SmartDashboard.putNumber("gyro pitch", m_gyro.getPitch());
     // SmartDashboard.putNumber("gyro roll", m_gyro.getRoll());
@@ -222,66 +222,46 @@ public class SwerveDrivebase extends SubsystemBase {
     // m_backRight.logData("backRight");
     // logData();
     getLimelightData();
+    tuneTXController();
   }
 
   public void getLimelightData() {
-    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
-    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TX (radians)", Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)));
+    SmartDashboard.putNumber("TY (radians)", Units.degreesToRadians(LimelightHelpers.getTY(LimelightConstants.limelightName)));
     targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
     SmartDashboard.putNumber("Limelight X (m)", targetPoseRobot.getX());
-    SmartDashboard.putNumber("Limelight Y (m)", targetPoseRobot.getY());
     SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
+    SmartDashboard.putNumber("target offset", getTXTargetOffset());
   }
 
   public void tuneTXController() {
-    double P = SmartDashboard.getNumber("TX P", 0);
-    double I = SmartDashboard.getNumber("TX I", 0);
-    double D = SmartDashboard.getNumber("TX D", 0);
-    m_TXController.setP(P);
-    m_TXController.setI(I);
-    m_TXController.setD(D);
+    double P = SmartDashboard.getNumber("TX P", SwerveConstants.TXP);
+    double D = SmartDashboard.getNumber("TX D", SwerveConstants.TXD);
+
+    if (SwerveConstants.TXP != P || SwerveConstants.TXD != D) {
+      m_TXController.setP(P);
+      m_TXController.setD(D);
+      SwerveConstants.TXP = P;
+      SwerveConstants.TXD = D;
+    }
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
+  public double getTXTargetOffset() {
+    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+    double offsetX = targetPoseRobot.getX();
+    double offsetZ1 = targetPoseRobot.getZ();
+    double offsetZ2 = targetPoseRobot.getZ() + SwerveConstants.tagCenterOffset;
+    double angle1 = Math.atan(offsetX / offsetZ1);
+    double angle2 = Math.atan(offsetX / offsetZ2);
+
+    return angle1 - angle2;
+  }
+
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle) {
     return () -> {
-      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
+      double adjustment = m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
       return limiter.calculate(adjustment);
     };
   }
-
-  public void estimatePose() {
-    
-      m_poseEstimator.update(
-        m_gyro.getRotation2d(),
-        new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
-          m_frontRight.getPosition(),
-          m_backLeft.getPosition(),
-          m_backRight.getPosition()
-        });
-
-
-    LimelightHelpers.SetRobotOrientation("limelight", m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-    
-    boolean doRejectUpdate = false;
-
-    if(Math.abs(m_gyro.getRate()) > 360)
-    {
-      doRejectUpdate = true;
-    }
-    if(mt2.tagCount == 0)
-    {
-      doRejectUpdate = true;
-    }
-    if(!doRejectUpdate)
-    {
-      m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-      m_poseEstimator.addVisionMeasurement(
-          mt2.pose,
-          mt2.timestampSeconds);
-    }
-  }
-  
 
 }

@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 
@@ -66,11 +68,13 @@ public class Constants {
         public static final double kBackLeftMagEncoderMagnetOffset   = 0.874;     // set later, measure in Phoenix tuner x
         public static final double kBackRightMagEncoderMagnetOffset  = 0.302;     // set later, measure in Phoenix tuner x
 
-        public static final double kStrafeP = 0.0;
-        public static final double kStrafeI = 0.0;
-        public static final double kStrafeD = 0.0;
+        public static double TXP = 0.0065;
+        public static double TXD = 0.004;
+        public static double autoAlignMaxAngularVelocity = 2;
+        public static double autoAlignMaxAngularAcceleration = 8;
+        public static TrapezoidProfile.Constraints constraints = new Constraints(autoAlignMaxAngularVelocity,autoAlignMaxAngularAcceleration);
 
-        public static final double kAutoAlignSpeed = 0.5;
+        public static double tagCenterOffset = 0;
     }
 
     public static final class LimelightConstants {
