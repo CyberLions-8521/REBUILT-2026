@@ -154,7 +154,7 @@ public class Shooter extends SubsystemBase {
 
     private boolean isUpperAtSpeed(double targetRPS) {
         double velocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
-        return Math.abs(velocity - targetRPS) <= 10;
+        return MathUtil.isNear(targetRPS, velocity, 10);
     }
     
 
@@ -182,11 +182,11 @@ public class Shooter extends SubsystemBase {
 
 
     public Command StopUpperFlywheelCommand(){
-        return this.run(() -> stopUpperFlywheelMotors());
+        return run(this::stopUpperFlywheelMotors);
     }
 
     public Command StopLowerFlywheelCommand(){
-        return this.run(() -> stopLowerFlywheelMotors());
+        return run(this::stopLowerFlywheelMotors);
     }
 
     public Command stopBothFlywheelCommand(){
@@ -206,7 +206,7 @@ public class Shooter extends SubsystemBase {
                 }
             },
             interrupted -> {
-                stopBothFlywheelCommand();
+                stopBothFlywheelMotors();
             },
             () -> false,
             this
@@ -223,7 +223,7 @@ public class Shooter extends SubsystemBase {
                 }
             },
             interrupted -> {
-                stopBothFlywheelCommand();
+                stopBothFlywheelMotors();
             },
             () -> false,
             this
