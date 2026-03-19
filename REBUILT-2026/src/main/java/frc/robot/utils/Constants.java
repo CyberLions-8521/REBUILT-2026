@@ -101,6 +101,8 @@ public class Constants {
         public static final double kHubHeight = 1.8288; // 72 in (per game manual)
         public static final double kDeltaHeight = kHubHeight - kStartingHeight; 
 
+        public static final double kUpperFlywheelVelocityRPSThreshold = 50; //rps
+
     //======== Tuning ==================================================================
 
         public static final double kHoodP = 0.2; //original: 0.5
@@ -191,6 +193,10 @@ public class Constants {
         
     }
 
+
+
+
+
     public static class IndexerConstants {
     //======== Motor IDs ================================================================
         public static final int kIndexerID = 0;     
@@ -205,7 +211,7 @@ public class Constants {
         public static final String kCanbusName = "rio";
         public static final int kGearRatio = 0;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE
-        
+
     }
 
 }

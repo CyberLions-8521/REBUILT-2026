@@ -82,14 +82,14 @@ public class RobotContainer {
 
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
     m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
-    m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
+    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
 
     //SHOOT
-    m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
-    m_subsystemController.y().whileTrue(m_shooter.pass(60));
-    m_subsystemController.b().whileTrue(m_shooter.pass(55));
-    m_subsystemController.a().whileTrue(m_shooter.pass(45));
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
     
@@ -111,7 +111,7 @@ public class RobotContainer {
 
     m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
     m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
-    m_subsystemController.x().whileTrue(m_shooter.shoot());
+    m_subsystemController.x().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
 
 
@@ -148,7 +148,7 @@ public class RobotContainer {
         .andThen(driveBackCommand.withTimeout(3))
         .andThen(stopCommand)
         .andThen(m_intake.setPivotOut())
-        .andThen(m_shooter.shoot().alongWith(Commands.waitSeconds(2)
+        .andThen(m_shooter.ShootWithAprilTagCommand().alongWith(Commands.waitSeconds(2)
             .andThen(m_indexer.runIndexerCommand(0.6).alongWith(m_intake.getIntakeCommand(0.6)))).withTimeout(8))
     ));
   }
