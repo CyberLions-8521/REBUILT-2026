@@ -274,5 +274,13 @@ public class SwerveDrivebase extends SubsystemBase {
       return Math.sqrt(x * x + z * z);
     };
   }
+
+  public void TunePID() {
+    double driveP = SmartDashboard.getNumber("Drive P", SwerveConstants.driveD);
+    double driveD = SmartDashboard.getNumber("Drive D", SwerveConstants.driveD);
+
+    double turnP = SmartDashboard.getNumber("Turn P", SwerveConstants.turnP);
+    double turnD = SmartDashboard.getNumber("Turn D", SwerveConstants.turnD);
+  }
 }
 

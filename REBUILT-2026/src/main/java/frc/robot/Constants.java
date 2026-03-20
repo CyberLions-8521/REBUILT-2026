@@ -68,7 +68,7 @@ public class Constants {
         public static final double kBackLeftMagEncoderMagnetOffset   = 0.9609;     // set later, measure in Phoenix tuner x
         public static final double kBackRightMagEncoderMagnetOffset  = 0.83-0.0426;     // set later, measure in Phoenix tuner x
 
-        public static double TXP = 5;
+        public static double TXP = 0;
         public static double TXD = 0;
         public static double autoAlignMaxAngularVelocity = 2;
         public static double autoAlignMaxAngularAcceleration = 8;
