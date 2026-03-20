@@ -8,13 +8,16 @@ import java.util.function.Supplier;
 
 import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +38,12 @@ public class SwerveDrivebase extends SubsystemBase {
   private final SwerveModule m_backRight;
 
   private final SwerveDriveKinematics m_kinematics;
+
+  /* ---------------------------------------------------------------------------------------------- */
+
+  private final SwerveDrivePoseEstimator m_estimator;
+
+  /* ---------------------------------------------------------------------------------------------- */
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
@@ -81,6 +90,19 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
+    
+    /* ---------------------------------------------------------------------------------------------- */
+
+    m_estimator = new SwerveDrivePoseEstimator(
+      m_kinematics, 
+      getHeading(), 
+      new SwerveModulePosition[
+        m_frontLeft.getPosition()
+      ],
+      new Pose2d()
+    );
+
+    /* ---------------------------------------------------------------------------------------------- */
 
     SmartDashboard.putNumber("turnP", 0);
     SmartDashboard.putNumber("turnD", 0);

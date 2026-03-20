@@ -7,13 +7,16 @@ package frc.robot;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.AutoAlignToTarget;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -30,6 +33,21 @@ public class RobotContainer {
   Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
   Indexer m_indexer = new Indexer();
+  
+  /* ---------------------------------------------------------------------------------------------- */
+
+  AutoAlignToTarget m_autoAlign = new AutoAlignToTarget(
+    new Translation2d(182.11, 158.84), // translation to blue hub (assuming blue origin)
+    m_drivebase, 
+    getJoystickValues(m_driveController::getLeftY, vx_limiter), 
+    getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+    new PIDController(1, 0.05, 0.5), 
+    new SlewRateLimiter(0.2), 
+    null, 
+    0.8 // about 45 degrees
+  );
+
+  /* ---------------------------------------------------------------------------------------------- */
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
