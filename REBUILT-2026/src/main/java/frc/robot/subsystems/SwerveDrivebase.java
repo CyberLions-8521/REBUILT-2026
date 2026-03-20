@@ -46,7 +46,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private Pose3d targetPoseRobot = new Pose3d();
 
-  private ProfiledPIDController m_TXController;
+  private PIDController m_TXController;
   
   public SwerveDrivebase() {
     resetGyro();
@@ -88,8 +88,9 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
 
-    m_TXController = new ProfiledPIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD, SwerveConstants.constraints);
+    m_TXController = new PIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD);
     m_TXController.setTolerance(Units.degreesToRadians(1));
+    LimelightHelpers.setupPortForwardingUSB(0);
   }
 
   //DATA LOGGING
@@ -194,10 +195,10 @@ public class SwerveDrivebase extends SubsystemBase {
   
 
   public void resetEncoders(){
-    m_frontLeft.resetEncoder();
-    m_frontRight.resetEncoder();
-    m_backLeft.resetEncoder();
-    m_backRight.resetEncoder();
+    // m_frontLeft.resetEncoder();
+    // m_frontRight.resetEncoder();
+    // m_backLeft.resetEncoder();
+    // m_backRight.resetEncoder();
   }
 
   public void setEncoderDistance(double distance){
@@ -226,8 +227,8 @@ public class SwerveDrivebase extends SubsystemBase {
   }
 
   public void getLimelightData() {
-    SmartDashboard.putNumber("TX (radians)", Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)));
-    SmartDashboard.putNumber("TY (radians)", Units.degreesToRadians(LimelightHelpers.getTY(LimelightConstants.limelightName)));
+    SmartDashboard.putNumber("TX (deg)", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TY (deg)", LimelightHelpers.getTY(LimelightConstants.limelightName));
     targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
     SmartDashboard.putNumber("Limelight X (m)", targetPoseRobot.getX());
     SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
@@ -260,7 +261,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle) {
     return () -> {
       double adjustment = m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
-      return limiter.calculate(adjustment);
+      return MathUtil.clamp(adjustment, -6, 6);
     };
   }
 

@@ -24,7 +24,7 @@ public class RobotContainer {
 
   // SwerveDrivebase m_drivebase = new SwerveDrivebase();
   CommandXboxController m_controller = new CommandXboxController(0);
-  LEDLights m_LEDLights = new LEDLights();
+  // LEDLights m_LEDLights = new LEDLights();
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -35,19 +35,19 @@ public class RobotContainer {
 
 
   public RobotContainer() {
-    m_LEDLights.setDefaultCommand(m_LEDLights.limitSwitchLEDCommand());
+    // m_LEDLights.setDefaultCommand(m_LEDLights.limitSwitchLEDCommand());
     configureBindings();
   }
 
   private void configureBindings() {
     m_drivebase.setDefaultCommand(this.getDriveCommand(
-      1,
+      0.5,
       getJoystickValues(m_controller::getLeftY, vx_limiter),
       getJoystickValues(m_controller::getLeftX, vy_limiter),
       getJoystickValues(m_controller::getRightX, omega_limiter),
       () -> true));
-    m_controller.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
-      0.2,
+    m_controller.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
+      0.5,
       getJoystickValues(m_controller::getLeftY, vx_limiter),
       getJoystickValues(m_controller::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter, 0),
@@ -76,7 +76,7 @@ public class RobotContainer {
       () -> m_drivebase.drive(
         -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        -omega.get(),
+        omega.get(),
         fieldRelative.get()),
       m_drivebase);    
   }

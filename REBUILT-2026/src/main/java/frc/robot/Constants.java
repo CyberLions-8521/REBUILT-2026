@@ -63,13 +63,13 @@ public class Constants {
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kSRXEncoderMaxValue = 1;
-        public static final double kFrontLeftMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
-        public static final double kFrontRightMagEncoderMagnetOffset = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 0;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 0;     // set later, measure in Phoenix tuner x
+        public static final double kFrontLeftMagEncoderMagnetOffset  = 0.821;     // set later, measure in Phoenix tuner x
+        public static final double kFrontRightMagEncoderMagnetOffset = 0.3815-0.0179;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 0.9609;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 0.83-0.0426;     // set later, measure in Phoenix tuner x
 
-        public static double TXP = 0.0065;
-        public static double TXD = 0.004;
+        public static double TXP = 5;
+        public static double TXD = 0;
         public static double autoAlignMaxAngularVelocity = 2;
         public static double autoAlignMaxAngularAcceleration = 8;
         public static TrapezoidProfile.Constraints constraints = new Constraints(autoAlignMaxAngularVelocity,autoAlignMaxAngularAcceleration);
