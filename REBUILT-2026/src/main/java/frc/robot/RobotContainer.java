@@ -50,7 +50,7 @@ public class RobotContainer {
       0.5,
       getJoystickValues(m_controller::getLeftY, vx_limiter),
       getJoystickValues(m_controller::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter, 0),
+      m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, m_controller::getLeftX),
       () -> false));
 
     // m_LEDLights.setDefaultCommand(m_LEDLights.setLEDCommand(LEDMode.Idle));

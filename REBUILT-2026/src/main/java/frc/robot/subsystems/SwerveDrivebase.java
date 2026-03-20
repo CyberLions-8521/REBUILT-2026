@@ -258,11 +258,21 @@ public class SwerveDrivebase extends SubsystemBase {
     return angle1 - angle2;
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle) {
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
-      double adjustment = m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
+      double feedforward = tangentialVelocity.get() / getRadius().get();
+      double adjustment = feedforward + m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
       return MathUtil.clamp(adjustment, -6, 6);
     };
   }
 
+  public Supplier<Double> getRadius() {
+    return () -> {
+      targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+      double x = targetPoseRobot.getX();
+      double z = targetPoseRobot.getZ();
+      return Math.sqrt(x * x + z * z);
+    };
+  }
 }
+
