@@ -30,13 +30,13 @@ public class Constants {
 
         private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60.0;      // neo free rpm = 5676 rpm
         private static final double kDriveWheelFreeSpeedRps = kDrivingMotorFreeSpeedRps * kDriveConversionFactor;
-        public static final double driveFF = 1.0 / kDriveWheelFreeSpeedRps;
-        public static final double driveP = 0.025;
+        public static  double driveFF = 0.215;
+        public static double  driveP = 0.05;
         public static final double driveI = 0;
-        public static final double driveD = 0;
-        public static final double turnP = 0.04;
+        public static double  driveD = 0;
+        public static double  turnP = 0.04;
         public static final double turnI = 0;
-        public static final double turnD = 0.01;        
+        public static double  turnD = 0.01;        
         public static final String kCANCoderBus = "Ryan";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;

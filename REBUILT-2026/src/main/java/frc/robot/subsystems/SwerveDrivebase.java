@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs.SwerveConfigs;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.LimelightHelpers;
@@ -52,6 +54,10 @@ public class SwerveDrivebase extends SubsystemBase {
     resetGyro();
     SmartDashboard.putNumber("TX P", SwerveConstants.TXP);
     SmartDashboard.putNumber("TX D", SwerveConstants.TXD);
+
+    SmartDashboard.putNumber("drive FF", SwerveConstants.driveFF);
+    SmartDashboard.putNumber("drive P", SwerveConstants.driveP);
+    SmartDashboard.putNumber("drive D", SwerveConstants.driveD);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -222,8 +228,9 @@ public class SwerveDrivebase extends SubsystemBase {
     m_backLeft.logData("backLeft");
     m_backRight.logData("backRight");
     // logData();
-    getLimelightData();
-    tuneTXController();
+    // getLimelightData();
+    // tuneTXController();
+    TunePID();
   }
 
   public void getLimelightData() {
@@ -278,9 +285,26 @@ public class SwerveDrivebase extends SubsystemBase {
   public void TunePID() {
     double driveP = SmartDashboard.getNumber("Drive P", SwerveConstants.driveD);
     double driveD = SmartDashboard.getNumber("Drive D", SwerveConstants.driveD);
+    double driveFF = SmartDashboard.getNumber("Drive FF", SwerveConstants.driveFF);
 
     double turnP = SmartDashboard.getNumber("Turn P", SwerveConstants.turnP);
     double turnD = SmartDashboard.getNumber("Turn D", SwerveConstants.turnD);
+
+    SparkMaxConfig m_driveConfig = SwerveConfigs.m_configDrive;
+    SparkMaxConfig m_turnConfig = SwerveConfigs.m_configTurn;
+
+    if (driveP != SwerveConstants.driveP || driveD != SwerveConstants.driveD || turnP != SwerveConstants.turnP || turnD != SwerveConstants.turnD || SwerveConstants.driveFF != driveFF) {
+      m_driveConfig.closedLoop.pidf(driveP, 0, driveD, driveFF);
+      m_turnConfig.closedLoop.pidf(turnP, 0, turnD, 0);
+      m_frontLeft.configure(m_driveConfig, m_turnConfig);
+      m_frontRight.configure(m_driveConfig, m_turnConfig);
+      m_backLeft.configure(m_driveConfig, m_turnConfig);
+      m_backRight.configure(m_driveConfig, m_turnConfig);
+      SwerveConstants.driveP = driveP;
+      SwerveConstants.driveD = driveD;
+      SwerveConstants.turnP = turnP;
+      SwerveConstants.turnD = turnD;
+      SwerveConstants.driveFF = driveFF;
+    }
   }
 }
-

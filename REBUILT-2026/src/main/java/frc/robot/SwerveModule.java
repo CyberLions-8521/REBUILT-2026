@@ -53,7 +53,12 @@ public class SwerveModule {
     //DATA LOGGING
     //for literally everything 
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get()));
+        // SmartDashboard.putNumber(motor + " SRXEncoder", (m_SRXEncoder.get()));
+        SmartDashboard.putNumber(motor + " desired speed", m_desiredState.speedMetersPerSecond);
+        SmartDashboard.putNumber(motor + " actual speed", m_driveEncoder.getVelocity());
+
+        SmartDashboard.putNumber(motor + " desired position", m_desiredState.angle.getDegrees());
+        SmartDashboard.putNumber(motor + " actual position", m_turnEncoder.getPosition());
     }
 
     public SwerveModuleState getState() {
