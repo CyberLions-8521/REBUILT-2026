@@ -96,7 +96,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
     m_TXController = new PIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD);
     m_TXController.setTolerance(Units.degreesToRadians(1));
-    LimelightHelpers.setupPortForwardingUSB(0);
+    
   }
 
   //DATA LOGGING
@@ -201,10 +201,10 @@ public class SwerveDrivebase extends SubsystemBase {
   
 
   public void resetEncoders(){
-    // m_frontLeft.resetEncoder();
-    // m_frontRight.resetEncoder();
-    // m_backLeft.resetEncoder();
-    // m_backRight.resetEncoder();
+    m_frontLeft.resetEncoder();
+    m_frontRight.resetEncoder();
+    m_backLeft.resetEncoder();
+    m_backRight.resetEncoder();
   }
 
   public void setEncoderDistance(double distance){
@@ -223,14 +223,16 @@ public class SwerveDrivebase extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_frontLeft.logData("frontLeft");
-    m_frontRight.logData("frontRight");
-    m_backLeft.logData("backLeft");
-    m_backRight.logData("backRight");
+    m_frontLeft.resetEncoder();
+    m_frontRight.resetEncoder();
+    m_backLeft.resetEncoder();
+    m_backRight.resetEncoder();
+    m_backRight.logData("BR");
+
     // logData();
     // getLimelightData();
     // tuneTXController();
-    TunePID();
+    // TunePID();
   }
 
   public void getLimelightData() {

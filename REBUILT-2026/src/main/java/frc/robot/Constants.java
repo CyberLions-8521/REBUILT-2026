@@ -64,9 +64,9 @@ public class Constants {
 
         public static final double kSRXEncoderMaxValue = 1;
         public static final double kFrontLeftMagEncoderMagnetOffset  = 0.821;     // set later, measure in Phoenix tuner x
-        public static final double kFrontRightMagEncoderMagnetOffset = 0.3815-0.0179;     // set later, measure in Phoenix tuner x
-        public static final double kBackLeftMagEncoderMagnetOffset   = 0.9609;     // set later, measure in Phoenix tuner x
-        public static final double kBackRightMagEncoderMagnetOffset  = 0.83-0.0426;     // set later, measure in Phoenix tuner x
+        public static final double kFrontRightMagEncoderMagnetOffset = 0.3828; // 0.3815-0.0179;     // set later, measure in Phoenix tuner x
+        public static final double kBackLeftMagEncoderMagnetOffset   = 0.9232; // 0.9609;     // set later, measure in Phoenix tuner x
+        public static final double kBackRightMagEncoderMagnetOffset  = 0.8323; // 0.83-0.0426;     // set later, measure in Phoenix tuner x
 
         public static double TXP = 0;
         public static double TXD = 0;
