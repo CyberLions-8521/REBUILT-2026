@@ -190,7 +190,7 @@ public class SwerveDrivebase extends SubsystemBase {
   @Override
   public void periodic() {
     // tunePID();
-    // tuneTXController();
+    tuneTXController();
     getLimelightData();
   }
 
@@ -241,7 +241,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
       double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
-      double adjustment = feedforward + m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
+      double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
       return MathUtil.clamp(adjustment, -6, 6);
     };
   }
