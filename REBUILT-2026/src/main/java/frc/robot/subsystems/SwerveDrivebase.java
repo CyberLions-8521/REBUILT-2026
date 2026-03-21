@@ -223,11 +223,9 @@ public class SwerveDrivebase extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_frontLeft.resetEncoder();
-    m_frontRight.resetEncoder();
-    m_backLeft.resetEncoder();
-    m_backRight.resetEncoder();
-    m_backRight.logData("BR");
+    this.resetEncoders();
+    
+    // m_backRight.logData("BR");
 
     // logData();
     // getLimelightData();
