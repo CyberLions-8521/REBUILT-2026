@@ -87,7 +87,7 @@ public class Constants {
 
     //======== Shooter Subsystem ========================================================
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         
         public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)

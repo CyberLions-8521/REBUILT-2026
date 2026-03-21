@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.LEDLights.LEDMode;
 import frc.robot.utils.Configs.ShooterConfigs;
 import frc.robot.utils.Constants.ShooterConstants;
 
@@ -23,6 +24,8 @@ public class Shooter extends SubsystemBase {
     private final TalonFX m_upperFlywheelLeader;
     private final TalonFX m_upperFlywheelFollower;
     private final TalonFX m_lowerFlywheel;
+
+    private final LEDLights m_LedLights = new LEDLights();
 
     private final VelocityVoltage m_requestFlywheel = new VelocityVoltage(0).withSlot(1);
     private final VelocityVoltage m_requestFlywheelBottom = new VelocityVoltage(0).withSlot(1);
@@ -201,12 +204,15 @@ public class Shooter extends SubsystemBase {
             () -> {
                 double rps = lookupVelocity(getDistance());
                 runUpperFlywheelMotors(rps);
+                m_LedLights.setLEDCommand(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
+                    m_LedLights.setLEDCommand(LEDMode.Shooting);
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
+                m_LedLights.turnOffLEDs();
             },
             () -> false,
             this
@@ -218,12 +224,15 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> {
                 runUpperFlywheelMotors(rps);
+                m_LedLights.setLEDCommand(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
+                    m_LedLights.setLEDCommand(LEDMode.Shooting);
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
+                m_LedLights.turnOffLEDs();
             },
             () -> false,
             this
