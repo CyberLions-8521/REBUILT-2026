@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -39,13 +40,17 @@ public class SwerveDrivebase extends SubsystemBase {
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
   private PIDController m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
+  private PIDController m_radiusController = new PIDController(LimelightConstants.radiusControllerP, 0, LimelightConstants.radiusControllerD);
 
   private Pose3d targetPoseRobot;
 
   public SwerveDrivebase() {
     m_gyro.reset();
-    SmartDashboard.putNumber("TX P", 0);
-    SmartDashboard.putNumber("TX D", 0);
+    SmartDashboard.putNumber("TX P", LimelightConstants.TXControllerP);
+    SmartDashboard.putNumber("TX D", LimelightConstants.TXControllerD);
+    SmartDashboard.putNumber("TX FF", LimelightConstants.TXControllerFF);
+    SmartDashboard.putNumber("radius P", LimelightConstants.radiusControllerP);
+    SmartDashboard.putNumber("radius D", LimelightConstants.TXControllerD);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -205,24 +210,16 @@ public class SwerveDrivebase extends SubsystemBase {
   // }
 
   public void tuneTXController() {
-    double TXP = SmartDashboard.getNumber("TX P", 0);
-    double TXD = SmartDashboard.getNumber("TX D", 0);
+    double TXP = SmartDashboard.getNumber("TX P", LimelightConstants.TXControllerP);
+    double TXD = SmartDashboard.getNumber("TX D", LimelightConstants.TXControllerD);
+    double TXFF = SmartDashboard.getNumber("TX FF", LimelightConstants.TXControllerFF);
+    double radiusP = SmartDashboard.getNumber("radius P", LimelightConstants.radiusControllerP);
+    double radiusD = SmartDashboard.getNumber("radius D", LimelightConstants.TXControllerD);
+    LimelightConstants.TXControllerFF = TXFF;
     m_TXController.setP(TXP);
     m_TXController.setD(TXD);
-  }
-
-  public double calculateAutoAlignSetpoint(){
-    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
-
-      double x = targetPoseRobot.getX();
-      double z = targetPoseRobot.getZ();
-      double zc = ShooterConstants.limelightToRobotCenter + ShooterConstants.aprilTagToHub;
-
-      double angle_1 = Math.toDegrees(Math.atan(x/(z+zc)));
-      double angle_2 = Math.toDegrees(Math.atan(x/z));
-      double diff = angle_2 - angle_1;
-
-      return diff;
+    m_radiusController.setP(radiusP);
+    m_radiusController.setD(radiusD);
   }
 
   public void getLimelightData() {
@@ -230,18 +227,44 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
+  public double getTXTargetOffset() {
+    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+    double offsetX = targetPoseRobot.getX();
+    double offsetZ1 = targetPoseRobot.getZ();
+    double offsetZ2 = targetPoseRobot.getZ() + LimelightConstants.tagCenterOffset;
+    double angle1 = Math.atan(offsetX / offsetZ1);
+    double angle2 = Math.atan(offsetX / offsetZ2);
+
+    return angle1 - angle2;
+  }
+
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
-      double adjustment = -m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), 0);
-      return limiter.calculate(adjustment);
+      double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
+      double adjustment = feedforward + m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
+      return MathUtil.clamp(adjustment, -6, 6);
     };
   }
 
-  public Supplier<Double> getTXAdujstmentRotation3d(SlewRateLimiter limiter) {
-    return () -> {
-      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), calculateAutoAlignSetpoint());
-      return limiter.calculate(adjustment);
-    };
+  public double getRadius() {
+      targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+      double x = targetPoseRobot.getX();
+      double z = targetPoseRobot.getZ();
+      return Math.sqrt(x * x + z * z);
   }
 
+  public Supplier<Double> getRadiusSupplier() {
+    return () -> getRadius();
+  }
+
+  public Supplier<Double> getRadiusAdjustment() {
+    return () -> {
+      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 2) {
+          return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+        } else {
+          return 0.0;
+        }
+      };
+    }
+  
 }
