@@ -55,6 +55,10 @@ public class SwerveDrivebase extends SubsystemBase {
     resetGyro();
     SmartDashboard.putNumber("TX P", LimelightConstants.TXControllerP);
     SmartDashboard.putNumber("TX D", LimelightConstants.TXControllerD);
+    SmartDashboard.putNumber("TX FF", LimelightConstants.TXControllerFF);
+
+    SmartDashboard.putNumber("radius P", LimelightConstants.radiusControllerP);
+    SmartDashboard.putNumber("radius D", LimelightConstants.radiusControllerD);
 
     SmartDashboard.putNumber("drive FF", SwerveConstants.driveFF);
     SmartDashboard.putNumber("drive P", SwerveConstants.driveP);
@@ -255,8 +259,8 @@ public class SwerveDrivebase extends SubsystemBase {
     m_TXController.setD(TXD);
     LimelightConstants.TXControllerP = TXP;
     LimelightConstants.TXControllerD = TXD;
-    // m_radiusController.setP(radiusP);
-    // m_radiusController.setD(radiusD);
+    m_radiusController.setP(radiusP);
+    m_radiusController.setD(radiusD);
   }
 
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
