@@ -157,7 +157,7 @@ public class Shooter extends SubsystemBase {
 
     private boolean isUpperAtSpeed(double targetRPS) {
         double velocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
-        return MathUtil.isNear(targetRPS, velocity, 10);
+        return MathUtil.isNear(targetRPS, velocity, 5);
     }
     
 
@@ -204,15 +204,16 @@ public class Shooter extends SubsystemBase {
             () -> {
                 double rps = lookupVelocity(getDistance());
                 runUpperFlywheelMotors(rps);
-                m_LedLights.setLEDCommand(LEDMode.Charging);
+                m_LedLights.setLEDMode(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
-                    m_LedLights.setLEDCommand(LEDMode.Shooting);
+                    m_LedLights.setLEDMode(LEDMode.Shooting);
+
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
-                m_LedLights.turnOffLEDs();
+                m_LedLights.setLEDMode(LEDMode.Off);
             },
             () -> false,
             this
@@ -224,15 +225,12 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> {
                 runUpperFlywheelMotors(rps);
-                m_LedLights.setLEDCommand(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
-                    m_LedLights.setLEDCommand(LEDMode.Shooting);
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
-                m_LedLights.turnOffLEDs();
             },
             () -> false,
             this

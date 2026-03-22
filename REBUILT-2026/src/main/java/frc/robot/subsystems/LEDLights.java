@@ -41,23 +41,28 @@ public class LEDLights extends SubsystemBase {
   }
 
   private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, CANdleConstants.kCanbusName);
-
+  private LEDMode currentMode = LEDMode.Off;
 
   public LEDLights() {
     m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfigs);
   }
 
-  public void turnOffLEDs(){
-    m_CANdle.setControl(LEDMode.Off.animation);
-  }
+  // public void turnOffLEDs(){
+  //   m_CANdle.setControl(LEDMode.Off.animation);
+  // }
 
-  public Command turnOffLEDsCommand() {
-     return run(this::turnOffLEDs);
+  // public Command turnOffLEDsCommand() {
+  //    return run(this::turnOffLEDs);
+  // }
+  public void setLEDMode(LEDMode newMode){
+    currentMode = newMode;
   }
 
   public Command setLEDCommand(LEDMode newMode) {
     return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
+
+
 
   // public boolean isLimitSwitchPressed(){
   //   return !m_leftLimitSwitch.get() && !m_rightLimitSwith.get();
@@ -72,7 +77,7 @@ public class LEDLights extends SubsystemBase {
  
   @Override
   public void periodic() {
-
+    m_CANdle.setControl(currentMode.animation);
 
 
     // SmartDashboard.putBoolean("LimitSwitchStatus", !m_leftLimitSwitch.get());
