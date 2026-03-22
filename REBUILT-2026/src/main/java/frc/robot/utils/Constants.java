@@ -140,8 +140,8 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String kLimelightName = "limelight";
-        public static final double kTXControllerP = 0.0065;
-        public static final double kTXControllerD = 0.004;
+        public static final double kTXControllerP = 0.1;
+        public static final double kTXControllerD = 0;
     }
 
 
