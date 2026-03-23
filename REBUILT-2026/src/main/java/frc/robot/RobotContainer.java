@@ -37,13 +37,13 @@ public class RobotContainer {
   /* ---------------------------------------------------------------------------------------------- */
 
   AutoAlignToTarget m_autoAlign = new AutoAlignToTarget(
-    new Translation2d(182.11, 158.84), // translation to blue hub (assuming blue origin)
+    new Translation2d(10, 0), // translation in front of the robot
     m_drivebase, 
     getJoystickValues(m_driveController::getLeftY, vx_limiter), 
     getJoystickValues(m_driveController::getLeftX, vy_limiter), 
     new PIDController(1, 0.05, 0.5), 
     new SlewRateLimiter(0.2), 
-    null, 
+    m_drivebase.m_estimator, 
     0.8 // about 45 degrees
   );
 
@@ -87,12 +87,19 @@ public class RobotContainer {
       () -> true));
 
     // auto align - x
-    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-      1,
-      getJoystickValues(m_driveController::getLeftY, vx_limiter),
-      getJoystickValues(m_driveController::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter),
-      () -> false));
+
+    /* ---------------------------------------------------------------------------------------------- */
+
+    // m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
+    //   1,
+    //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
+    //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
+    //   m_drivebase.getTXAdujstmentRotation(omega_limiter),
+    //   () -> false));
+    
+    m_driveController.x().whileTrue(m_autoAlign);
+
+    /* ---------------------------------------------------------------------------------------------- */
 
     m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
     m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());

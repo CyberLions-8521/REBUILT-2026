@@ -41,7 +41,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /* ---------------------------------------------------------------------------------------------- */
 
-  private final SwerveDrivePoseEstimator m_estimator;
+  public final SwerveDrivePoseEstimator m_estimator;
 
   /* ---------------------------------------------------------------------------------------------- */
 
@@ -96,9 +96,7 @@ public class SwerveDrivebase extends SubsystemBase {
     m_estimator = new SwerveDrivePoseEstimator(
       m_kinematics, 
       getHeading(), 
-      new SwerveModulePosition[
-        m_frontLeft.getPosition()
-      ],
+      getSwervePositions(),
       new Pose2d()
     );
 
@@ -204,11 +202,33 @@ public class SwerveDrivebase extends SubsystemBase {
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
 
+  /* ---------------------------------------------------------------------------------------------- */
+
+  public SwerveModulePosition[] getSwervePositions() {
+    return new SwerveModulePosition[] {
+      m_frontLeft.getPosition(),
+      m_frontRight.getPosition(),
+      m_backLeft.getPosition(),
+      m_backRight.getPosition()
+    };
+  }
+
+  /* ---------------------------------------------------------------------------------------------- */
+
   @Override
   public void periodic() {
     // tunePID();
     // tuneTXController();
     getLimelightData();
+
+    /* ---------------------------------------------------------------------------------------------- */
+
+    m_estimator.update(
+      getHeading(),
+      getSwervePositions()
+    );
+
+    /* ---------------------------------------------------------------------------------------------- */
   }
 
   // public void tunePID () {
