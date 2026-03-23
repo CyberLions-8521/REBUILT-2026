@@ -225,12 +225,17 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> {
                 runUpperFlywheelMotors(rps);
+                m_LedLights.setLEDMode(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
+                    m_LedLights.setLEDMode(LEDMode.Shooting);
+
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
+                m_LedLights.setLEDMode(LEDMode.Off);
+
             },
             () -> false,
             this

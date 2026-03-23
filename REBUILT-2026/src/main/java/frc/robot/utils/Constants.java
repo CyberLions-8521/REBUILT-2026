@@ -155,12 +155,10 @@ public class Constants {
 
 
 
-
-
     public static final class CANdleConstants {
         public static final String kCanbusName = "Ryan";
 
-        public static final int kLedCount = 128;
+        public static final int kLedCount = 256;
         public static final int kCANdleID = 15;
     }
 
