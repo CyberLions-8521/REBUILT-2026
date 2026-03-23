@@ -120,8 +120,8 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
-        public static  double TXControllerP = 0.0065;
-        public static  double TXControllerD = 0.004;
+        public static  double TXControllerP = 0.68;
+        public static  double TXControllerD = 0;
         public static  double TXControllerFF = 0;
         public static  double radiusControllerP = 0;
         public static  double radiusControllerD = 0;

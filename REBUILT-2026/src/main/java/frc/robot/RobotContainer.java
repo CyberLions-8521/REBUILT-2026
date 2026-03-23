@@ -61,26 +61,20 @@ public class RobotContainer {
       () -> true));
 
       // brake drive - left trigger
-    // m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
-    //   0.5, 
-    //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
-    //   getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-    //   getJoystickValues(m_driveController::getRightX, omega_limiter), 
-    //   () -> true));
+    m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
+      0.5, 
+      getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+      getJoystickValues(m_driveController::getRightX, omega_limiter), 
+      () -> true));
 
     // auto align - leftTrigger
-    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).and(() -> m_drivebase.getRadius() > LimelightConstants.minimumDistance).whileTrue(this.getDriveAutoAlignCommand(
+    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
       0.5,
-      getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      m_drivebase.getRadiusAdjustment(getJoystickValues(m_driveController::getLeftY, vx_limiter)),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
       () -> false));
-    // m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).and(() -> m_drivebase.getRadius() <= LimelightConstants.minimumDistance).whileTrue(this.getDriveAutoAlignCommand(
-    //   0.5,
-    //   m_drivebase.getRadiusAdjustment(),
-    //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
-    //   m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
-    //   () -> false));
 
     m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
     m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());
