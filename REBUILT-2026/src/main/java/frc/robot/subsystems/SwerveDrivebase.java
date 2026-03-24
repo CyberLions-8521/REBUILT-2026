@@ -90,6 +90,9 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("turnP", 0);
     SmartDashboard.putNumber("turnD", 0);
 
+    m_radiusController.setTolerance(0.1);
+    m_TXController.setTolerance(1);
+
   }
 
 
@@ -240,9 +243,9 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
-      double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
-      double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
-      return MathUtil.clamp(adjustment, -6, 6);
+        double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
+        double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
+        return MathUtil.clamp(adjustment, -6, 6);
     };
   }
 
@@ -259,7 +262,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   public Supplier<Double> getRadiusAdjustment() {
     return () -> {
-      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 2) {
+      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 1) {
           return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
         } else {
           return 0.0;
