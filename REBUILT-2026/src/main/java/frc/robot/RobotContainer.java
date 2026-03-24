@@ -35,6 +35,8 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
+  public static final int[] validTags = {1, 2, 3};
+
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
 
   public RobotContainer() {
@@ -52,6 +54,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validTags);
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
