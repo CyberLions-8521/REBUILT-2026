@@ -69,15 +69,9 @@ public class RobotContainer {
     //   () -> true));
 
     // auto align - leftTrigger
-    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).and(() -> m_drivebase.getRadius() >= LimelightConstants.minimumDistance).whileTrue(this.getDriveAutoAlignCommand(
-      0.5,
-      getJoystickValues(m_driveController::getLeftY, vx_limiter),
-      getJoystickValues(m_driveController::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
-      () -> false));
-    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).and(() -> m_drivebase.getRadius() <= LimelightConstants.minimumDistance).whileTrue(this.getDriveAutoAlignCommand(
-      0.5,
-      m_drivebase.getRadiusAdjustment(),
+    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
+      0.3,
+      m_drivebase.getRadiusAdjustment(getJoystickValues(m_driveController::getLeftY, vx_limiter)),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
       () -> false));

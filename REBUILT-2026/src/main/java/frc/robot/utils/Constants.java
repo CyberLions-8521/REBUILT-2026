@@ -121,7 +121,7 @@ public class Constants {
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
         public static  double TXControllerP = 0.062;
-        public static  double TXControllerD = 0.0;
+        public static  double TXControllerD = 0;
         public static  double TXControllerFF = 0;
         public static  double radiusControllerP = 0.4;
         public static  double radiusControllerD = 0;

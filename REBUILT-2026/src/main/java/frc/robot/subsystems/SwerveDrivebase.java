@@ -90,7 +90,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("turnP", 0);
     SmartDashboard.putNumber("turnD", 0);
 
-    m_radiusController.setTolerance(0.1);
+    m_radiusController.setTolerance(0.2);
     m_TXController.setTolerance(1);
 
   }
@@ -193,8 +193,8 @@ public class SwerveDrivebase extends SubsystemBase {
   @Override
   public void periodic() {
     // tunePID();
-    tuneTXController();
-    getLimelightData();
+    // tuneTXController();
+    // getLimelightData();
   }
 
   // public void tunePID () {
@@ -260,12 +260,14 @@ public class SwerveDrivebase extends SubsystemBase {
     return () -> getRadius();
   }
 
-  public Supplier<Double> getRadiusAdjustment() {
+  public Supplier<Double> getRadiusAdjustment(Supplier<Double> joystick) {
     return () -> {
-      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 1) {
+      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 2 && getRadiusSupplier().get() < LimelightConstants.minimumDistance - 0.2) {
           return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+        } else if (getRadiusSupplier().get() < LimelightConstants.minimumDistance + 0.2) {
+          return MathUtil.clamp(joystick.get(), -SwerveConstants.kMaxMetersPerSecond, 0);
         } else {
-          return 0.0;
+          return joystick.get();
         }
       };
     }
