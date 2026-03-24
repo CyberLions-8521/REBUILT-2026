@@ -204,16 +204,16 @@ public class Shooter extends SubsystemBase {
             () -> {
                 double rps = lookupVelocity(getDistance());
                 runUpperFlywheelMotors(rps);
-                m_LedLights.setLEDMode(LEDMode.Charging);
+                // m_LedLights.setLEDMode(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
-                    m_LedLights.setLEDMode(LEDMode.Shooting);
+                    // m_LedLights.setLEDMode(LEDMode.Shooting);
 
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
-                m_LedLights.setLEDMode(LEDMode.Off);
+                // m_LedLights.setLEDMode(LEDMode.Off);
             },
             () -> false,
             this
@@ -225,16 +225,16 @@ public class Shooter extends SubsystemBase {
             () -> {},
             () -> {
                 runUpperFlywheelMotors(rps);
-                m_LedLights.setLEDMode(LEDMode.Charging);
+                // m_LedLights.setLEDMode(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
                     runLowerFlywheelMotors(rps);
-                    m_LedLights.setLEDMode(LEDMode.Shooting);
+                    // m_LedLights.setLEDMode(LEDMode.Shooting);
 
                 }
             },
             interrupted -> {
                 stopBothFlywheelMotors();
-                m_LedLights.setLEDMode(LEDMode.Off);
+                // m_LedLights.setLEDMode(LEDMode.Off);
 
             },
             () -> false,
