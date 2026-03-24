@@ -55,40 +55,47 @@ public class Constants {
         public static final double kBackLeftCANCoderMagnetOffset   = -0.06372;     // set later
         public static final double kBackRightCANCoderMagnetOffset  = -0.17163;     // set later
     }
+public static final class ShooterConstants {
 
-    public static final class ShooterConstants {
+    //======== Motor IDs ================================================================
 
-        public static final String kCanbusName = "rio";
-        
         public static final int kHoodID = 20;
+
         public static final int kShooterTopLeftID = 21;
         public static final int kShooterTopRightID = 22;
         public static final int kShooterBottomRightID = 23;
 
+    //======== Shooter Subsystem ========================================================
+
+        public static final String kCanbusName = "Ryan";
+        
         public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
         
-        // hood not being used rn
-        // PositionDutyCycle takes inputs in rotations.
-        // 8.88 rotations for 30 degrees (~40-70deg from the horizontal)
-        // 0.296 rot ~~ 1deg
-        
         public static final double kMaxRot = 8.8;
         public static final double kHoodDegsToRot = 0.296;
+
+        public static final double kShooterHeight = 0.5842; // 23 in to m
+        public static final double kDrivebaseHeight = 0.1778; // 7 in
+        public static final double kStartingHeight = kShooterHeight + kDrivebaseHeight;
+        public static final double kHubHeight = 1.8288; // 72 in (per game manual)
+        public static final double kDeltaHeight = kHubHeight - kStartingHeight; 
+
+        public static final double kUpperFlywheelVelocityRPSThreshold = 50; //rps
+
+    //======== Tuning ==================================================================
+
         public static final double kHoodP = 0.2; //original: 0.5
         public static final double kHoodI = 0.0;
         public static final double kHoodD = 0.0;
         public static final double kHoodFeedForward = 0.229; // final later
         public static final double kHoodLowDegFromHorizontal = 40;
 
-        // set vars to final once tuned
-        // otherwise changed through SmartDashboard
         public static final double kShooterP = 0.2;
         public static final double kShooterI = 0.0;
         public static final double kShooterD = 0.0;
         public static final double kShooterS = 0.25;
         public static final double kShooterV = 0.1185;
-
         // adjust these later
         public static final double kMinShooterRange = 1.5; // minimum distance the robot can shoot from
         public static final double kMaxShooterRange = 5.8; // maximum distance the robot can shoot from OR that the limelight can see
@@ -97,9 +104,6 @@ public class Constants {
 
         public static final double kGravity = 9.807;
         
-        // Linear Regression (from testing): 
-        // y = a + bx, where y = velocity and x = motor speed
-        // should test again since these were prototype numbers
         public static final double kA = 36.74;
         public static final double kB = 4.59;
 
@@ -108,14 +112,6 @@ public class Constants {
         public static final double aprilTagToHub = 0.597;
         public static final double limelightToRobotCenter = 0.305; // 12 in to m
 
-
-        public static final double shooterHeight = 0.5842; // 23 in to m
-        public static final double drivebaseHeight = 0.1778; // 7 in
-        public static final double startHeight = shooterHeight + drivebaseHeight;
-        public static final double hubHeight = 1.8288; // 72 in (per game manual)
-        public static final double deltaHeight = hubHeight - startHeight; 
-
-        
     }
 
     public static final class LimelightConstants {
