@@ -123,10 +123,10 @@ public class Constants {
         public static  double TXControllerP = 0.062;
         public static  double TXControllerD = 0;
         public static  double TXControllerFF = 0;
-        public static  double radiusControllerP = 0.4;
+        public static  double radiusControllerP = 0.8;
         public static  double radiusControllerD = 0;
         public static final double tagCenterOffset = 0;
-        public static final double minimumDistance = 2;
+        public static final double minimumDistance = 2.25;
     }
 
     public static final class LimitSwitchConstants {

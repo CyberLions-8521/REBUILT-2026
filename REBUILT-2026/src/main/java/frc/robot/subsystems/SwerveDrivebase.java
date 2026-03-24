@@ -260,14 +260,12 @@ public class SwerveDrivebase extends SubsystemBase {
     return () -> getRadius();
   }
 
-  public Supplier<Double> getRadiusAdjustment(Supplier<Double> joystick) {
+  public Supplier<Double> getRadiusAdjustment() {
     return () -> {
       if (LimelightHelpers.getTV(LimelightConstants.limelightName) && getRadiusSupplier().get() < LimelightConstants.minimumDistance - 0.1) {
           return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
-        } else if (getRadiusSupplier().get() < LimelightConstants.minimumDistance + 0.1) {
-          return MathUtil.clamp(joystick.get(), -SwerveConstants.kMaxMetersPerSecond, 0);
         } else {
-          return joystick.get();
+          return 0.0;
         }
       };
     }

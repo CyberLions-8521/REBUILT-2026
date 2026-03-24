@@ -35,7 +35,7 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-  public static final int[] validTags = {1, 2, 3};
+  public static final int[] validTags = {12, 18, 20};
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
 
@@ -74,7 +74,7 @@ public class RobotContainer {
     // auto align - leftTrigger
     m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
       0.3,
-      m_drivebase.getRadiusAdjustment(getJoystickValues(m_driveController::getLeftY, vx_limiter)),
+      m_drivebase.getRadiusAdjustment(),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
       () -> false));
