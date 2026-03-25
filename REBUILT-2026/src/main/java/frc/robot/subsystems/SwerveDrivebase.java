@@ -91,7 +91,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("turnD", 0);
 
     m_radiusController.setTolerance(0.1);
-    m_TXController.setTolerance(1);
+    m_TXController.setTolerance(2);
 
   }
 
@@ -230,22 +230,12 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
   }
 
-  public double getTXTargetOffset() {
-    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
-    double offsetX = targetPoseRobot.getX();
-    double offsetZ1 = targetPoseRobot.getZ();
-    double offsetZ2 = targetPoseRobot.getZ() + LimelightConstants.tagCenterOffset;
-    double angle1 = Math.atan(offsetX / offsetZ1);
-    double angle2 = Math.atan(offsetX / offsetZ2);
-
-    return angle1 - angle2;
-  }
-
   public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
         double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
         double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
-        return MathUtil.clamp(adjustment, -6, 6);
+        double deadBandAdjustment = MathUtil.applyDeadband(adjustment, 0.1);
+        return MathUtil.clamp(deadBandAdjustment, -6, 6);
     };
   }
 
@@ -263,7 +253,8 @@ public class SwerveDrivebase extends SubsystemBase {
   public Supplier<Double> getRadiusAdjustment() {
     return () -> {
       if (LimelightHelpers.getTV(LimelightConstants.limelightName) && getRadiusSupplier().get() < LimelightConstants.minimumDistance - 0.1) {
-          return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+          double adjustment = m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+          return MathUtil.applyDeadband(adjustment, 0.05);
         } else {
           return 0.0;
         }

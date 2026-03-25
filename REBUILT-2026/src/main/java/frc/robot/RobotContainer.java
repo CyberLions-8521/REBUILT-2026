@@ -27,7 +27,7 @@ public class RobotContainer {
   CommandXboxController m_driveController = new CommandXboxController(0);
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
-  // Shooter m_shooter = new Shooter();
+  Shooter m_shooter = new Shooter();
   // Intake m_intake = new Intake();
   // Indexer m_indexer = new Indexer();
 
@@ -87,12 +87,12 @@ public class RobotContainer {
     // m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
     // m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
 
-    // //SHOOT
-    // m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
+    //SHOOT
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
-    // m_subsystemController.y().whileTrue(m_shooter.pass(60));
-    // m_subsystemController.b().whileTrue(m_shooter.pass(55));
-    // m_subsystemController.a().whileTrue(m_shooter.pass(45));
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
     

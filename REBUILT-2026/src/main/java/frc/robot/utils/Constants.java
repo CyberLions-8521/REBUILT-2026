@@ -45,7 +45,7 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
+        public static final double kMaxMetersPerSecond = 2.3; //oriignal is 4.4 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
@@ -120,7 +120,7 @@ public class Constants {
         public static  double TXControllerP = 0.062;
         public static  double TXControllerD = 0;
         public static  double TXControllerFF = 0;
-        public static  double radiusControllerP = 0.8;
+        public static  double radiusControllerP = 1.5;
         public static  double radiusControllerD = 0;
         public static final double tagCenterOffset = 0;
         public static final double minimumDistance = 2.25;
