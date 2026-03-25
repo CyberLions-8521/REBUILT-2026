@@ -2,25 +2,24 @@
 package frc.robot.subsystems;
 
 
+import edu.wpi.first.hal.ConstantsJNI;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+
 import frc.robot.LimelightHelpers;
-import frc.robot.utils.Configs.CANdleConfigs;
-import frc.robot.utils.Constants.CANdleConstants;
 import frc.robot.utils.Constants.LimelightConstants;
-import frc.robot.subsystems.Shooter;
+import frc.robot.utils.Constants.ShooterConstants;
+
 
 public class LEDLights extends SubsystemBase {
   private final Spark m_blinkinSpark = new Spark(0); 
   private final Shooter m_shooter;
 
-  private boolean seesApirilTag;
-  private boolean centeredApirilTag;
+  private boolean seeAT;
+  private boolean centerAT;
   private boolean inRange;
 
   public enum LEDmode {
@@ -139,8 +138,8 @@ public class LEDLights extends SubsystemBase {
     this.m_shooter = i_shooter;
   }
 
-  public void setLEDcommand(double pattern) {
-    m_blinkinSpark.set(pattern);
+  public void setLEDcommand(LEDmode pattern) {
+    m_blinkinSpark.set(pattern.value);
   }
 
   public void Off() {
@@ -150,23 +149,44 @@ public class LEDLights extends SubsystemBase {
   public Command CheckLimeLights() {
     return new RunCommand(() ->
     {
-      seesApirilTag = LimelightHelpers.getTV(LimelightConstants.limelightName);
-      centeredApirilTag = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1;
-      inRange = m_shooter.getDistance() > 1.5;
+      seeAT = LimelightHelpers.getTV(LimelightConstants.limelightName);
+      centerAT = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1;
+      inRange = m_shooter.getDistance() < ShooterConstants.kMinShooterRange;
 
-      if (seesApirilTag && centeredApirilTag && inRange) {
-        setLEDcommand(LEDmode.Green.value);
+      if (!seeAT) {
+       setLEDcommand(LEDmode.Off);
+      } 
+      else if (!inRange) {
+        setLEDcommand(LEDmode.Orange);
       }
-      else if (seesApirilTag && inRange) {
-        setLEDcommand(LEDmode.Orange.value);
-      }
-      else if (seesApirilTag) {
-          setLEDcommand(LEDmode.Red.value);
+      else if (!centerAT) {
+          setLEDcommand(LEDmode.Yellow);
       } else {
-        Off();
+        setLEDcommand(LEDmode.Green);
       }
     }, this);
   }
+  public Command CheckShooter() {
+    return new RunCommand(() ->
+      {
+          /* is this really ness because it automatically only turns the bottom wheels once it reaches the speed it needs, so lights are unnessary for shooting
+           *  if (shooter.getrps <= whatever rps it needs) {
+           *    setLEDcommand(whatever);
+           * } else {
+           *    setLEDcommand(blah);
+           * }
+           */
+      
+    }, this);
+  }
+  public Command LightTest() {
+    return new RunCommand(() ->
+      {
+         setLEDcommand(LEDmode.Rainbow); 
+          
+    }, this);
+  }
+
   @Override
   public void periodic() {
     
