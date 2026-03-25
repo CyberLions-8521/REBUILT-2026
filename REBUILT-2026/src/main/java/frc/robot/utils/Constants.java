@@ -144,8 +144,12 @@ public class Constants {
         public static final int kPivotID = 12;     //NEED TO CHANGE
         public static final int kIntakeID = 10;   //NEED TO CHANGE
 
-        public static final double kGearRatio = 14.5;               //NEED TO CHANGE
-        public static final double kGearCircumference = 0;       //NEED TO CHANGE
+        public static  double rollerP = 0;
+        public static  double rollerV = 0;
+
+        public static  double pivotP = 0;
+        public static  double pivotD = 0;
+        public static  double pivotG = 0;
 
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;

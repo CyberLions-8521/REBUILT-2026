@@ -110,7 +110,11 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
             kPivotConfig.Feedback
-                .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
+                .withSensorToMechanismRatio(1);
+            kPivotConfig.Slot0
+                .withKP(IntakeConstants.pivotP)
+                .withKD(IntakeConstants.pivotD)
+                .withKG(IntakeConstants.pivotG);
         
             kIntakeConfig.Slot0
                 .withKP(0)
@@ -123,7 +127,10 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
             kIntakeConfig.Feedback
-                .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
+                .withSensorToMechanismRatio(1);
+            kIntakeConfig.Slot0
+                .withKV(IntakeConstants.rollerV)
+                .withKP(IntakeConstants.rollerP);
         }
     }
 
