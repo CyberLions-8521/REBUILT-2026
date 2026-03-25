@@ -13,6 +13,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Configs.SwerveConfigs;
@@ -104,6 +105,10 @@ public class SwerveModule {
 
     public void setEncoderDistance(double distance) {
         m_driveMotor.setPosition(distance);
+    }
+
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(m_driveMotor.getPosition().getValueAsDouble(), Rotation2d.fromRotations(m_turnMotor.getPosition().getValueAsDouble()));
     }
 
     public void stop() {

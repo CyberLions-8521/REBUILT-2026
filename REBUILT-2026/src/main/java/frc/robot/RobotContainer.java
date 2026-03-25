@@ -57,7 +57,7 @@ public class RobotContainer {
     LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validTags);
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
-      1,
+      0.5,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       getJoystickValues(m_driveController::getRightX, omega_limiter),
