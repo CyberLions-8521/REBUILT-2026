@@ -79,21 +79,7 @@ public class RobotContainer {
     m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
     m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());
 
-
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
-    m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
-
-    //SHOOT
-    m_subsystemController.rightTrigger().whileTrue(m_shooter.shoot());
-
-    m_subsystemController.y().whileTrue(m_shooter.pass(60));
-    m_subsystemController.b().whileTrue(m_shooter.pass(55));
-    m_subsystemController.a().whileTrue(m_shooter.pass(45));
-
-
-    
-
+  
 
     //INDEXER
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
@@ -111,7 +97,12 @@ public class RobotContainer {
 
     m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
     m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
-    m_subsystemController.x().whileTrue(m_shooter.shoot());
+  
+     m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
+
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
 
@@ -140,17 +131,7 @@ public class RobotContainer {
   // Sendable Chooser Autos
 
   public void configureAutos() {
-    Command driveBackCommand = m_drivebase.resetGyroCommand().andThen(new RunCommand(() -> m_drivebase.drive(-0.5, 0, 0, true)));
-    Command stopCommand = new InstantCommand(() -> m_drivebase.drive(0, 0, 0, true));
-    m_chooser.addOption("No Auto", null);
-    m_chooser.addOption("Preload Center", new SequentialCommandGroup(
-        m_intake.getResetEncoderPosition()
-        .andThen(driveBackCommand.withTimeout(3))
-        .andThen(stopCommand)
-        .andThen(m_intake.setPivotOut())
-        .andThen(m_shooter.shoot().alongWith(Commands.waitSeconds(2)
-            .andThen(m_indexer.runIndexerCommand(0.6).alongWith(m_intake.getIntakeCommand(0.6)))).withTimeout(8))
-    ));
+   
   }
 
   public Command getAutonomousCommand() {
