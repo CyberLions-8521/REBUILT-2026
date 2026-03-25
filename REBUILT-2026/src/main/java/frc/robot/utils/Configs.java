@@ -59,26 +59,25 @@ public class Configs {
                 
         }
     }
-
-    public static final class ShooterConfigs {
-       public static final TalonFXConfiguration kKrakenLeaderConfig = new TalonFXConfiguration();
-       public static final TalonFXConfiguration kKrakenFollowerConfig = new TalonFXConfiguration();
+ public static final class ShooterConfigs {
+       public static final TalonFXConfiguration upperFlywheelConfigs = new TalonFXConfiguration();
+       public static final TalonFXConfiguration lowerFlywheelConfigs = new TalonFXConfiguration();
        
        static {
-            kKrakenLeaderConfig.MotorOutput
+            upperFlywheelConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
 
-            kKrakenLeaderConfig.CurrentLimits
+            upperFlywheelConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(20);
        }
 
        static {
-            kKrakenFollowerConfig.MotorOutput
+            lowerFlywheelConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast);
 
-            kKrakenFollowerConfig.CurrentLimits
+            lowerFlywheelConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(20);
        }
