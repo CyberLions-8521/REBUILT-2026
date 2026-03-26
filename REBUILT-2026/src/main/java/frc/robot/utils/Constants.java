@@ -71,10 +71,6 @@ public class Constants {
        
     }
 
-
-
-
-
     public static final class ShooterConstants {
 
     //======== Motor IDs ================================================================
@@ -158,17 +154,12 @@ public class Constants {
 
 
 
-
-
     public static final class CANdleConstants {
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
 
-        public static final int kLedCount = 128;
-        public static final int kCANdleID = 4;
+        public static final int kLedCount = 256;
+        public static final int kCANdleID = 15;
     }
-
-
-
 
 
     public static class IntakeConstants {
