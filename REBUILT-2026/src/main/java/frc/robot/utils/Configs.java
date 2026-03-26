@@ -103,7 +103,7 @@ public class Configs {
                 .withKI(0);
             pivotConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(IntakeConstants.kPivotCurrentLimit);
+                .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
             pivotConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
@@ -116,7 +116,7 @@ public class Configs {
                 .withKI(0);
             rollerConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(IntakeConstants.kRollerCurrentLimit);
+                .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
             rollerConfigs.MotorOutput
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(InvertedValue.CounterClockwise_Positive);

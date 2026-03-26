@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -38,14 +39,18 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private PIDController m_TXController = new PIDController(LimelightConstants.kTXControllerP, 0, LimelightConstants.kTXControllerD);
+  private PIDController m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
+  private PIDController m_radiusController = new PIDController(LimelightConstants.radiusControllerP, 0, LimelightConstants.radiusControllerD);
 
   private Pose3d targetPoseRobot;
 
   public SwerveDrivebase() {
     m_gyro.reset();
-    SmartDashboard.putNumber("TX P", 0);
-    SmartDashboard.putNumber("TX D", 0);
+    SmartDashboard.putNumber("TX P", LimelightConstants.TXControllerP);
+    SmartDashboard.putNumber("TX D", LimelightConstants.TXControllerD);
+    SmartDashboard.putNumber("TX FF", LimelightConstants.TXControllerFF);
+    SmartDashboard.putNumber("radius P", LimelightConstants.radiusControllerP);
+    SmartDashboard.putNumber("radius D", LimelightConstants.TXControllerD);
 
     m_frontLeft = new SwerveModule(
       SwerveConstants.kFrontLeftDriveID,
@@ -84,6 +89,9 @@ public class SwerveDrivebase extends SubsystemBase {
 
     SmartDashboard.putNumber("turnP", 0);
     SmartDashboard.putNumber("turnD", 0);
+
+    m_radiusController.setTolerance(0.1);
+    m_TXController.setTolerance(2);
 
   }
 
@@ -186,7 +194,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public void periodic() {
     // tunePID();
     // tuneTXController();
-    getLimelightData();
+    // getLimelightData();
   }
 
   // public void tunePID () {
@@ -205,43 +213,63 @@ public class SwerveDrivebase extends SubsystemBase {
   // }
 
   public void tuneTXController() {
-    double TXP = SmartDashboard.getNumber("TX P", 0);
-    double TXD = SmartDashboard.getNumber("TX D", 0);
+    double TXP = SmartDashboard.getNumber("TX P", LimelightConstants.TXControllerP);
+    double TXD = SmartDashboard.getNumber("TX D", LimelightConstants.TXControllerD);
+    double TXFF = SmartDashboard.getNumber("TX FF", LimelightConstants.TXControllerFF);
+    double radiusP = SmartDashboard.getNumber("radius P", LimelightConstants.radiusControllerP);
+    double radiusD = SmartDashboard.getNumber("radius D", LimelightConstants.TXControllerD);
+    LimelightConstants.TXControllerFF = TXFF;
     m_TXController.setP(TXP);
     m_TXController.setD(TXD);
-  }
-
-  public double calculateAutoAlignSetpoint(){
-    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.kLimelightName);
-
-      double x = targetPoseRobot.getX();
-      double z = targetPoseRobot.getZ();
-      double zc = ShooterConstants.limelightToRobotCenter + ShooterConstants.aprilTagToHub;
-
-      double angle_1 = Math.toDegrees(Math.atan(x/(z+zc)));
-      double angle_2 = Math.toDegrees(Math.atan(x/z));
-      double diff = angle_2 - angle_1;
-
-      return diff;
+    m_radiusController.setP(radiusP);
+    m_radiusController.setD(radiusD);
   }
 
   public void getLimelightData() {
-    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.kLimelightName));
-    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.kLimelightName));
+    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter) {
+  public Supplier<Double> getTXAdujstmentRotation(double angle) {
     return () -> {
-      double adjustment = -m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.kLimelightName), 0);
-      return limiter.calculate(adjustment);
+        double feedforward = 0; //LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
+        double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
+        double deadBandAdjustment = MathUtil.applyDeadband(adjustment, 0.1);
+        return MathUtil.clamp(deadBandAdjustment, -6, 6);
     };
   }
 
-  public Supplier<Double> getTXAdujstmentRotation3d(SlewRateLimiter limiter) {
-    return () -> {
-      double adjustment = m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.kLimelightName), calculateAutoAlignSetpoint());
-      return limiter.calculate(adjustment);
-    };
+  public double getRadius() {
+      targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+      double x = targetPoseRobot.getX();
+      double z = targetPoseRobot.getZ();
+      return Math.sqrt(x * x + z * z);
   }
 
+  public Supplier<Double> getRadiusSupplier() {
+    return () -> getRadius();
+  }
+
+  public Supplier<Double> getRadiusAdjustment() {
+    return () -> {
+      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && getRadiusSupplier().get() < LimelightConstants.minimumDistance - 0.1) {
+          double adjustment = m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+          return MathUtil.applyDeadband(adjustment, 0.05);
+        } else {
+          return 0.0;
+        }
+      };
+    }
+
+    public static final class LimelightConstants {
+        public static final String limelightName = "limelight";
+        public static  double TXControllerP = 0.062;
+        public static  double TXControllerD = 0;
+        public static  double TXControllerFF = 0;
+        public static  double radiusControllerP = 1.5;
+        public static  double radiusControllerD = 0;
+        public static final double tagCenterOffset = 0;
+        public static final double minimumDistance = 2.25;
+    }
+  
 }

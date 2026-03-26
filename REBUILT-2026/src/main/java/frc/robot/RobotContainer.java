@@ -18,6 +18,7 @@ import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
+import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -69,11 +70,11 @@ public class RobotContainer {
       () -> true));
 
     // auto align - x
-    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.kLimelightName)).whileTrue(this.getDriveCommand(
+    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(omega_limiter),
+      m_drivebase.getTXAdujstmentRotation(0),
       () -> false));
 
     m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
@@ -100,11 +101,10 @@ public class RobotContainer {
     m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
 
     //INTAKE PIVOT
-    m_subsystemController.povUp().onTrue(m_intake.setPivotIn().withTimeout(1));
-    m_subsystemController.povDown().onTrue(m_intake.setPivotOut().withTimeout(1));
+    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
+    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
 
-    m_subsystemController.povLeft().whileTrue(m_intake.getPivotCommand(0.1));
-    m_subsystemController.povRight().whileTrue(m_intake.getPivotCommand(-0.1));
+    m_subsystemController.povLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
     
     //INTAKE ROLLERS
     m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
@@ -147,7 +147,7 @@ public class RobotContainer {
         m_intake.getResetEncoderPosition()
         .andThen(driveBackCommand.withTimeout(3))
         .andThen(stopCommand)
-        .andThen(m_intake.setPivotOut())
+        .andThen(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition))
         .andThen(m_shooter.shoot().alongWith(Commands.waitSeconds(2)
             .andThen(m_indexer.runIndexerCommand(0.6).alongWith(m_intake.getIntakeCommand(0.6)))).withTimeout(8))
     ));

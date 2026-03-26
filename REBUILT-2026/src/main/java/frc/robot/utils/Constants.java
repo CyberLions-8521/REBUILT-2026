@@ -137,9 +137,14 @@ public class Constants {
 
 
     public static final class LimelightConstants {
-        public static final String kLimelightName = "limelight";
-        public static final double kTXControllerP = 0.0065;
-        public static final double kTXControllerD = 0.004;
+        public static final String limelightName = "limelight";
+        public static  double TXControllerP = 0.062;
+        public static  double TXControllerD = 0;
+        public static  double TXControllerFF = 0;
+        public static  double radiusControllerP = 1.5;
+        public static  double radiusControllerD = 0;
+        public static final double tagCenterOffset = 0;
+        public static final double minimumDistance = 2.25;
     }
 
 
@@ -175,8 +180,8 @@ public class Constants {
 
     //======== Motor Configurations ================================================================
 
-        public static final int kPivotCurrentLimit = 20;
-        public static final int kRollerCurrentLimit = 20;
+        public static final int pivotCurrentLimit = 20;
+        public static final int intakeCurrentLimit = 20;
 
     //======== Intake Subsystem ================================================================
 
@@ -188,6 +193,17 @@ public class Constants {
         public static final double kGearRatio = 14.5;              
         public static final double kGearCircumference = 0; 
         public static final double kMiddleEncoderPosition = -2.56; //for after ventura
+
+        public static  double rollerP = 0;
+        public static  double rollerV = 0;
+
+        public static  double pivotP = 0;
+        public static  double pivotD = 0;
+        public static  double pivotG = 0;
+
+        public static final double extendedEncoderPosition = -4.5;
+        public static final double retractedEncoderPosition = -2;
+        public static final double middleEncoderPosition = -2.56; 
         
     }
 
