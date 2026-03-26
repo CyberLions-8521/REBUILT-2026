@@ -29,7 +29,7 @@ public class RobotContainer {
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
   Shooter m_shooter = new Shooter();
-  Intake m_intake = new Intake();
+  // Intake m_intake = new Intake();
   // Indexer m_indexer = new Indexer();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -107,11 +107,11 @@ public class RobotContainer {
     // m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
 
   //INTAKE
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition));
-    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition));
-    m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
+    // m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    // m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition));
+    // m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition));
+    // m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+    // m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
     
 
 
