@@ -25,8 +25,6 @@ public class Shooter extends SubsystemBase {
     private final TalonFX m_upperFlywheelFollower;
     private final TalonFX m_lowerFlywheel;
 
-    private final LEDLights m_LedLights = new LEDLights();
-
     private final VelocityVoltage m_requestFlywheel = new VelocityVoltage(0).withSlot(1);
     private final VelocityVoltage m_requestFlywheelBottom = new VelocityVoltage(0).withSlot(1);
 

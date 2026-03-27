@@ -16,8 +16,12 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.SwerveDrivebase.LimelightConstants;
 import frc.robot.utils.Configs.CANdleConfigs;
 import frc.robot.utils.Constants.CANdleConstants;
+import frc.robot.utils.Constants.ShooterConstants;
+import frc.robot.subsystems.Shooter;
 
 public class LEDLights extends SubsystemBase {
 
@@ -26,13 +30,10 @@ public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
     Off (new EmptyAnimation(0)),
-    SeesApriltag (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(0, 255, 0))), //limelight can see the apriltag
-    TargetingApriltag (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
-    Shooting (new FireAnimation(0, CANdleConstants.kLedCount - 1).withBrightness(1.0)),
-    Charging (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255, 35, 0))),
-    Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,115,0))),
-    LimitSwitchDetected (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0,255,0)));
-    
+    SeesAprilTag (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,0,0))),
+    AlignedToApriLTag (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))),  
+    Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,115,0)));
+
     public final ControlRequest animation;
 
     private LEDMode (ControlRequest animation) {
@@ -42,8 +43,12 @@ public class LEDLights extends SubsystemBase {
 
   private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, CANdleConstants.kCanbusName);
   private LEDMode currentMode = LEDMode.Off;
+  private Shooter m_shooter;
+  
 
-  public LEDLights() {
+
+  public LEDLights(Shooter i_shooter) {
+    this.m_shooter = i_shooter;
     m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfigs);
   }
 
@@ -62,34 +67,23 @@ public class LEDLights extends SubsystemBase {
     return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
 
-
-
-  // public boolean isLimitSwitchPressed(){
-  //   return !m_leftLimitSwitch.get() && !m_rightLimitSwith.get();
-  // }
-
-  // public Command limitSwitchLEDCommand() {
-  //   return new RunCommand(() -> {
-  //     m_CANdle.setControl(isLimitSwitchPressed() ? LEDMode.LimitSwitchDetected.animation : LEDMode.Off.animation);
-  //   }, this);
-  // }
-
- 
   @Override
   public void periodic() {
+
+    boolean seeAT = LimelightHelpers.getTV(LimelightConstants.limelightName); //checks if the april tag is visible
+    boolean centerAT = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1; //checks if it is aligned
+    boolean inRange = m_shooter.getDistance() < ShooterConstants.kMinShooterRange; //not in deadzone
+
+    if (!seeAT) {
+      currentMode = LEDMode.Off;
+    } else if (!inRange) {
+      currentMode = LEDMode.Off;
+    } else if (!centerAT) {
+      currentMode = LEDMode.SeesAprilTag;
+    } else {
+      currentMode = LEDMode.AlignedToApriLTag;
+    }
+
     m_CANdle.setControl(currentMode.animation);
-
-
-    // SmartDashboard.putBoolean("LimitSwitchStatus", !m_leftLimitSwitch.get());
-
-    // if(!m_leftLimitSwitch.get() && !m_rightLimitSwith.get()){
-    //   m_CANdle.setControl(LEDMode.Shooting.animation);
-    // } 
-    // else {
-    //    m_CANdle.setControl(LEDMode.Off.animation);
-    // }
-    
-
-
   }
 }

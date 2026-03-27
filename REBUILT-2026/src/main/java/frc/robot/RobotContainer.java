@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
 import frc.robot.utils.Constants.IntakeConstants;
@@ -31,6 +32,7 @@ public class RobotContainer {
   Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
   Indexer m_indexer = new Indexer();
+  LEDLights m_lights = new LEDLights(m_shooter);
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -93,6 +95,9 @@ public class RobotContainer {
     m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
     m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
     m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
+
+    //LEDS
+  
 
 
     //INDEXER
