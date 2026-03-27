@@ -68,17 +68,20 @@ public class Constants {
         public static final double kBackLeftMagEncoderMagnetOffset   = 0.9232; // 0.9609;     // set later, measure in Phoenix tuner x
         public static final double kBackRightMagEncoderMagnetOffset  = 0.8323; // 0.83-0.0426;     // set later, measure in Phoenix tuner x
 
-        public static double TXP = 0;
-        public static double TXD = 0;
         public static double autoAlignMaxAngularVelocity = 2;
         public static double autoAlignMaxAngularAcceleration = 8;
         public static TrapezoidProfile.Constraints constraints = new Constraints(autoAlignMaxAngularVelocity,autoAlignMaxAngularAcceleration);
-
-        public static double tagCenterOffset = 0;
     }
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
+        public static double TXControllerFF = 0;
+        public static double TXControllerP = 0;
+        public static double TXControllerD = 0;
+        public static double radiusControllerP = 0;
+        public static double radiusControllerD = 0;
+        public static double tagCenterOffset = 0;
+        public static double minimumDistance = 2;
         public static final double outpostShootingRadius = 0; //set later
         public static final double outpostShootingRadiusTolerance = 0; //set later
         

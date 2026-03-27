@@ -56,12 +56,17 @@ public class SwerveDrivebase extends SubsystemBase {
   private Pose3d targetPoseRobot = new Pose3d();
 
   private PIDController m_TXController;
+  private PIDController m_radiusController = new PIDController(LimelightConstants.radiusControllerP, 0, LimelightConstants.radiusControllerD);
   private SwerveDrivePoseEstimator m_poseEstimator;
-  
+
   public SwerveDrivebase() {
     resetGyro();
-    SmartDashboard.putNumber("TX P", SwerveConstants.TXP);
-    SmartDashboard.putNumber("TX D", SwerveConstants.TXD);
+    SmartDashboard.putNumber("TX P", LimelightConstants.TXControllerP);
+    SmartDashboard.putNumber("TX D", LimelightConstants.TXControllerD);
+    SmartDashboard.putNumber("TX FF", LimelightConstants.TXControllerFF);
+
+    SmartDashboard.putNumber("radius P", LimelightConstants.radiusControllerP);
+    SmartDashboard.putNumber("radius D", LimelightConstants.radiusControllerD);
 
     SmartDashboard.putNumber("drive FF", SwerveConstants.driveFF);
     SmartDashboard.putNumber("drive P", SwerveConstants.driveP);
@@ -102,8 +107,10 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
 
-    m_TXController = new PIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD);
-    m_TXController.setTolerance(Units.degreesToRadians(1));
+    // m_TXController = new PIDController(SwerveConstants.TXP, 0, SwerveConstants.TXD);
+    // m_TXController.setTolerance(Units.degreesToRadians(1));
+    // m_TXController = new PIDController(LimelightConstants.TXControllerP, 0, LimelightConstants.TXControllerD);
+    // m_TXController.setTolerance(1);
 
     m_poseEstimator = 
       new SwerveDrivePoseEstimator(
@@ -118,7 +125,6 @@ public class SwerveDrivebase extends SubsystemBase {
           getStartingPose(),
           VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)));
-    
 
     RobotConfig config;
     try{
@@ -285,51 +291,67 @@ public class SwerveDrivebase extends SubsystemBase {
   public void getLimelightData() {
     SmartDashboard.putNumber("TX (deg)", LimelightHelpers.getTX(LimelightConstants.limelightName));
     SmartDashboard.putNumber("TY (deg)", LimelightHelpers.getTY(LimelightConstants.limelightName));
-    targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
-    SmartDashboard.putNumber("Limelight X (m)", targetPoseRobot.getX());
-    SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
-    SmartDashboard.putNumber("target offset", getTXTargetOffset());
+    // targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+    // SmartDashboard.putNumber("Limelight X (m)", targetPoseRobot.getX());
+    // SmartDashboard.putNumber("Limelight Z (m)", targetPoseRobot.getZ());
+    // SmartDashboard.putNumber("target offset", getTXTargetOffset());
   }
 
   public void tuneTXController() {
-    double P = SmartDashboard.getNumber("TX P", SwerveConstants.TXP);
-    double D = SmartDashboard.getNumber("TX D", SwerveConstants.TXD);
+    double TXP = SmartDashboard.getNumber("TX P", LimelightConstants.TXControllerP);
+    double TXD = SmartDashboard.getNumber("TX D", LimelightConstants.TXControllerD);
+    double TXFF = SmartDashboard.getNumber("TX FF", LimelightConstants.TXControllerFF);
+    double radiusP = SmartDashboard.getNumber("radius P", LimelightConstants.radiusControllerP);
+    double radiusD = SmartDashboard.getNumber("radius D", LimelightConstants.TXControllerD);
+    LimelightConstants.TXControllerFF = TXFF;
+    if (TXP != LimelightConstants.TXControllerP || TXD != LimelightConstants.TXControllerD)
+    m_TXController.setP(TXP);
+    m_TXController.setD(TXD);
+    LimelightConstants.TXControllerP = TXP;
+    LimelightConstants.TXControllerD = TXD;
+    m_radiusController.setP(radiusP);
+    m_radiusController.setD(radiusD);
+  }
 
-    if (SwerveConstants.TXP != P || SwerveConstants.TXD != D) {
-      m_TXController.setP(P);
-      m_TXController.setD(D);
-      SwerveConstants.TXP = P;
-      SwerveConstants.TXD = D;
-    }
+  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
+    return () -> {
+      double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
+      double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
+      return MathUtil.clamp(adjustment, -6, 6);
+    };
+  }
+
+  public double getRadius() {
+      targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
+      double x = targetPoseRobot.getX();
+      double z = targetPoseRobot.getZ();
+      return Math.sqrt(x * x + z * z);
   }
 
   public double getTXTargetOffset() {
     targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
     double offsetX = targetPoseRobot.getX();
     double offsetZ1 = targetPoseRobot.getZ();
-    double offsetZ2 = targetPoseRobot.getZ() + SwerveConstants.tagCenterOffset;
+    double offsetZ2 = targetPoseRobot.getZ() + LimelightConstants.tagCenterOffset;
     double angle1 = Math.atan(offsetX / offsetZ1);
     double angle2 = Math.atan(offsetX / offsetZ2);
 
     return angle1 - angle2;
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
-    return () -> {
-      double feedforward = tangentialVelocity.get() / getRadius().get();
-      double adjustment = feedforward + m_TXController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(LimelightConstants.limelightName)), angle);
-      return MathUtil.clamp(adjustment, -6, 6);
-    };
+  public Supplier<Double> getRadiusSupplier() {
+    return () -> getRadius();
   }
 
-  public Supplier<Double> getRadius() {
+  public Supplier<Double> getRadiusAdjustment() {
     return () -> {
-      targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace(LimelightConstants.limelightName);
-      double x = targetPoseRobot.getX();
-      double z = targetPoseRobot.getZ();
-      return Math.sqrt(x * x + z * z);
-    };
-  }
+      if (LimelightHelpers.getTV(LimelightConstants.limelightName) && Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) <= 2) {
+          return m_radiusController.calculate(getRadiusSupplier().get(), LimelightConstants.minimumDistance);
+        } else {
+          return 0.0;
+        }
+      };
+    }
 
   public void TunePID() {
     double driveP = SmartDashboard.getNumber("Drive P", SwerveConstants.driveD);
