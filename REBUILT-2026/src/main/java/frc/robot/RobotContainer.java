@@ -29,8 +29,8 @@ public class RobotContainer {
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
   Shooter m_shooter = new Shooter();
-  // Intake m_intake = new Intake();
-  // Indexer m_indexer = new Indexer();
+  Intake m_intake = new Intake();
+  Indexer m_indexer = new Indexer();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -56,7 +56,8 @@ public class RobotContainer {
 
   private void configureBindings() {
     LimelightHelpers.SetFiducialIDFiltersOverride(LimelightConstants.limelightName, validTags);
-  //DRIVEBASE
+
+    //DRIVEBASE
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
@@ -80,38 +81,72 @@ public class RobotContainer {
 
 
 
-    // m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    // m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
     // m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
 
     //SHOOTER
-    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
+    // m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
-    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
-    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
-    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
+    // m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    // m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    // m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
     
 
 
-    // //INDEXER
-    // m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
-    // m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //INDEXER
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
 
     
-    // //INTAKE ROLLERS
-    // m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
+    //INTAKE ROLLERS
+    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
 
-    // m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
-    // m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
+    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
 
-  //INTAKE
-    // m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    // m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition));
-    // m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition));
-    // m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
-    // m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
+    //INTAKE
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition));
+    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition));
+    m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
     
 
 

@@ -107,8 +107,8 @@ public class Configs {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
             kPivotConfig.MotorOutput
-                .withNeutralMode(NeutralModeValue.Brake)
-                .withInverted(InvertedValue.CounterClockwise_Positive);
+                .withNeutralMode(NeutralModeValue.Coast)
+                .withInverted(InvertedValue.Clockwise_Positive);
             kPivotConfig.Feedback
                 .withSensorToMechanismRatio(1);
             kPivotConfig.Slot0

@@ -60,7 +60,7 @@ public class Intake extends SubsystemBase {
                 setPivotPosition(position);
             }, 
             interrupted -> m_pivot.set(0), 
-            () -> m_pivot.getPosition().getValueAsDouble() <= position - 0.1 || m_pivot.getPosition().getValueAsDouble() >= position + 0.1,
+            () -> m_pivot.getPosition().getValueAsDouble() >= position - 0.1 && m_pivot.getPosition().getValueAsDouble() <= position + 0.1,
             this);
     }
 

@@ -132,14 +132,14 @@ public class Constants {
     }
 
     public static final class CANdleConstants {
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
 
         public static final int ledCount = 128;
-        public static final int CANdleID = 4;
+        public static final int CANdleID = 15;
     }
 
     public static class IntakeConstants {
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
 
         public static final int kPivotID = 12;     //NEED TO CHANGE
         public static final int kIntakeID = 10;   //NEED TO CHANGE
@@ -154,16 +154,16 @@ public class Constants {
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;
 
-        public static final double extendedEncoderPosition = -4.5; //set later
-        public static final double retractedEncoderPosition = -2; //set later
-        public static final double retractedMiddleEncoderPosition = -2.5;
-        public static final double middleEncoderPosition = -2.56; //for after ventura
+        // first three measured 3/28 5:56PM
+        public static final double extendedEncoderPosition = 6.37;
+        public static final double retractedEncoderPosition = 0;
+        public static final double middleEncoderPosition = 2.14; 
     }
 
     public static class IndexerConstants {
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
 
-        public static final int kIndexerID = 0;     
+        public static final int kIndexerID = 9;     
         public static final int indexerCurrentLimit = 20;
 
         public static final int kGearRatio = 0;               //NEED TO CHANGE
