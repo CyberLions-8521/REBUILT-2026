@@ -151,6 +151,7 @@ public class Constants {
         public static  double pivotD = 0;
         public static  double pivotG = 0;
 
+
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;
         public static final double pivotGearRatio = 14.5;

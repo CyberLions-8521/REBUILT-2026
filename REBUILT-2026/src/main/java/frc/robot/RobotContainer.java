@@ -36,7 +36,7 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
-  public static final int[] validTags = {12, 18, 20};
+  public static final int[] validTags = {12, 18, 20, 10};
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
 
@@ -83,11 +83,11 @@ public class RobotContainer {
     // m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
 
     //SHOOTER
-    // m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
-    // m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
-    // m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
-    // m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
     //INDEXER
