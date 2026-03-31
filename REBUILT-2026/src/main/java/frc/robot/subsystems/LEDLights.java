@@ -1,149 +1,65 @@
-
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.controls.ColorFlowAnimation;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.EmptyAnimation;
+import com.ctre.phoenix6.controls.FireAnimation;
+import com.ctre.phoenix6.controls.RgbFadeAnimation;
+import com.ctre.phoenix6.controls.SingleFadeAnimation;
+import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.hardware.CANdle;
+import com.ctre.phoenix6.signals.RGBWColor;
 
-import edu.wpi.first.hal.ConstantsJNI;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.LEDLights.LEDmode;
+import frc.robot.utils.Configs.CANdleConfigs;
+import frc.robot.utils.Constants.CANdleConstants;
 import frc.robot.utils.Constants.LimelightConstants;
+import frc.robot.utils.Constants.LimitSwitchConstants;
 import frc.robot.utils.Constants.ShooterConstants;
 
 
-public class LEDLights extends SubsystemBase {
-  private final Spark m_blinkinSpark = new Spark(0); 
+public class LEDLightsCANdle extends SubsystemBase {
+ 
   private final Shooter m_shooter;
-
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.CANdleID, CANdleConstants.kCanbusName);
   private boolean seeAT;
   private boolean centerAT;
   private boolean inRange;
 
-  public enum LEDmode {
-    Rainbow(0.99),
-    PartyRainbow(0.97),
-    OceanRainbow(0.95),
-    LavaRainbow(0.93),
-    ForestRainbow(0.91),
-    RainbowwGlitter(0.89),
-    Confetti(0.87),
-    ShotRed(0.85),
-    ShotBlue(0.83),
-    ShotWhite(0.81),
-    SinelonRainbow(0.79),
-    SinelonParty(0.77),
-    SinelonOcean(0.75),
-    SinelonLava(0.73),
-    SinelonForest(0.71),
-    BPMRainbow(0.69),
-    BPMParty(0.67),
-    BPMOcean(0.65),
-    BPMLava(0.63),
-    BPMForest(0.61),
-    FireMedium(0.59),
-    FireLarge(0.57),
-    TwinklesRainbow(0.55),
-    TwinklesParty(0.53),
-    TwinklesOcean(0.51),
-    TwinklesLava(0.49),
-    TwinklesForest(0.47),
-    ColorWavesRainbow(0.45),
-    ColorWavesParty(0.43),
-    ColorWavesOcean(0.41),
-    ColorWavesLava(0.39),
-    ColorWavesForest(0.37),
-    LarsonScannerRed(0.35),
-    LarsonScannerGray(0.33),
-    LightChaseRed(0.31),
-    LightChaseBlue(0.29),
-    LightChaseGray(0.27),
-    HeartbeatRed(0.25),
-    HeartbeatBlue(0.23),
-    HeartbeatWhite(0.21),
-    HeartbeatGray(0.19),
-    BreathRed(0.17),
-    BreathBlue(0.15),
-    BreathGray(0.13),
-    StrobeRed(0.11),
-    StrobeBlue(0.09),
-    StrobeGold(0.07),
-    StrobeWhite(0.05),
-    Color1BlendtoBlack(0.03),
-    Color1Larson(0.01),
-    Color1Chase(0.01),
-    Color1HeartbeatSlow(0.03),
-    Color1HeartbeatMed(0.05),
-    Color1HeartbeatFast(0.07),
-    Color1BreathSlow(0.09),
-    Color1BreathFast(0.11),
-    Color1Shot(0.13),
-    Color1Strobe(0.15),
-    Color2BlendtoBlack(0.17),
-    Color2Larson(0.19),
-    Color2Chase(0.21),
-    Color2HeartbeatSlow(0.23),
-    Color2HeartbeatMed(0.25),
-    Color2HeartbeatFast(0.27),
-    Color2BreathSlow(0.29),
-    Color2BreathFast(0.31),
-    Color2Shot(0.33),
-    Color2Strobe(0.35),
-    SparkleC1onC2(0.37),
-    SparkleC2onC1(0.39),
-    GradientC1C2(0.41),
-    BPMC1C2(0.43),
-    BlendC1toC2(0.45),
-    BlendC1C2(0.47),
-    NoBlendC1C2(0.49),
-    TwinklesC1C2(0.51),
-    ColorWavesC1C2(0.53),
-    SinelonC1C2(0.55),
-    HotPink(0.57),
-    DarkRed(0.59),
-    Red(0.61),
-    RedOrange(0.63),
-    Orange(0.65),
-    Gold(0.67),
-    Yellow(0.69),
-    LawnGreen(0.71),
-    Lime(0.73),
-    DarkGreen(0.75),
-    Green(0.77),
-    BlueGreen(0.79),
-    Aqua(0.81),
-    SkyBlue(0.83),
-    DarkBlue(0.85),
-    Blue(0.87),
-    BlueViolet(0.89),
-    Violet(0.91),
-    White(0.93),
-    Gray(0.95),
-    DarkGray(0.97),
-    Black(0.99),
-    Off(0.0);
+public enum LEDMode {
+    Off (new EmptyAnimation(0)),
+    SeesApriltag (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(0, 255, 0))), //limelight can see the apriltag
+    TargetingApriltag (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0, 255, 0))), //limelight is targeting the tag
+    Shooting (new FireAnimation(0, CANdleConstants.ledCount - 1).withBrightness(1.0)),
+    Charging (new StrobeAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255, 35, 0))),
+    Intaking (new TwinkleAnimation(0, CANdleConstants.ledCount - 1).withColor(new RGBWColor(255,115,0))),
+    LimitSwitchDetected (new SolidColor(0, CANdleConstants.ledCount -1).withColor(new RGBWColor(0,255,0)));
     
-    public final double value;
+    //comment
 
-    private LEDmode (double value) {
-      this.value = value;
+    public final ControlRequest animation;
+
+    private LEDMode (ControlRequest animation) {
+      this.animation = animation;
     }
   }
 
-
-
-  public LEDLights(Shooter i_shooter) {
+    
+  public LEDLightsCANdle(Shooter i_shooter) {
     this.m_shooter = i_shooter;
+    m_CANdle.getConfigurator().apply(CANdleConfigs.CANdleConfig);
   }
-
-  public void setLEDcommand(LEDmode pattern) {
-    m_blinkinSpark.set(pattern.value);
-  }
-
-  public void Off() {
-    m_blinkinSpark.set(LEDmode.Off.value);
+  public Command setLEDCommand(LEDMode newMode) {
+    return new RunCommand(() -> m_CANdle.setControl(newMode.animation), this);
   }
 
   public Command CheckLimeLights() {
@@ -152,43 +68,23 @@ public class LEDLights extends SubsystemBase {
       seeAT = LimelightHelpers.getTV(LimelightConstants.limelightName);
       centerAT = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1;
       inRange = m_shooter.getDistance() < ShooterConstants.kMinShooterRange;
-
+      
       if (!seeAT) {
-       setLEDcommand(LEDmode.Off);
+       setLEDCommand(LEDMode.Off);
       } 
       else if (!inRange) {
-        setLEDcommand(LEDmode.Orange);
+        setLEDCommand(LEDMode.Shooting);
       }
       else if (!centerAT) {
-          setLEDcommand(LEDmode.Yellow);
+          setLEDCommand(LEDMode.SeesApriltag);
       } else {
-        setLEDcommand(LEDmode.Green);
+        setLEDCommand(LEDMode.TargetingApriltag);
       }
-    }, this);
-  }
-  public Command CheckShooter() {
-    return new RunCommand(() ->
-      {
-          /* is this really ness because it automatically only turns the bottom wheels once it reaches the speed it needs, so lights are unnessary for shooting
-           *  if (shooter.getrps <= whatever rps it needs) {
-           *    setLEDcommand(whatever);
-           * } else {
-           *    setLEDcommand(blah);
-           * }
-           */
-      
-    }, this);
-  }
-  public Command LightTest() {
-    return new RunCommand(() ->
-      {
-         setLEDcommand(LEDmode.Rainbow); 
-          
     }, this);
   }
 
   @Override
   public void periodic() {
-    
+      CheckLimeLights();
   }
 }
