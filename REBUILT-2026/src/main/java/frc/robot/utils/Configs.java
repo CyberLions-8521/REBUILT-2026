@@ -107,7 +107,7 @@ public class Configs {
                 .withNeutralMode(NeutralModeValue.Coast)
                 .withInverted(InvertedValue.CounterClockwise_Positive);
             kPivotConfig.Feedback
-                .withSensorToMechanismRatio(1);
+                .withSensorToMechanismRatio(IntakeConstants.pivotGearRatio);
             kPivotConfig.Slot0
                 .withKP(IntakeConstants.pivotP)
                 .withKD(IntakeConstants.pivotD)

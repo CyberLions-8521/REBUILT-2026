@@ -80,9 +80,6 @@ public class RobotContainer {
     m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());
 
 
-
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
     // m_shooter.setDefaultCommand(m_shooter.stopFlywheel());
 
     //SHOOTER
@@ -93,51 +90,14 @@ public class RobotContainer {
     // m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //INDEXER
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());  
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
     m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
 
     
     //INTAKE ROLLERS
     m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
-
     m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
     m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
 
@@ -146,7 +106,6 @@ public class RobotContainer {
     m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(2));
     m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(2));
     m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition).withTimeout(2));
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
     
 
 

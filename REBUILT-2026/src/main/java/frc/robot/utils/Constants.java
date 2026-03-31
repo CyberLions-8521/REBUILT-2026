@@ -149,10 +149,11 @@ public class Constants {
 
         public static  double pivotP = 0;
         public static  double pivotD = 0;
-        public static  double pivotG = 0.5;
+        public static  double pivotG = 0;
 
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;
+        public static final double pivotGearRatio = 14.5;
 
         // first three measured 3/28 5:56PM
         public static final double extendedEncoderPosition = 0.05;

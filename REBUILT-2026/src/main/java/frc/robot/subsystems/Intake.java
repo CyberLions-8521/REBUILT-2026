@@ -19,7 +19,6 @@ public class Intake extends SubsystemBase {
     private TalonFX m_intake;
     private TalonFX m_pivot;
 
-    private VelocityVoltage m_intakeController;
     private PositionVoltage m_pivotController;
     private VelocityVoltage m_antiGravityController;
 
@@ -30,7 +29,6 @@ public class Intake extends SubsystemBase {
         m_intake.getConfigurator().apply(IntakeConfigs.kIntakeConfig);
         m_pivot.getConfigurator().apply(IntakeConfigs.kPivotConfig);
 
-        m_intakeController = new VelocityVoltage(0);
         m_pivotController = new PositionVoltage(0);
         m_antiGravityController = new VelocityVoltage(0);
 
@@ -73,7 +71,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setIntakeSpeed(double speed){
-        m_intake.setControl(m_intakeController.withVelocity(speed));
+        m_intake.set(speed);
     }
 
     public void stopPivot() {
