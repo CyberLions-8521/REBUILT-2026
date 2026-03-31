@@ -149,15 +149,15 @@ public class Constants {
 
         public static  double pivotP = 0;
         public static  double pivotD = 0;
-        public static  double pivotG = 0;
+        public static  double pivotG = 0.5;
 
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;
 
         // first three measured 3/28 5:56PM
-        public static final double extendedEncoderPosition = 6.37;
-        public static final double retractedEncoderPosition = 0;
-        public static final double middleEncoderPosition = 2.14; 
+        public static final double extendedEncoderPosition = 0.05;
+        public static final double retractedEncoderPosition = 6.4;
+        public static final double middleEncoderPosition = 5.2; 
     }
 
     public static class IndexerConstants {

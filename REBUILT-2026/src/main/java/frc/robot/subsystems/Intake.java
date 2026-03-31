@@ -21,6 +21,7 @@ public class Intake extends SubsystemBase {
 
     private VelocityVoltage m_intakeController;
     private PositionVoltage m_pivotController;
+    private VelocityVoltage m_antiGravityController;
 
     public Intake(){
         m_intake = new TalonFX(IntakeConstants.kIntakeID, IntakeConstants.kCanbusName);
@@ -31,6 +32,7 @@ public class Intake extends SubsystemBase {
 
         m_intakeController = new VelocityVoltage(0);
         m_pivotController = new PositionVoltage(0);
+        m_antiGravityController = new VelocityVoltage(0);
 
         resetPivotEncoders();
 
@@ -43,6 +45,8 @@ public class Intake extends SubsystemBase {
 
     private void logData(){
         SmartDashboard.putNumber("Pivot Position", getPivotPosition());
+        SmartDashboard.putNumber("roller speed", getRollerSpeed());
+        SmartDashboard.getNumber("desired speed", 5);
     }
 
     public Command getResetEncoderPosition() {
@@ -59,8 +63,8 @@ public class Intake extends SubsystemBase {
             () -> {
                 setPivotPosition(position);
             }, 
-            interrupted -> m_pivot.set(0), 
-            () -> m_pivot.getPosition().getValueAsDouble() >= position - 0.1 && m_pivot.getPosition().getValueAsDouble() <= position + 0.1,
+            interrupted -> stopPivot(), 
+            () -> m_pivot.getPosition().getValueAsDouble() >= position - 0.05 && m_pivot.getPosition().getValueAsDouble() <= position + 0.05,
             this);
     }
 
@@ -72,8 +76,26 @@ public class Intake extends SubsystemBase {
         m_intake.setControl(m_intakeController.withVelocity(speed));
     }
 
+    public void stopPivot() {
+        m_pivot.setControl(m_antiGravityController.withVelocity(0));
+    }
+    public Command stopPivotCommand() {
+        return new RunCommand(() -> stopPivot(), this);
+    }
+
+    public Command defaultCommand() {
+        return new RunCommand(() -> {
+            stopPivot();
+            setIntakeSpeed(0);
+        }, this);
+    }
+
+    public double getRollerSpeed() {
+        return m_intake.getVelocity().getValueAsDouble();
+    }
+
     public void resetPivotEncoders(){
-        m_pivot.setPosition(0);
+        m_pivot.setPosition(IntakeConstants.retractedEncoderPosition);
     }
     
     public double getPivotPosition(){
@@ -85,7 +107,7 @@ public class Intake extends SubsystemBase {
         Slot0Configs m_intakeConfig = new Slot0Configs();
         double pivotP = SmartDashboard.getNumber("pivot P", IntakeConstants.pivotP);
         double pivotD = SmartDashboard.getNumber("pivot D", IntakeConstants.pivotD);
-        double pivotG = SmartDashboard.getNumber("intake P", IntakeConstants.pivotG);
+        double pivotG = SmartDashboard.getNumber("pivot G", IntakeConstants.pivotG);
         double intakeP = SmartDashboard.getNumber("intake P", IntakeConstants.rollerP);
         double intakeV = SmartDashboard.getNumber("intake V", IntakeConstants.rollerV);
 
@@ -112,6 +134,6 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         logData();
-        tunePID();
+        // tunePID();
     }
 }

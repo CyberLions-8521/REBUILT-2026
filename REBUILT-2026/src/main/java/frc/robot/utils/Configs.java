@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -99,27 +100,20 @@ public class Configs {
         public static final TalonFXConfiguration kIntakeConfig = new TalonFXConfiguration();
 
         static {
-            kPivotConfig.Slot0
-                .withKP(0)
-                .withKD(0)
-                .withKI(0);
             kPivotConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.pivotCurrentLimit);
             kPivotConfig.MotorOutput
                 .withNeutralMode(NeutralModeValue.Coast)
-                .withInverted(InvertedValue.Clockwise_Positive);
+                .withInverted(InvertedValue.CounterClockwise_Positive);
             kPivotConfig.Feedback
                 .withSensorToMechanismRatio(1);
             kPivotConfig.Slot0
                 .withKP(IntakeConstants.pivotP)
                 .withKD(IntakeConstants.pivotD)
-                .withKG(IntakeConstants.pivotG);
+                .withKG(IntakeConstants.pivotG)
+                .withGravityType(GravityTypeValue.Arm_Cosine);
         
-            kIntakeConfig.Slot0
-                .withKP(0)
-                .withKD(0)
-                .withKI(0);
             kIntakeConfig.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);

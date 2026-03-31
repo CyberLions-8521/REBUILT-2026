@@ -142,10 +142,10 @@ public class RobotContainer {
     m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
 
     //INTAKE
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition));
-    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition));
-    m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+    m_intake.setDefaultCommand(m_intake.defaultCommand());
+    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(2));
+    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(2));
+    m_subsystemController.povLeft().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition).withTimeout(2));
     m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(5));
     
 
@@ -200,7 +200,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return m_chooser.getSelected();
+    return m_intake.getResetEncoderPosition();
   }
 
 }
