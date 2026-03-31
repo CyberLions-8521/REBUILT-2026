@@ -16,12 +16,8 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
-import frc.robot.subsystems.SwerveDrivebase.LimelightConstants;
 import frc.robot.utils.Configs.CANdleConfigs;
 import frc.robot.utils.Constants.CANdleConstants;
-import frc.robot.utils.Constants.ShooterConstants;
-import frc.robot.subsystems.Shooter;
 
 public class LEDLights extends SubsystemBase {
 
@@ -30,8 +26,12 @@ public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
     Off (new EmptyAnimation(0)),
-    SeesAprilTag (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,0,0))),
-    AlignedToApriLTag (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))),  
+    SeesAprilTag (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(0, 255, 0))),
+    TargetingApriltag  (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), 
+    Shooting (new FireAnimation(0, CANdleConstants.kLedCount - 1).withBrightness(0)),
+    Charging (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), 
+    RedSolid (new SolidColor(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,0,0))),
+    GreenSolid (new SolidColor(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(0,255,0))),
     Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,115,0)));
 
     public final ControlRequest animation;
@@ -70,20 +70,22 @@ public class LEDLights extends SubsystemBase {
   @Override
   public void periodic() {
 
-    boolean seeAT = LimelightHelpers.getTV(LimelightConstants.limelightName); //checks if the april tag is visible
-    boolean centerAT = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1; //checks if it is aligned
-    boolean inRange = m_shooter.getDistance() < ShooterConstants.kMinShooterRange; //not in deadzone
+    // boolean seeAT = LimelightHelpers.getTV(LimelightConstants.limelightName); //checks if the april tag is visible
+    // boolean centerAT = Math.abs(LimelightHelpers.getTX(LimelightConstants.limelightName)) < 1; //checks if it is aligned
+    // boolean inRange = m_shooter.getDistance() < ShooterConstants.kMinShooterRange; //not in deadzone
 
-    if (!seeAT) {
-      currentMode = LEDMode.Off;
-    } else if (!inRange) {
-      currentMode = LEDMode.Off;
-    } else if (!centerAT) {
-      currentMode = LEDMode.SeesAprilTag;
-    } else {
-      currentMode = LEDMode.AlignedToApriLTag;
-    }
+    // if (!seeAT) {
+    //   currentMode = LEDMode.Off;
+    // } else if (!inRange) {
+    //   currentMode = LEDMode.Off;
+    // } else if (!centerAT) {
+    //   currentMode = LEDMode.SeesAprilTag;
+    // } else {
+    //   currentMode = LEDMode.AlignedToApriLTag;
+    // }
 
-    m_CANdle.setControl(currentMode.animation);
+    // m_CANdle.setControl(currentMode.animation);
   }
+
+
 }

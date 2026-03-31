@@ -16,11 +16,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDLights;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
+import frc.robot.subsystems.LEDLights.LEDMode;
 import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
@@ -37,6 +39,8 @@ public class RobotContainer {
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
+  public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_driveController.leftBumper().getAsBoolean());
+  public final Trigger seesTagLeftBumperPressed = m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)); //placeholder for the real condtition check (will do later)
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
 
@@ -97,8 +101,9 @@ public class RobotContainer {
     m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
     //LEDS
-  
-
+    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Off));
+    seesTagLeftBumperNotPressed.whileTrue(m_lights.setLEDCommand(LEDMode.SeesAprilTag));
+    seesTagLeftBumperPressed.whileTrue(m_lights.setLEDCommand(LEDMode.TargetingApriltag));
 
     //INDEXER
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));

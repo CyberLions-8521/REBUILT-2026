@@ -41,7 +41,7 @@ public class Constants {
 
         public static final double kCANcoderAbsDiscontPoint = 0.5;
 
-    //======== Swerve Drivebase ========================================================
+        //======== Swerve Drivebase ========================================================
 
         private static final double kWheelDiameter = Units.inchesToMeters(4);
         private static final double kWheelCircumference = Math.PI * kWheelDiameter;
@@ -61,9 +61,9 @@ public class Constants {
 
         public static final double kSlewRateLimiter = 3.0;
 
-    //======== Tuning ==================================================================
+        //======== Tuning ==================================================================
 
-        public static final double kDriveP = 3.5; //set later 3.5 (oriingal)
+        public static final double kDriveP = 3.5; //set later 3.5 (original)
         public static final double kDriveV = 2.4; //used for feed forward 2.4 (original)
 
         public static final double kTurnP = 120; //set later
@@ -83,7 +83,7 @@ public class Constants {
 
     //======== Shooter Subsystem ========================================================
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         
         public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
@@ -128,10 +128,6 @@ public class Constants {
 
     }
 
-
-
-
-
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
         public static  double TXControllerP = 0.062;
@@ -143,10 +139,6 @@ public class Constants {
         public static final double minimumDistance = 2.25;
     }
 
-
-
-
-    
     public static final class LimitSwitchConstants {
         public static final int kLeftLimitSwitchID = 0; 
         public static final int kRightLimitSwitchID = 4; 
@@ -180,7 +172,7 @@ public class Constants {
         public static final double kRetractedEncoderPosition = -2; //set later
         public static final double kRetractedMiddleEncoderPosition = -2.5;
         
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         public static final double kGearRatio = 14.5;              
         public static final double kGearCircumference = 0; 
         public static final double kMiddleEncoderPosition = -2.56; //for after ventura
@@ -200,7 +192,7 @@ public class Constants {
 
     public static class IndexerConstants {
     //======== Motor IDs ================================================================
-        public static final int kIndexerID = 0;     
+        public static final int kIndexerID = 9;     
 
     //======== Motor Configurations ================================================================
 
@@ -209,8 +201,8 @@ public class Constants {
 
     //======== Indexer Subsystem ================================================================
 
-        public static final String kCanbusName = "rio";
-        public static final int kGearRatio = 0;               //NEED TO CHANGE
+        public static final String kCanbusName = "Ryan";
+        public static final double kGearRatio = 1.5;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE
         
     }
