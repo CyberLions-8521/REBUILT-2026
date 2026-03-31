@@ -149,7 +149,7 @@ public class Constants {
 
         public static  double pivotP = 0;
         public static  double pivotD = 0;
-        public static  double pivotG = 0.5;
+        public static  double pivotG = 0.4;
 
         public static final int pivotCurrentLimit = 20;
         public static final int intakeCurrentLimit = 20;
