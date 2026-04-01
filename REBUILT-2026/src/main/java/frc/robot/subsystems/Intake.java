@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,9 +16,6 @@ public class Intake extends SubsystemBase {
     private TalonFX m_intake;
     private TalonFX m_pivot;
 
-    private VelocityVoltage m_intakeController;
-    private PositionVoltage m_pivotController;
-
     public Intake(){
         m_intake = new TalonFX(IntakeConstants.kIntakeID, IntakeConstants.kCanbusName);
         m_pivot = new TalonFX(IntakeConstants.kPivotID, IntakeConstants.kCanbusName);
@@ -29,16 +23,7 @@ public class Intake extends SubsystemBase {
         m_intake.getConfigurator().apply(IntakeConfigs.rollerConfigs);
         m_pivot.getConfigurator().apply(IntakeConfigs.pivotConfigs);
 
-        m_intakeController = new VelocityVoltage(0);
-        m_pivotController = new PositionVoltage(0);
-
         resetPivotEncoders();
-
-        SmartDashboard.putNumber("pivot P", IntakeConstants.pivotP);
-        SmartDashboard.putNumber("pivot D", IntakeConstants.pivotD);
-        SmartDashboard.putNumber("pivot G", IntakeConstants.pivotG);
-        SmartDashboard.putNumber("intake P", IntakeConstants.rollerP);
-        SmartDashboard.putNumber("intake V", IntakeConstants.rollerV);
     }
 
     private void logData(){
@@ -53,23 +38,38 @@ public class Intake extends SubsystemBase {
         return new RunCommand(() -> setIntakeSpeed(speed), this);
     }
 
-    public Command setPivotPositionCommand(double position) {
+    public Command getPivotCommand(double speed) {
+        return new RunCommand(() -> setPivotSpeed(speed), this);
+    }
+
+    public Command setPivotIn() {
         return new FunctionalCommand(
-            () -> {}, 
+            () -> {},
             () -> {
-                setPivotPosition(position);
-            }, 
-            interrupted -> m_pivot.set(0), 
-            () -> m_pivot.getPosition().getValueAsDouble() <= position - 0.1 || m_pivot.getPosition().getValueAsDouble() >= position + 0.1,
+                setPivotSpeed(0.2);
+            },
+            interrupted -> setPivotSpeed(0.0),
+            () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.retractedEncoderPosition,
             this);
     }
 
-    public void setPivotPosition(double position){
-        m_pivot.setControl(m_pivotController.withPosition(position));
+    public Command setPivotOut() {
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                setPivotSpeed(-0.2);
+            },
+            interrupted -> setPivotSpeed(0.0),
+            () -> m_pivot.getPosition().getValueAsDouble() <= IntakeConstants.extendedEncoderPosition, //get actual encoder value later
+            this);
+    }
+
+    public void setPivotSpeed(double speed){
+        m_pivot.set(speed);
     }
 
     public void setIntakeSpeed(double speed){
-        m_intake.setControl(m_intakeController.withVelocity(speed));
+        m_intake.set(speed);
     }
 
     public void resetPivotEncoders(){
@@ -80,38 +80,8 @@ public class Intake extends SubsystemBase {
         return m_pivot.getPosition().getValueAsDouble();
     }
 
-    public void tunePID() {
-        Slot0Configs m_pivotConfig = new Slot0Configs();
-        Slot0Configs m_intakeConfig = new Slot0Configs();
-        double pivotP = SmartDashboard.getNumber("pivot P", IntakeConstants.pivotP);
-        double pivotD = SmartDashboard.getNumber("pivot D", IntakeConstants.pivotD);
-        double pivotG = SmartDashboard.getNumber("intake P", IntakeConstants.pivotG);
-        double intakeP = SmartDashboard.getNumber("intake P", IntakeConstants.rollerP);
-        double intakeV = SmartDashboard.getNumber("intake V", IntakeConstants.rollerV);
-
-        if (pivotP != IntakeConstants.pivotP || pivotD != IntakeConstants.pivotD || pivotG != IntakeConstants.pivotG) { 
-            m_pivotConfig.kP = pivotP;
-            m_pivotConfig.kV = pivotD;
-            m_pivotConfig.kG = pivotG;
-            m_pivot.getConfigurator().apply(m_pivotConfig);
-            IntakeConstants.pivotP = pivotP;
-            IntakeConstants.pivotD = pivotD;
-            IntakeConstants.pivotG = pivotG;
-        }
-
-        if (intakeP != IntakeConstants.rollerP || intakeV != IntakeConstants.rollerV) {
-            m_intakeConfig.kP = intakeP;
-            m_intakeConfig.kV = intakeV;
-            m_intake.getConfigurator().apply(m_intakeConfig);
-            IntakeConstants.rollerP = intakeP;
-            IntakeConstants.rollerV = intakeV;
-        }
-
-    }
-
     @Override
     public void periodic() {
         logData();
-        tunePID();
     }
 }

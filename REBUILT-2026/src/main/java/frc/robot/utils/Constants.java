@@ -168,9 +168,8 @@ public class Constants {
 
     //======== Intake Subsystem ================================================================
 
-        public static final double kExtendedEncoderPosition = -4.5; //set later
-        public static final double kRetractedEncoderPosition = -2; //set later
-        public static final double kRetractedMiddleEncoderPosition = -2.5;
+        public static final double kExtendedEncoderPosition = -4.5; 
+        public static final double kRetractedEncoderPosition = -2;
         
         public static final String kCanbusName = "Ryan";
         public static final double kGearRatio = 14.5;              
@@ -186,6 +185,7 @@ public class Constants {
 
         public static final double extendedEncoderPosition = -4.5;
         public static final double retractedEncoderPosition = -2;
+
         public static final double middleEncoderPosition = -2.56; 
         
     }
