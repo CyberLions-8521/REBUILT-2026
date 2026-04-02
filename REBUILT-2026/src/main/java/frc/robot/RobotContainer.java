@@ -40,7 +40,7 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public final Trigger seesTagLeftBumperNotPressed = new Trigger(() -> LimelightHelpers.getTV(LimelightConstants.limelightName) && !m_driveController.leftBumper().getAsBoolean());
-  public final Trigger seesTagLeftBumperPressed = m_driveController.leftBumper().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)); //placeholder for the real condtition check (will do later)
+  public final Trigger seesTagLeftBumperPressed = m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)); //placeholder for the real condtition check (will do later)
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<Command>();
 
@@ -60,12 +60,12 @@ public class RobotContainer {
 
   private void configureBindings() {
     // default drive 
-    m_drivebase.setDefaultCommand(this.getDriveCommand(
+       m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       getJoystickValues(m_driveController::getRightX, omega_limiter),
-      () -> true));
+        () -> true));
 
       // brake drive - left trigger
     m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
@@ -75,13 +75,18 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-    // auto align - x
-    m_driveController.x().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveCommand(
-      1,
+    m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
+      0.3, 
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
+      getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+      getJoystickValues(m_driveController::getRightX, omega_limiter), 
+      () -> true));
+    m_driveController.leftTrigger().and(() -> LimelightHelpers.getTV(LimelightConstants.limelightName)).whileTrue(this.getDriveAutoAlignCommand(
+      0.3,
+      m_drivebase.getRadiusAdjustment(),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
-      m_drivebase.getTXAdujstmentRotation(0),
-      () -> false));
+      m_drivebase.getTXAdujstmentRotation(omega_limiter, 0, () -> {return getJoystickValues(m_driveController::getLeftX, vy_limiter).get() * 0.5 * SwerveConstants.kMaxMetersPerSecond;}),
+      () -> true));
 
     m_driveController.a().onTrue(m_drivebase.resetGyroCommand());
     m_driveController.b().onTrue(m_drivebase.resetEncodersCommand());
@@ -105,16 +110,15 @@ public class RobotContainer {
     seesTagLeftBumperPressed.whileTrue(m_lights.setLEDCommand(LEDMode.TargetingApriltag));
 
     //INDEXER
-    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
-    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.6));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.4));
 
     //INTAKE PIVOT
-    m_subsystemController.povUp().whileTrue(m_intake.getIntakeCommand(0.75));
-    m_subsystemController.povDown().whileTrue(m_intake.getIntakeCommand(-0.4));
+    m_subsystemController.povLeft().whileTrue(m_intake.getIntakeCommand(0.6));
+
     
-    
-    m_subsystemController.povLeft().whileTrue(m_intake.setPivotOut());
-    m_subsystemController.povRight().whileTrue(m_intake.setPivotIn());
+    m_subsystemController.povDown().whileTrue(m_intake.setPivotOut());
+    m_subsystemController.povUp().whileTrue(m_intake.setPivotIn());
     
     //double whammy
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
@@ -138,6 +142,17 @@ public class RobotContainer {
         fieldRelative.get()),
       m_drivebase);    
   }
+
+  private Command getDriveAutoAlignCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
+    return new RunCommand(
+      () -> m_drivebase.drive(
+        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        omega.get(),
+        fieldRelative.get()),
+      m_drivebase);    
+  }
+
 
   public Supplier<Double> getJoystickValues(Supplier<Double> controller, SlewRateLimiter limiter) {
     return () -> {

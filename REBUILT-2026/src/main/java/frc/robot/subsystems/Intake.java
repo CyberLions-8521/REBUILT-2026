@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                setPivotSpeed(0.2);
+                setPivotSpeed(0.5);
             },
             interrupted -> setPivotSpeed(0.0),
             () -> m_pivot.getPosition().getValueAsDouble() >= IntakeConstants.retractedEncoderPosition,

@@ -26,7 +26,7 @@ public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
     Off (new EmptyAnimation(0)),
-    SeesAprilTag (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(0, 255, 0))),
+    SeesAprilTag (new StrobeAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255, 0, 0))),
     TargetingApriltag  (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), 
     Shooting (new FireAnimation(0, CANdleConstants.kLedCount - 1).withBrightness(0)),
     Charging (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))), 

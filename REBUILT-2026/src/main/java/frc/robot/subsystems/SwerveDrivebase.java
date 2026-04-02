@@ -230,9 +230,9 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
   }
 
-  public Supplier<Double> getTXAdujstmentRotation(double angle) {
+public Supplier<Double> getTXAdujstmentRotation(SlewRateLimiter limiter, double angle, Supplier<Double> tangentialVelocity) {
     return () -> {
-        double feedforward = 0; //LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
+        double feedforward = LimelightConstants.TXControllerFF * (tangentialVelocity.get() / getRadiusSupplier().get());
         double adjustment = feedforward + m_TXController.calculate(LimelightHelpers.getTX(LimelightConstants.limelightName), angle);
         double deadBandAdjustment = MathUtil.applyDeadband(adjustment, 0.1);
         return MathUtil.clamp(deadBandAdjustment, -6, 6);

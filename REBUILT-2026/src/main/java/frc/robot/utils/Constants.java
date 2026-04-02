@@ -54,7 +54,7 @@ public class Constants {
         public static final double kWheelBase = Units.inchesToMeters(22.5625);    // x-direction of robot, set later
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
-        public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
+        public static final double kMaxMetersPerSecond = 2; //oriignal is 4.4 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
         public static final String kCANBus = "Circus Circle";   // name assigned in Phoenix Tuner X
@@ -130,7 +130,7 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
-        public static  double TXControllerP = 0.062;
+        public static  double TXControllerP = 0.07;
         public static  double TXControllerD = 0;
         public static  double TXControllerFF = 0;
         public static  double radiusControllerP = 1.5;
