@@ -11,19 +11,15 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDLights;
+import frc.robot.subsystems.LEDLights.LEDMode;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivebase;
-import frc.robot.subsystems.LEDLights.LEDMode;
-import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
@@ -101,7 +97,7 @@ public class RobotContainer {
     m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
 
     m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
-    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    // m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
     m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
 
     //LEDS
@@ -110,8 +106,9 @@ public class RobotContainer {
     seesTagLeftBumperPressed.whileTrue(m_lights.setLEDCommand(LEDMode.TargetingApriltag));
 
     //INDEXER
-    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.6));
-    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.4));
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.65));
+    m_subsystemController.leftBumper().whileTrue(m_shooter.ShootWithAprilTagCommand().alongWith(m_indexer.runIndexerCommand(0.5)));
+    
 
     //INTAKE PIVOT
     m_subsystemController.povLeft().whileTrue(m_intake.getIntakeCommand(0.6));
@@ -119,12 +116,22 @@ public class RobotContainer {
     
     m_subsystemController.povDown().whileTrue(m_intake.setPivotOut());
     m_subsystemController.povUp().whileTrue(m_intake.setPivotIn());
+   
+    m_subsystemController.povLeft().onTrue(m_intake.setPivotOut().withTimeout(1.2)
+          .alongWith(m_intake.getIntakeCommand(0.5).withTimeout(1.2))
+          .andThen(m_intake.setPivotIn().withTimeout(1.5))
+          );
+
     
     //double whammy
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
-    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
-    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    // m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    // m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
+    // m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
+    // m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+
+    //big commandsw
+    
+
 
 
 
