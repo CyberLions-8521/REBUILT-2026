@@ -10,6 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,8 +29,16 @@ public class RobotContainer {
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter omega_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
 
+  // Auto align objects
+  // Both hub locations are relative to the blue alliance
+  // The alliance is defined in the constructor, default is blue origin as the odometry origin is that as well
+  public static final Translation2d blueHubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+  public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
+  public DriverStation.Alliance alliance;
+  public Translation2d selectedHub;
+
   public RobotContainer() {
-      LimelightHelpers.setCameraPose_RobotSpace("limelight",
+      LimelightHelpers.setCameraPose_RobotSpace("limelight", // may need to be configured!!!! but idk
         0.0,  // Forward (m)
         0.0,  // Side (m)
         0.0,  // Up (m)
@@ -39,9 +48,25 @@ public class RobotContainer {
     );
     configureBindings();
     configureAutos();
+
+    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
   }
 
   private void configureBindings() {
+    /*
+     * (some of the original bindings from the REBUILT code)
+     *
+     * Drive controller bindings:
+     * Brake drive - left trigger
+     * Auto align - x
+     *
+     * Subsystem controller:
+     * Move indexer - left & right bumper
+     * Intake rollers - left trigger
+     * Intake rollers + indexer - x
+     */
+
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
@@ -50,7 +75,7 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter),
       () -> true));
 
-      // brake drive - left trigger
+    // brake drive - left trigger
     m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
       0.5, 
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
@@ -58,21 +83,19 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-      // auto-align to a hub for testing lol
-      Translation2d hubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
-
-      m_driveController.x().whileTrue(new SequentialCommandGroup(
-        m_drivebase.odometryAutoAlign(
-          hubLocation, 
-          getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-          getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-          true
-        ),
-        m_drivebase.odometryAutoDistance(hubLocation)
-      ));
+    // auto-align + auto distance to either hub depending on the alliance - x
+    m_driveController.x().whileTrue(new SequentialCommandGroup(
+      m_drivebase.odometryAutoAlign(
+        selectedHub, 
+        getJoystickValues(m_driveController::getLeftY, vx_limiter), 
+        getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+        true
+      ),
+      m_drivebase.odometryAutoDistance(selectedHub)
+    ));
   }
 
-   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
+  private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
     return new RunCommand(
       () -> m_drivebase.drive(
         -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,

@@ -14,6 +14,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,7 +40,6 @@ import frc.robot.utils.SwerveModule;
 
 
 
-/** Controls the four swerve modules, odometry, gyro, and drivebase simulation. */
 public class SwerveDrivebase extends SubsystemBase {
   private final SwerveModule m_frontLeft;
   private final SwerveModule m_frontRight;
@@ -69,7 +69,12 @@ public class SwerveDrivebase extends SubsystemBase {
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  // ---------------------------------------------------- Basic ----------------------------------------------------
+  /* ---------------------------------------------------- Basic ----------------------------------------------------
+  * The minimum required methods for the drivebase to function
+  * Works by adjusting the state of each swerve module. The states are calculated through inverse kinematics
+  * Desaturating wheel speeds makes sure they are below the max attainable speed 
+  * getHeading() is used by drive(). Otherwise, it would've eneded up in the odometry or auto-alignment section
+  */
 
   /** Creates the swerve drivebase and initializes its modules, kinematics, and telemetry. */
   public SwerveDrivebase() {
@@ -178,11 +183,42 @@ public class SwerveDrivebase extends SubsystemBase {
   public void periodic() { 
     getLimelightData();
     tunePIDControllers();
+    
     m_poseEstimator.update(getHeading(), getModulePositions());
+
+    LimelightHelpers.PoseEstimate visionEstimation = getLimelightPose(LimelightConstants.limelightName);
+    if (visionEstimation != null) {
+      double xyStdDev = getStandardDeviation(visionEstimation);
+      m_poseEstimator.addVisionMeasurement(
+        visionEstimation.pose,
+        visionEstimation.timestampSeconds,
+        VecBuilder.fill(
+          xyStdDev,
+          xyStdDev,
+          9999999 // since higher numbers translate to less trust, dont trust Limelight rotations at all!!!!! that's the gyro's job
+        )
+      );
+    }
+    
     m_field.setRobotPose(getPose());
+
   }
 
-  // --------------------------------------------------- Odometry ---------------------------------------------------
+
+
+
+
+
+
+
+  /* --------------------------------------------------- Odometry ---------------------------------------------------
+  * Calculates an estimated position of the robot on the field given field data from encoders, the gyro, and Limelight/vision
+  * The readings are given through periodic()
+  * Limelight/vision can be a very useful sensor for odometry given that it is trustable. So getLimelightPose may return null...
+  * Standard deviation is used to tell the pose estimator/odometry how much to trust a sensor. 
+  * The trust on vision is dynamic through # of tags, distance, etc.
+  * Pathplanner is very important for odometry as it returns the field data for auto after it's done
+  */
   
   /** Returns all module positions in the order expected by the swerve kinematics. */
   private SwerveModulePosition[] getModulePositions() {
@@ -204,7 +240,56 @@ public class SwerveDrivebase extends SubsystemBase {
     m_poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
   }
 
-  // -------------------------------------------------- Simulation --------------------------------------------------
+  /** Returns the estimated pose and timestamp from a Limelight that can be added to the pose estimation. */
+  private LimelightHelpers.PoseEstimate getLimelightPose(String name) {
+    LimelightHelpers.SetRobotOrientation( // Set orientation values for the MegaTag2 algorithm
+      name,
+      getHeading().getDegrees(),
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    );
+
+    LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
+
+    if (estimate.tagCount == 0) return null; // If there are no tags in sight, return null
+
+    if (Math.abs(m_gyro.getRate()) > LimelightConstants.kMaxViableGyroRate) return null; // If there is too much rotational motion, return null
+    
+    if ( // Check x, y, and timestamp values
+      !Double.isFinite(estimate.pose.getX()) ||
+      !Double.isFinite(estimate.pose.getY()) ||
+      !Double.isFinite(estimate.timestampSeconds)
+    ) return null;
+
+    return estimate;
+
+  }
+
+  /** Returns a varying standard deviation value for visionary estimation depending on # of tags, distance from tags, etc. Smaller value = more trust, vice versa*/
+  private double getStandardDeviation(LimelightHelpers.PoseEstimate estimate) {
+    if (estimate.tagCount >= 2) return 0.25;
+    else if (estimate.avgTagDist < 2.0) return 0.5;
+    else return 1.5;
+  }
+
+
+
+
+
+
+
+  
+  /* -------------------------------------------------- Simulation --------------------------------------------------
+  * Simulation is the least straight-forward for me out of the rest of the sections so this is the most important description
+  * As said in the module's description for its job during simulation, each module holds "fake" values of data - turn position, distance, and velocity
+  * The false data of the gyroscope is the simulation heading
+    * getHeading() is one of those methods that starts with the conditional for simulation, just like in the module code
+  * The Field2d is used for both the actual robot movement out of simulation and the simulated movement during simulation
+  * The best way to think of simulation is the ideal movement of the robot from input
+  */
 
   /** Advances the simulated heading and module positions each simulation loop. */
   @Override
@@ -219,7 +304,19 @@ public class SwerveDrivebase extends SubsystemBase {
     m_backRight.updateSim(delay);
   }
 
-  // ------------------------------------------------ Auto-alignment ------------------------------------------------
+
+
+
+
+
+
+  
+  /* ------------------------------------------------ Auto-alignment ------------------------------------------------
+  * Reducing the load on the drivers is very important during the game!!!! This means assisting movement through code
+  * Auto-alignment makes it easier for a driver to move to a certain destination
+  * Auto-alignment can be based on odometry or Limelight vision
+  * Using a profiled PID is better than a PID, because of the relationship between error and distance; farther = more aggresive on the motors = bad
+  */
 
   /** Auto-align to a certain point on the field using odometry */
   public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean stop) {
@@ -291,7 +388,21 @@ public class SwerveDrivebase extends SubsystemBase {
     );
   }
 
-  // -------------------------------------------------- Pathplanner -------------------------------------------------
+
+
+
+
+
+
+  
+  /* -------------------------------------------------- Pathplanner -------------------------------------------------
+  * Pathplanner is used to prevent hard-coding autos and makes it much easier on programming
+  * I'm gonna be so fr, a lot of the Pathplanner code was copied from a guide ty YASS (Yet Another Software Suite)
+  * A lot of Pathplanner code is setting up something called the AutoBuilder which converts paths in the GUI into commands
+  * NamedCommands are used to bridge Pathplanner GUI to the rest of the code so other subsystems or commands can be triggered by it
+  * Yes there is another driving method because Pathplanner needs it. The difference with this one is that it's robot relative and not field relative
+  * We rely on Pathplanner for the initial pose/pose after auto inside of the pose estimator
+  */
   
   /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
   private void driveRobotRelative(ChassisSpeeds speedsRobotRelative) {
@@ -385,9 +496,21 @@ public class SwerveDrivebase extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-  // ------------------------------------------------- Calibration --------------------------------------------------
 
-  // USING THESE MAY BREAK ODOMETRY, HASN'T BEEN TEST YET
+
+
+
+
+
+  
+  /* ------------------------------------------------- Calibration --------------------------------------------------
+  * These commands/methods were leftover from when I started to modify the REBUILT code of the drivebase
+  * I'm pretty sure these are not meant for odometry as it could break it completely
+  * I have not tested whether these are needed nor if I should even remove them or not
+  * They get their own section because they generally do the same thing for the robot
+  */
+
+  // USING THESE MAY BREAK ODOMETRY DURING OPERATION, HASN'T BEEN TEST YET
 
   /** Zeros all four drive encoders. */
   private void resetEncoders(){
@@ -423,7 +546,18 @@ public class SwerveDrivebase extends SubsystemBase {
     return this.runOnce(this::resetEncoders);
   }
 
-  // -------------------------------------------------- Extraneous --------------------------------------------------
+
+
+
+
+
+
+  
+  /* -------------------------------------------------- Extraneous --------------------------------------------------
+  * These methods were also leftover from when I started to modify the REBUILT drivebase code
+  * It's not 100% known for me if they are needed, but it could be good to have anyway
+  * tunePIDControllers() is the golden child in this section as it lets us tune PID dynamically during operation without having to recompile the code 
+  */
 
   /** Dynamically tune the PID controllers of the drivebase */
   public void tunePIDControllers () {

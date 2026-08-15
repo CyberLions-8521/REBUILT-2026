@@ -19,7 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Configs.SwerveConfigs;
 import frc.robot.utils.Constants.SwerveConstants;
 
-/** Represents one swerve module's drive motor, turn motor, and absolute encoder. */
+
+
 public class SwerveModule {
     private TalonFX m_driveMotor;
     private TalonFX m_turnMotor; 
@@ -34,7 +35,13 @@ public class SwerveModule {
     private double m_simDriveVelocityMetersPerSecond = 0.0;
     private Rotation2d m_simTurnPosition = new Rotation2d();
 
-    // ---------------------------------------------------- Basic ----------------------------------------------------
+    /* ---------------------------------------------------- Basic ----------------------------------------------------
+    * The basic methods needed for the drivebase to work
+    * The drivebase controls each module by setting a desired state for it to follow 
+    * Each swerve module actually uses both an absolute encoder and relative encoder 
+        * The absolute encoder is used as the known origin for the relative encoder
+        * The relative encoder is the main encoder as it works faster and better for when the robot is driving
+    */
 
     /** Creates a swerve module and applies the starting hardware configuration. */
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
@@ -86,7 +93,17 @@ public class SwerveModule {
         m_driveMotor.setPosition(0);
     }
 
-    // --------------------------------------------------- Odometry ---------------------------------------------------
+
+
+
+
+
+
+
+    /* --------------------------------------------------- Odometry ---------------------------------------------------
+    * Most of the explanation and actual odometry/pose estimation is in SwerveDrivebase
+    * The purpose of these methods are to return the data from each module so it can be fed into the pose estimator
+    */
 
     /** Returns the current drive velocity in meters per second. */
     private double getDriveVelocityMetersPerSecond() {
@@ -110,7 +127,19 @@ public class SwerveModule {
         return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
     }
 
-    // -------------------------------------------------- Simulation --------------------------------------------------
+
+
+
+
+
+
+
+    /* -------------------------------------------------- Simulation --------------------------------------------------
+    * Simulatting the robot means keeping track of fake/not real information of each swerve module, including turn position, distance, and velocity
+    * A few methods may start with a conditional that checks if simulation is active, and then will return the "fake" value if so
+    * updateSim() is the main method for updating the all of the values based on the desired positioning of the module
+    * The best way to think of simulation is that it is the ideal movement based on the fact that it uses the desired position object (and represents it)
+    */
 
     /** Updates the simulated module position and velocity over the given loop delay. */
     public void updateSim(double delay) {
@@ -119,7 +148,18 @@ public class SwerveModule {
         m_simDriveDistanceMeters += m_simDriveVelocityMetersPerSecond * delay;
     }
 
-    // -------------------------------------------------- Extraneous --------------------------------------------------
+
+
+
+
+
+
+
+    /* -------------------------------------------------- Extraneous --------------------------------------------------
+    * Extra methods leftover from when I started to modify the swerve module code
+    * It is not certain whether these are 100%, absolutely necessary in the module class
+    * Nothing else really needed to be said
+    */
 
     /** Returns the absolute CANcoder position in rotations. */
     private double getCANCoderPosition() {
@@ -153,18 +193,18 @@ public class SwerveModule {
 
     /** Updates the drive motor PID and feedforward constants. */
     public void configDrivePID(double kP, double kV){
-          Slot0Configs m_driveConfig = new Slot0Configs();
-          m_driveConfig.kP = kP;
-          m_driveConfig.kV = kV;
-          m_driveMotor.getConfigurator().apply(m_driveConfig);
-     }
+        Slot0Configs m_driveConfig = new Slot0Configs();
+        m_driveConfig.kP = kP;
+        m_driveConfig.kV = kV;
+        m_driveMotor.getConfigurator().apply(m_driveConfig);
+    }
 
     /** Updates the turn motor PID constants. */
     public void configTurnPID(double kP, double kD){ 
-          Slot0Configs m_turnConfig = new Slot0Configs();
-          m_turnConfig.kP = kP;
-          m_turnConfig.kD = kD;
-          m_turnMotor.getConfigurator().apply(m_turnConfig);
-     }
+        Slot0Configs m_turnConfig = new Slot0Configs();
+        m_turnConfig.kP = kP;
+        m_turnConfig.kD = kD;
+        m_turnMotor.getConfigurator().apply(m_turnConfig);
+    }
 
 }
