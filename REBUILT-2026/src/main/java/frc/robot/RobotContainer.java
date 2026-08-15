@@ -48,9 +48,6 @@ public class RobotContainer {
     );
     configureBindings();
     configureAutos();
-
-    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
   }
 
   private void configureBindings() {
@@ -84,6 +81,8 @@ public class RobotContainer {
       () -> true));
 
     // auto-align + auto distance to either hub depending on the alliance - x
+    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
     m_driveController.x().whileTrue(new SequentialCommandGroup(
       m_drivebase.odometryAutoAlign(
         selectedHub, 

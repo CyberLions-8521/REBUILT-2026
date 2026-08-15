@@ -81,7 +81,7 @@ public class Constants {
         public static final double kAutoDistanceP = 3.0;
         public static final double kAutoDistanceI = 0.0;
         public static final double kAutoDistanceD = 0.5;
-        public static final double kAutoDistanceTarget = 3.5; // meters
+        public static final double kAutoDistanceTarget = 2.5; // meters
 
     //======== Pathplanner ==================================================================
         public static final double kTranslationP = 5.0;
