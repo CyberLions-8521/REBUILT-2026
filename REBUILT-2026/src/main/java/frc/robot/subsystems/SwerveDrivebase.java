@@ -41,6 +41,9 @@ import frc.robot.utils.SwerveModule;
 
 
 public class SwerveDrivebase extends SubsystemBase {
+  
+  // ---------------------------------------------------- Fields ----------------------------------------------------
+  //#region
   private final SwerveModule m_frontLeft;
   private final SwerveModule m_frontRight;
   private final SwerveModule m_backLeft;
@@ -68,6 +71,13 @@ public class SwerveDrivebase extends SubsystemBase {
   private double m_lastAutoDistanceD = SwerveConstants.kAutoDistanceD;
 
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
+  
+  //#endregion
+
+
+
+
+
 
   /* ---------------------------------------------------- Basic ----------------------------------------------------
   * The minimum required methods for the drivebase to function
@@ -75,6 +85,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * Desaturating wheel speeds makes sure they are below the max attainable speed 
   * getHeading() is used by drive(). Otherwise, it would've eneded up in the odometry or auto-alignment section
   */
+  //#region
 
   /** Creates the swerve drivebase and initializes its modules, kinematics, and telemetry. */
   public SwerveDrivebase() {
@@ -204,7 +215,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   }
 
-
+  //#endregion
 
 
 
@@ -219,6 +230,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * The trust on vision is dynamic through # of tags, distance, etc.
   * Pathplanner is very important for odometry as it returns the field data for auto after it's done
   */
+  //#region
   
   /** Returns all module positions in the order expected by the swerve kinematics. */
   private SwerveModulePosition[] getModulePositions() {
@@ -275,7 +287,7 @@ public class SwerveDrivebase extends SubsystemBase {
     else return 1.5;
   }
 
-
+  //#endregion
 
 
 
@@ -290,6 +302,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * The Field2d is used for both the actual robot movement out of simulation and the simulated movement during simulation
   * The best way to think of simulation is the ideal movement of the robot from input
   */
+  //#region
 
   /** Advances the simulated heading and module positions each simulation loop. */
   @Override
@@ -304,7 +317,7 @@ public class SwerveDrivebase extends SubsystemBase {
     m_backRight.updateSim(delay);
   }
 
-
+  //#endregion
 
 
 
@@ -317,6 +330,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * Auto-alignment can be based on odometry or Limelight vision
   * Using a profiled PID is better than a PID, because of the relationship between error and distance; farther = more aggresive on the motors = bad
   */
+  //#region
 
   /** Auto-align to a certain point on the field using odometry */
   public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean stop) {
@@ -388,7 +402,7 @@ public class SwerveDrivebase extends SubsystemBase {
     );
   }
 
-
+  //#endregion
 
 
 
@@ -403,6 +417,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * Yes there is another driving method because Pathplanner needs it. The difference with this one is that it's robot relative and not field relative
   * We rely on Pathplanner for the initial pose/pose after auto inside of the pose estimator
   */
+  //#region
   
   /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
   private void driveRobotRelative(ChassisSpeeds speedsRobotRelative) {
@@ -496,7 +511,7 @@ public class SwerveDrivebase extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-
+  //#endregion
 
 
 
@@ -509,6 +524,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * I have not tested whether these are needed nor if I should even remove them or not
   * They get their own section because they generally do the same thing for the robot
   */
+  //#region
 
   // USING THESE MAY BREAK ODOMETRY DURING OPERATION, HASN'T BEEN TEST YET
 
@@ -546,7 +562,7 @@ public class SwerveDrivebase extends SubsystemBase {
     return this.runOnce(this::resetEncoders);
   }
 
-
+  //#endregion
 
 
 
@@ -558,6 +574,7 @@ public class SwerveDrivebase extends SubsystemBase {
   * It's not 100% known for me if they are needed, but it could be good to have anyway
   * tunePIDControllers() is the golden child in this section as it lets us tune PID dynamically during operation without having to recompile the code 
   */
+  //#region
 
   /** Dynamically tune the PID controllers of the drivebase */
   public void tunePIDControllers () {
@@ -671,4 +688,7 @@ public class SwerveDrivebase extends SubsystemBase {
             Math.abs(m_backLeft.getDriveDistance())   +
             Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
+
+  //#endregion
+  
 }

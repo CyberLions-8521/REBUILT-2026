@@ -22,6 +22,9 @@ import frc.robot.utils.Constants.SwerveConstants;
 
 
 public class SwerveModule {
+
+    // ---------------------------------------------------- Fields ----------------------------------------------------
+    //#region
     private TalonFX m_driveMotor;
     private TalonFX m_turnMotor; 
     private CANcoder m_CANcoder;
@@ -35,6 +38,8 @@ public class SwerveModule {
     private double m_simDriveVelocityMetersPerSecond = 0.0;
     private Rotation2d m_simTurnPosition = new Rotation2d();
 
+    //#endregion
+
     /* ---------------------------------------------------- Basic ----------------------------------------------------
     * The basic methods needed for the drivebase to work
     * The drivebase controls each module by setting a desired state for it to follow 
@@ -42,6 +47,7 @@ public class SwerveModule {
         * The absolute encoder is used as the known origin for the relative encoder
         * The relative encoder is the main encoder as it works faster and better for when the robot is driving
     */
+    //#region
 
     /** Creates a swerve module and applies the starting hardware configuration. */
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
@@ -93,7 +99,7 @@ public class SwerveModule {
         m_driveMotor.setPosition(0);
     }
 
-
+    //#endregion
 
 
 
@@ -104,6 +110,7 @@ public class SwerveModule {
     * Most of the explanation and actual odometry/pose estimation is in SwerveDrivebase
     * The purpose of these methods are to return the data from each module so it can be fed into the pose estimator
     */
+    //#region
 
     /** Returns the current drive velocity in meters per second. */
     private double getDriveVelocityMetersPerSecond() {
@@ -127,7 +134,7 @@ public class SwerveModule {
         return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
     }
 
-
+    //#endregion
 
 
 
@@ -140,6 +147,7 @@ public class SwerveModule {
     * updateSim() is the main method for updating the all of the values based on the desired positioning of the module
     * The best way to think of simulation is that it is the ideal movement based on the fact that it uses the desired position object (and represents it)
     */
+    //#region
 
     /** Updates the simulated module position and velocity over the given loop delay. */
     public void updateSim(double delay) {
@@ -148,7 +156,7 @@ public class SwerveModule {
         m_simDriveDistanceMeters += m_simDriveVelocityMetersPerSecond * delay;
     }
 
-
+    //#endregion
 
 
 
@@ -160,6 +168,7 @@ public class SwerveModule {
     * It is not certain whether these are 100%, absolutely necessary in the module class
     * Nothing else really needed to be said
     */
+    //#region
 
     /** Returns the absolute CANcoder position in rotations. */
     private double getCANCoderPosition() {
@@ -206,5 +215,7 @@ public class SwerveModule {
         m_turnConfig.kD = kD;
         m_turnMotor.getConfigurator().apply(m_turnConfig);
     }
+
+    //#endregion
 
 }

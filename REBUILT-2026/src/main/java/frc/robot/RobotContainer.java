@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -14,15 +15,23 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.SwerveDrivebase;
+import frc.robot.subsystems.*;
+import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
   CommandXboxController m_driveController = new CommandXboxController(0);
+  CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  Shooter m_shooter = new Shooter();
+  Intake m_intake = new Intake();
+  Indexer m_indexer = new Indexer();
+  LEDLights m_lights = new LEDLights(m_shooter);
+  
   private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -48,21 +57,14 @@ public class RobotContainer {
     );
     configureBindings();
     configureAutos();
+    SmartDashboard.putData(m_autoChooser);
   }
 
   private void configureBindings() {
-    /*
-     * (some of the original bindings from the REBUILT code)
-     *
-     * Drive controller bindings:
-     * Brake drive - left trigger
-     * Auto align - x
-     *
-     * Subsystem controller:
-     * Move indexer - left & right bumper
-     * Intake rollers - left trigger
-     * Intake rollers + indexer - x
-     */
+
+    //======================== Drive controller ==============================================
+    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
 
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
@@ -80,18 +82,60 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-    // auto-align + auto distance to either hub depending on the alliance - x
-    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
-    m_driveController.x().whileTrue(new SequentialCommandGroup(
+    // auto-align, auto distance, and shoot - x
+    m_driveController.x().whileTrue(
+      Commands.parallel(
+        m_shooter.ShootWithoutAprilTagCommand(60), // this will need to be tuned irl later!!!!
+        new SequentialCommandGroup(
+          m_drivebase.odometryAutoAlign(
+            selectedHub, 
+            getJoystickValues(m_driveController::getLeftY, vx_limiter), 
+            getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+            true
+            ),
+          m_drivebase.odometryAutoDistance(selectedHub),
+          Commands.waitUntil(() -> m_shooter.isUpperAtSpeed(60)),
+          m_indexer.runIndexerCommand(0.5)
+        )
+      )
+    );
+
+    // auto-align only - b
+    m_driveController.b().whileTrue(
       m_drivebase.odometryAutoAlign(
-        selectedHub, 
+        selectedHub,
         getJoystickValues(m_driveController::getLeftY, vx_limiter), 
         getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-        true
-      ),
-      m_drivebase.odometryAutoDistance(selectedHub)
-    ));
+        false
+        )
+    );
+
+    //======================== Subsystems controller ==============================================
+
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
+    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
+
+    // shoot
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
+    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
+
+    // indexer
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+
+    // intake pivot
+    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
+    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+    m_subsystemController.povLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+
+    // intake rollers
+    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
+    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
+    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+
   }
 
   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
