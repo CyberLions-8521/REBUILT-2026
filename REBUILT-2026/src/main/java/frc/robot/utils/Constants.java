@@ -74,11 +74,11 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 5.0;
+        public static final double kAutoAlignP = 25.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
-        public static final double kAutoDistanceP = 3.0;
+        public static final double kAutoDistanceP = 35.0;
         public static final double kAutoDistanceI = 0.0;
         public static final double kAutoDistanceD = 0.5;
         public static final double kAutoDistanceTarget = 2.5; // meters

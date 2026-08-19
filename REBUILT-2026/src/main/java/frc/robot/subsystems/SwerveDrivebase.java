@@ -12,6 +12,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.FlippingUtil;
 import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
@@ -27,10 +28,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -84,11 +87,16 @@ public class SwerveDrivebase extends SubsystemBase {
   * Works by adjusting the state of each swerve module. The states are calculated through inverse kinematics
   * Desaturating wheel speeds makes sure they are below the max attainable speed 
   * getHeading() is used by drive(). Otherwise, it would've eneded up in the odometry or auto-alignment section
+  * This class is a singleton because it makes sense - I mean, there's only one drivebase per robot anyway
   */
   //#region
 
+  private static class SwerveSingleton {
+    private static final SwerveDrivebase instance = new SwerveDrivebase();
+  }
+
   /** Creates the swerve drivebase and initializes its modules, kinematics, and telemetry. */
-  public SwerveDrivebase() {
+  private SwerveDrivebase() {
     m_gyro.reset();
 
     m_frontLeft = new SwerveModule(
@@ -161,6 +169,10 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("Auto-distance D", SwerveConstants.kAutoDistanceD);
 
     setupPathPlanner();
+  }
+
+  public static SwerveDrivebase getInstance() {
+    return SwerveSingleton.instance;
   }
 
   /** Drives the robot with the given chassis speeds, optionally relative to the field. */
@@ -295,7 +307,6 @@ public class SwerveDrivebase extends SubsystemBase {
 
   
   /* -------------------------------------------------- Simulation --------------------------------------------------
-  * Simulation is the least straight-forward for me out of the rest of the sections so this is the most important description
   * As said in the module's description for its job during simulation, each module holds "fake" values of data - turn position, distance, and velocity
   * The false data of the gyroscope is the simulation heading
     * getHeading() is one of those methods that starts with the conditional for simulation, just like in the module code
@@ -511,56 +522,28 @@ public class SwerveDrivebase extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-  //#endregion
+  /** Resets odometry based on the starting position of a Pathplanner auto. Useful for when the robot cannot move during auto but still requires a pose. */
+  public Command resetPoseFromAuto(String autoName) {
+    PathPlannerAuto sourceAuto = new PathPlannerAuto(autoName);
 
+    return Commands.runOnce(() -> {
+      Pose2d startingPose = sourceAuto.getStartingPose();
 
+      if (startingPose == null) {
+        DriverStation.reportError(
+          "PathPlanner auto \"" + autoName + "\" does not have a starting pose.",
+          false
+        );
+        return;
+      }
 
+      if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+        startingPose = FlippingUtil.flipFieldPose(startingPose);
+      }
 
-
-  
-  /* ------------------------------------------------- Calibration --------------------------------------------------
-  * These commands/methods were leftover from when I started to modify the REBUILT code of the drivebase
-  * I'm pretty sure these are not meant for odometry as it could break it completely
-  * I have not tested whether these are needed nor if I should even remove them or not
-  * They get their own section because they generally do the same thing for the robot
-  */
-  //#region
-
-  // USING THESE MAY BREAK ODOMETRY DURING OPERATION, HASN'T BEEN TEST YET
-
-  /** Zeros all four drive encoders. */
-  private void resetEncoders(){
-    m_frontLeft.zeroDriveEncoder();
-    m_frontRight.zeroDriveEncoder();
-    m_backLeft.zeroDriveEncoder();
-    m_backRight.zeroDriveEncoder();
-    // safely reset odometry too
-    m_poseEstimator.resetPosition(getHeading(), getModulePositions(), getPose());
-  }
-
-  /** Resets the gyro and simulated heading to zero. */
-  private void resetGyro() {
-    if (RobotBase.isSimulation()) m_simHeading = new Rotation2d();
-    m_gyro.reset();
-    m_gyro.setAngleAdjustment(0);
-    // safely reset odometry too
-    m_poseEstimator.resetPosition(getHeading(), getModulePositions(), getPose());
-  }
-
-  /** Resets the gyro heading to zero. */
-  private void zeroHeading() { 
-    m_gyro.reset();
-  }
-
-  /** Returns a one-shot command that resets the gyro. */
-  public Command resetGyroCommand() { 
-    return this.runOnce(this::resetGyro);
-  }
-
-  /** Returns a one-shot command that resets all drive encoders. */
-  public Command resetEncodersCommand() { 
-    return this.runOnce(this::resetEncoders);
-  }
+      resetOdometry(startingPose);
+    }, this);
+}
 
   //#endregion
 
@@ -571,7 +554,6 @@ public class SwerveDrivebase extends SubsystemBase {
   
   /* -------------------------------------------------- Extraneous --------------------------------------------------
   * These methods were also leftover from when I started to modify the REBUILT drivebase code
-  * It's not 100% known for me if they are needed, but it could be good to have anyway
   * tunePIDControllers() is the golden child in this section as it lets us tune PID dynamically during operation without having to recompile the code 
   */
   //#region
@@ -645,48 +627,12 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
   }
 
-  /** Returns a command that drives forward until the average module distance reaches the target. */
-  public FunctionalCommand getDriveCommand(double distance) { 
-    return new FunctionalCommand (
-      () -> this.resetEncoders(),
-      () -> this.drive(1.0, 0, 0,true),
-      interrupted -> this.drive(0, 0, 0, true), 
-      () -> MathUtil.isNear(distance, this.getStraightDistance(), 0.1), 
-      this);
-  }
-
-  /** Returns a command that drives backward until the average module distance reaches the target. */
-  public FunctionalCommand getReversedDriveCommand(double distance) {  
-    return new FunctionalCommand (
-      () -> this.resetEncoders(),
-      () -> this.drive(-1.0, 0, 0,true),
-      interrupted -> this.drive(0, 0, 0, true), 
-      () -> MathUtil.isNear(distance, this.getStraightDistance(), 0.1), 
-      this);
-  }
-
   /** Stops all four swerve modules. */
   public void stopModules() { 
     m_frontLeft.stop();
     m_frontRight.stop();
     m_backLeft.stop();
     m_backRight.stop();
-  }
-
-  /** Sets all drive encoder distances to the given value in meters. */
-  private void setEncoderDistance(double distance){ 
-    m_frontLeft.setEncoderDistance(distance);
-    m_frontRight.setEncoderDistance(distance);
-    m_backLeft.setEncoderDistance(distance);
-    m_backRight.setEncoderDistance(distance);
-  }
-
-  /** Returns the average absolute drive distance across all four modules in meters. */
-  private double getStraightDistance() { // meters
-    return (Math.abs(m_frontLeft.getDriveDistance())  +
-            Math.abs(m_frontRight.getDriveDistance()) +
-            Math.abs(m_backLeft.getDriveDistance())   +
-            Math.abs(m_backRight.getDriveDistance())) / 4.0;
   }
 
   //#endregion

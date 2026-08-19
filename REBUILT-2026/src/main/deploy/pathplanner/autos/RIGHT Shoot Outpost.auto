@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakePivotOut"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RightStartPointToCenter"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WarmUpShooter"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootForDuration"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightToOutpost"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeForDuration"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightOutpostPointToCenter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootForDuration"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

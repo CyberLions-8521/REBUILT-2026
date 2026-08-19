@@ -8,7 +8,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -124,6 +126,15 @@ public class Shooter extends SubsystemBase {
         return m_currentRange;
     }
 
+    public double getDistance(Pose2d estimatedPose, Translation2d targetPoint) { // overloaded version for distance based on real odometry
+        return targetPoint.getDistance(estimatedPose.getTranslation());
+    }
+
+    public double getDynamicRPS(Pose2d estimatedPose, Translation2d targetPoint){ // calculates the RPS based on odometry (best used when the robot is still)
+        double distance = getDistance(estimatedPose, targetPoint);
+        return lookupVelocity(distance);
+    }
+
     public void runUpperFlywheelMotors(double speed) {
         speed = MathUtil.clamp(speed,
             ShooterConstants.kMinShooterVelocity,
@@ -153,12 +164,19 @@ public class Shooter extends SubsystemBase {
         stopLowerFlywheelMotors();
     }
 
-    public boolean isUpperAtSpeed(double targetRPS) {
+    private boolean isUpperAtSpeed(double targetRPS) {
         double velocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
         return MathUtil.isNear(targetRPS, velocity, 5);
     }
-    
 
+    public boolean isShooterAtSpeed(double targetRPS) {
+        double upperVelocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
+        double lowerVelocity = m_lowerFlywheel.getVelocity().getValueAsDouble();
+        boolean isUpperAtSpeed = MathUtil.isNear(targetRPS, upperVelocity, 5);
+        boolean isLowerAtSpeed = MathUtil.isNear(targetRPS, lowerVelocity, 5);
+        return isUpperAtSpeed && isLowerAtSpeed;
+    }
+    
     // // -------------------- COMMANDS --------------------
     // public Command runFlywheel(DoubleSupplier speed) {
     //     return new FunctionalCommand(
@@ -232,6 +250,28 @@ public class Shooter extends SubsystemBase {
             },
             interrupted -> {
                 stopBothFlywheelMotors();
+                // m_LedLights.setLEDMode(LEDMode.Off);
+
+            },
+            () -> false,
+            this
+        );
+    }
+
+    public Command WarmUpShooter(double rps, boolean stopWhenFinished) {
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                runUpperFlywheelMotors(rps);
+                // m_LedLights.setLEDMode(LEDMode.Charging);
+                if (isUpperAtSpeed(rps)) {
+                    runLowerFlywheelMotors(rps);
+                    // m_LedLights.setLEDMode(LEDMode.Shooting);
+
+                }
+            },
+            interrupted -> {
+                if (stopWhenFinished) stopBothFlywheelMotors();
                 // m_LedLights.setLEDMode(LEDMode.Off);
 
             },

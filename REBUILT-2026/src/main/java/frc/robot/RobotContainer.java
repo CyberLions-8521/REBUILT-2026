@@ -4,8 +4,9 @@
 
 package frc.robot;
 
-import java.util.Set;
 import java.util.function.Supplier;
+
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -26,7 +27,7 @@ import frc.robot.utils.Constants.SwerveConstants;
 public class RobotContainer {
   CommandXboxController m_driveController = new CommandXboxController(0);
   CommandXboxController m_subsystemController = new CommandXboxController(1);
-  SwerveDrivebase m_drivebase = new SwerveDrivebase();
+  SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
   Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
   Indexer m_indexer = new Indexer();
@@ -40,21 +41,32 @@ public class RobotContainer {
 
   // Auto align objects
   // Both hub locations are relative to the blue alliance
-  // The alliance is defined in the constructor, default is blue origin as the odometry origin is that as well
   public static final Translation2d blueHubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
   public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
-  public DriverStation.Alliance alliance;
-  public Translation2d selectedHub;
 
   public RobotContainer() {
-      LimelightHelpers.setCameraPose_RobotSpace("limelight", // may need to be configured!!!! but idk
-        0.0,  // Forward (m)
-        0.0,  // Side (m)
-        0.0,  // Up (m)
-        0.0,  // Roll (deg)
-        15.0,  // Pitch (deg)
-        0.0   // Yaw (deg)
+    NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60, false));
+    NamedCommands.registerCommand("IntakePivotOut", m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+    NamedCommands.registerCommand("IntakeForDuration", m_intake.getIntakeCommand(0.6).withTimeout(4));
+    NamedCommands.registerCommand("ShootForDuration", 
+      Commands.deadline(
+        new SequentialCommandGroup(
+          Commands.waitUntil(() -> m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))).withTimeout(5),
+          m_indexer.runIndexerCommand(0.4).withTimeout(5)
+        ),
+        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))
+      )
     );
+
+    LimelightHelpers.setCameraPose_RobotSpace("limelight", // may need to be configured!!!! but idk
+      0.0,  // Forward (m)
+      0.0,  // Side (m)
+      0.0,  // Up (m)
+      0.0,  // Roll (deg)
+      15.0,  // Pitch (deg)
+      0.0   // Yaw (deg)
+    );
+
     configureBindings();
     configureAutos();
     SmartDashboard.putData(m_autoChooser);
@@ -63,8 +75,6 @@ public class RobotContainer {
   private void configureBindings() {
 
     //======================== Drive controller ==============================================
-    alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-    selectedHub = (alliance == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
 
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
@@ -84,18 +94,25 @@ public class RobotContainer {
 
     // auto-align, auto distance, and shoot - x
     m_driveController.x().whileTrue(
-      Commands.parallel(
-        m_shooter.ShootWithoutAprilTagCommand(60), // this will need to be tuned irl later!!!!
-        new SequentialCommandGroup(
-          m_drivebase.odometryAutoAlign(
-            selectedHub, 
-            getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-            getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-            true
+      new SequentialCommandGroup(
+        Commands.deadline(
+          new SequentialCommandGroup(
+            m_drivebase.odometryAutoAlign(
+              getAllianceHubLocation(), 
+              getJoystickValues(m_driveController::getLeftY, vx_limiter), // joystick input does nothing lol
+              getJoystickValues(m_driveController::getLeftX, vy_limiter), // cause stop makes it ignored
+              true
             ),
-          m_drivebase.odometryAutoDistance(selectedHub),
-          Commands.waitUntil(() -> m_shooter.isUpperAtSpeed(60)),
-          m_indexer.runIndexerCommand(0.5)
+            m_drivebase.odometryAutoDistance(getAllianceHubLocation())
+          ),
+          m_shooter.WarmUpShooter(60, false) // warm up the shooter ahead of time
+        ),
+        Commands.parallel(
+          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation())),
+          new SequentialCommandGroup(
+            Commands.waitUntil(() -> m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))).withTimeout(5),
+            m_indexer.runIndexerCommand(0.4)
+          )
         )
       )
     );
@@ -103,7 +120,7 @@ public class RobotContainer {
     // auto-align only - b
     m_driveController.b().whileTrue(
       m_drivebase.odometryAutoAlign(
-        selectedHub,
+        getAllianceHubLocation(),
         getJoystickValues(m_driveController::getLeftY, vx_limiter), 
         getJoystickValues(m_driveController::getLeftX, vy_limiter), 
         false
@@ -156,14 +173,28 @@ public class RobotContainer {
     };
   }
 
+  private Translation2d getAllianceHubLocation() {
+    return (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
+  }
+
   // Sendable Chooser Autos
 
   public void configureAutos() {  
-    m_autoChooser.setDefaultOption("New Auto", m_drivebase.getAutonomousCommand("New Auto"));
+    m_autoChooser.addOption("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
+    m_autoChooser.addOption("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
+    m_autoChooser.addOption("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
+    m_autoChooser.setDefaultOption("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+    m_autoChooser.addOption("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
+    m_autoChooser.addOption("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
+    m_autoChooser.addOption("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
+    m_autoChooser.addOption("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
+    m_autoChooser.addOption("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
+
     SmartDashboard.putData("Auto Chooser", m_autoChooser);
   }
 
   public Command getAutonomousCommand() {
     return m_autoChooser.getSelected();
   }
+  
 }
