@@ -13,3 +13,5 @@ Added:
 * Elastic dashboard 
 * Dynamic PID tuning [✅]
 * Limelight visionary pose estimation (likely needs to be configured correctly in RobotContainer)
+
+**Ethan-Main branches of this branch and has a little more updates but still functions the same. So for the most recent versions of the drivebase, go to that branch instead.**
