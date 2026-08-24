@@ -96,6 +96,13 @@ public class Constants {
 
     public static final class LimelightConstants {
         public static final String limelightName = "limelight";
+        public static final double kLimelightForwardOffset = Units.inchesToMeters(12.5);
+        public static final double kLimelightSideOffset = 0.0;
+        public static final double kLimelightUpOffset = Units.inchesToMeters(10);
+        public static final double kLimelightRoll = 0.0;
+        public static final double kLimelightPitch = 15.0;
+        public static final double kLimelightYaw = 0.0;
+
         public static final double kMaxViableGyroRate = 720.0; // degrees 
     }
 

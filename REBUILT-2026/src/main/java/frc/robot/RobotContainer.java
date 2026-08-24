@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 import frc.robot.utils.Constants.IntakeConstants;
+import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
@@ -58,18 +59,18 @@ public class RobotContainer {
       )
     );
 
-    LimelightHelpers.setCameraPose_RobotSpace("limelight", // may need to be configured!!!! but idk
-      0.0,  // Forward (m)
-      0.0,  // Side (m)
-      0.0,  // Up (m)
-      0.0,  // Roll (deg)
-      15.0,  // Pitch (deg)
-      0.0   // Yaw (deg)
+    LimelightHelpers.setCameraPose_RobotSpace(
+      LimelightConstants.limelightName, 
+      LimelightConstants.kLimelightForwardOffset,  // Forward (m)
+      LimelightConstants.kLimelightSideOffset,  // Side (m)
+      LimelightConstants.kLimelightUpOffset,  // Up (m)
+      LimelightConstants.kLimelightRoll,  // Roll (deg)
+      LimelightConstants.kLimelightPitch,  // Pitch (deg)
+      LimelightConstants.kLimelightYaw   // Yaw (deg)
     );
 
     configureBindings();
     configureAutos();
-    SmartDashboard.putData(m_autoChooser);
   }
 
   private void configureBindings() {
