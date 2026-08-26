@@ -104,17 +104,20 @@ public class RobotContainer {
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
     m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
 
-    //INTAKE PIVOT
-    m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
-    m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
 
-    m_subsystemController.povLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+    //INTAKE PIVOT
+    // m_subsystemController.povUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
+    // m_subsystemController.povDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+
+    // m_subsystemController.povLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+    m_subsystemController.povUp().whileTrue(m_intake.blockPartyPivotCommand(0.2));
     
     //INTAKE ROLLERS
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
+    // m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
 
-    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
-    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    // m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
+    // m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    m_subsystemController.leftTrigger().whileTrue(m_intake.blockPartyIntakeCommand(0.75));
 
 
 

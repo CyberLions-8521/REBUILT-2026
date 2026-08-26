@@ -83,7 +83,7 @@ public class Constants {
 
     //======== Shooter Subsystem ========================================================
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         
         public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
@@ -180,7 +180,7 @@ public class Constants {
         public static final double kRetractedEncoderPosition = -2; //set later
         public static final double kRetractedMiddleEncoderPosition = -2.5;
         
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         public static final double kGearRatio = 14.5;              
         public static final double kGearCircumference = 0; 
         public static final double kMiddleEncoderPosition = -2.56; //for after ventura
@@ -200,7 +200,7 @@ public class Constants {
 
     public static class IndexerConstants {
     //======== Motor IDs ================================================================
-        public static final int kIndexerID = 0;     
+        public static final int kIndexerID = 9;     
 
     //======== Motor Configurations ================================================================
 
@@ -209,7 +209,7 @@ public class Constants {
 
     //======== Indexer Subsystem ================================================================
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "Ryan";
         public static final int kGearRatio = 0;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE
         

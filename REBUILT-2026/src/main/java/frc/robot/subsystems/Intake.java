@@ -53,6 +53,14 @@ public class Intake extends SubsystemBase {
         return new RunCommand(() -> setIntakeSpeed(speed), this);
     }
 
+    public Command blockPartyIntakeCommand(double speed) {
+        return this.run(() -> m_intake.set(speed));
+    }
+
+    public Command blockPartyPivotCommand(double speed) {
+        return this.run(() -> m_pivot.set(speed));
+    }
+
     public Command setPivotPositionCommand(double position) {
         return new FunctionalCommand(
             () -> {}, 
