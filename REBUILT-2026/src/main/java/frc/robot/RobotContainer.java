@@ -52,10 +52,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("ShootForDuration", 
       Commands.deadline(
         new SequentialCommandGroup(
-          Commands.waitUntil(() -> m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))).withTimeout(5),
+          Commands.waitUntil(() -> 
+            m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          ).withTimeout(5),
           m_indexer.runIndexerCommand(0.4).withTimeout(5)
         ),
-        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))
+        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
       )
     );
 
@@ -104,16 +106,42 @@ public class RobotContainer {
               getJoystickValues(m_driveController::getLeftX, vy_limiter), // cause stop makes it ignored
               true
             ),
-            m_drivebase.odometryAutoDistance(getAllianceHubLocation())
+            m_drivebase.odometryAutoDistance(getAllianceHubLocation(), true)
           ),
-          m_shooter.WarmUpShooter(60) // warm up the shooter ahead of time
+          m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) // warm up the upper rollers ahead of time
         ),
         Commands.parallel(
-          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation())),
+          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())),
           new SequentialCommandGroup(
-            Commands.waitUntil(() -> m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation()))).withTimeout(5),
+            Commands.waitUntil(() -> 
+              m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+            ).withTimeout(5),
             m_indexer.runIndexerCommand(0.4)
           )
+        )
+      )
+    );
+
+    // auto-align and dynamic shooting - a [EXPERIMENTAL]
+    m_driveController.a().whileTrue(
+      Commands.parallel(
+        m_drivebase.odometryAutoAlign(
+          getAllianceHubLocation(), 
+          getJoystickValues(m_driveController::getLeftY, vx_limiter),
+          getJoystickValues(m_driveController::getLeftX, vy_limiter),
+          false
+        ),
+        Commands.either(
+          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())), 
+          m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())), 
+          () -> m_drivebase.isAutoAligned()
+        ),
+        Commands.either(
+          m_indexer.runIndexerCommand(0.4), 
+          m_indexer.stopIndexerCommand(), 
+          () -> 
+            m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
+            && m_drivebase.isAutoAligned()
         )
       )
     );
@@ -174,8 +202,11 @@ public class RobotContainer {
     };
   }
 
-  private Translation2d getAllianceHubLocation() {
-    return (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue) ? blueHubLocation : redHubLocation;
+  private Supplier<Translation2d> getAllianceHubLocation() {
+    // suppplier so that hub can change after binding has been created 
+    return () -> { 
+      return (m_drivebase.shouldFlipPathForAlliance()) ? redHubLocation : blueHubLocation; 
+    };
   }
 
   // Sendable Chooser Autos

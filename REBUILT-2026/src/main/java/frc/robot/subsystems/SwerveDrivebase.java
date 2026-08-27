@@ -91,8 +91,18 @@ public class SwerveDrivebase extends SubsystemBase {
   * The minimum required methods for the drivebase to function
   * Works by adjusting the state of each swerve module. The states are calculated through inverse kinematics
   * Desaturating wheel speeds makes sure they are below the max attainable speed 
-  * getHeading() is used by drive(). Otherwise, it would've eneded up in the odometry or auto-alignment section
+  * getRawGyroHeading() is used by drive(). Otherwise, it would've eneded up in the odometry or auto-alignment section
   * This class is a singleton because it makes sense - I mean, there's only one drivebase per robot anyway
+  * There are three versions of a method that returns a heading (not overloaded) because of a severe bug when an auto was canceled prematurely (and then another one after that)
+    * If the robot was facing a certain direction during an auto and the robot was disabled, driving offset in that direction
+    * The auto-align commands worked which proved that odometry still worked
+      * So a odometry-relative heading method was created and is used in the getLimelightPose() method and drive() (sort of)
+    * After simulating the change, a new bug arose where driving is always blue alliance relative
+      * getDriverHeading() was created to fix this bug (just adds 180 degrees the field relative heading if its the red alliance)
+      * Used in only drive()
+    * There is another severe bug where the robot will continue to move if it was during the auto before it was disconnected
+      *(explained more in the pathplanner section)
+  * getRawGyroHeading() = pose estimation input, getFieldHeading() = pose, auto-alignment, Limelight yaw, pathplanner pose, getDriverHeading() = real driver input
   */
   //#region
 
@@ -138,7 +148,7 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePositions(), new Pose2d());
+    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getRawGyroHeading(), getModulePositions(), new Pose2d());
     
     m_field = new Field2d();
     m_frontLeftObject2d = m_field.getObject("Front Left Module");
@@ -179,7 +189,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("Auto-distance D", SwerveConstants.kAutoDistanceD);
 
     // makes the pathplanner autos on the blue alliance on default
-    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Sim/Force Blue Autos", true); 
+    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Sim/Force Blue Alliance", true); 
 
     setupPathPlanner();
   }
@@ -193,7 +203,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SwerveModuleState[] m_swerveModuleStates;
     if(fieldRelative) {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(
-        ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getHeading()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getDriverHeading()));
     } else {
       m_swerveModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(vx, vy, omega));
     }
@@ -208,10 +218,24 @@ public class SwerveDrivebase extends SubsystemBase {
     m_lastRobotRelativeSpeeds = m_kinematics.toChassisSpeeds(m_swerveModuleStates);
   }
 
-  /** Returns the current robot heading. */
-  public Rotation2d getHeading() { 
+  /** Returns the current robot heading based on the raw gyro value. */
+  public Rotation2d getRawGyroHeading() { 
     if (RobotBase.isSimulation()) return m_simHeading;
     return Rotation2d.fromDegrees(-m_gyro.getAngle());
+  }
+
+  /** Returns the current robot heading based on the field and odometry. */
+  public Rotation2d getFieldHeading() {
+    // does not need the simulation conditional because it will not be used in simulation, but its counterpart above will
+    return getPose().getRotation();
+  }
+
+  /** Returns the current robot heading based on odometry and the current aliance. */
+  public Rotation2d getDriverHeading() {
+    Rotation2d heading = getFieldHeading();
+
+    if (shouldFlipPathForAlliance()) return heading.plus(Rotation2d.fromDegrees(180));
+    return heading;
   }
 
   /** Updates Limelight data, odometry, and the dashboard field display each scheduler loop. */
@@ -223,7 +247,7 @@ public class SwerveDrivebase extends SubsystemBase {
     refreshOdometryStatusSignals();
     m_poseEstimator.updateWithTime(
       getOdometryTimestampAvgSeconds(),
-      getHeading(),
+      getRawGyroHeading(),
       getModulePositions()
     );
 
@@ -304,16 +328,23 @@ public class SwerveDrivebase extends SubsystemBase {
     return m_poseEstimator.getEstimatedPosition();
   }
 
+  /** Returns a supplier that supplies the pose of the robot */
+  public Supplier<Pose2d> getPoseSupplier() {
+    return () -> {
+      return getPose();
+    };
+  }
+
   /** Resets drive encoder distance and starts odometry from the given pose. */
   public void resetOdometry(Pose2d pose) {
-    m_poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
+    m_poseEstimator.resetPosition(getRawGyroHeading(), getModulePositions(), pose);
   }
 
   /** Returns the estimated pose and timestamp from a Limelight that can be added to the pose estimation. */
   private LimelightHelpers.PoseEstimate getLimelightPose(String name) {
     LimelightHelpers.SetRobotOrientation( // Set orientation values for the MegaTag2 algorithm
       name,
-      getHeading().getDegrees(),
+      getFieldHeading().getDegrees(),
       0.0,
       0.0,
       0.0,
@@ -392,9 +423,10 @@ public class SwerveDrivebase extends SubsystemBase {
   /* -------------------------------------------------- Simulation --------------------------------------------------
   * As said in the module's description for its job during simulation, each module holds "fake" values of data - turn position, distance, and velocity
   * The false data of the gyroscope is the simulation heading
-    * getHeading() is one of those methods that starts with the conditional for simulation, just like in the module code
+    * getRawGyroHeading() is one of those methods that starts with the conditional for simulation, just like in the module code
   * The Field2d is used for both the actual robot movement out of simulation and the simulated movement during simulation
   * The best way to think of simulation is the ideal movement of the robot from input
+  * Helped me to fix a lot of bugs lol
   */
   //#region
 
@@ -411,9 +443,9 @@ public class SwerveDrivebase extends SubsystemBase {
     m_backRight.updateSim(delay);
   }
 
-  /** Lets me flip the alliance the autos are based on dynamically in simulation */
-  private boolean shouldFlipPathForAlliance() {
-    if (RobotBase.isSimulation() && SmartDashboard.getBoolean("Sim/Force Blue Autos", true)) return false;
+  /** Lets me flip the alliance the autos are based on dynamically in simulation but still works for real use */
+  public boolean shouldFlipPathForAlliance() {
+    if (RobotBase.isSimulation() && SmartDashboard.getBoolean("Sim/Force Blue Alliance", true)) return false;
     return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 
@@ -471,7 +503,7 @@ public class SwerveDrivebase extends SubsystemBase {
   }
 
   /** Auto-distance to a certain point on the field (assuming that the robot is facing it already) */
-  public Command odometryAutoDistance(Translation2d m_targetPoint) {
+  public Command odometryAutoDistance(Translation2d m_targetPoint, boolean stop) {
     return new FunctionalCommand(
       () -> {
         // compacted math of below to set the current position and target before command runs
@@ -497,9 +529,87 @@ public class SwerveDrivebase extends SubsystemBase {
         );
       }, 
       (interrupted) -> drive(0.0, 0.0, 0.0, true), 
-      () -> m_autoDistancePID.atGoal(), 
+      () -> m_autoDistancePID.atGoal() && stop, 
       this
     );
+  }
+
+  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
+  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean stop) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
+        m_autoAlignPID.reset(position.getRotation().getRadians());
+        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+      },
+      () -> {
+        // First part - calculate dynamic heading
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
+        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
+
+        // Second part - convert dynamic heading to be suitable with the drive method
+        Rotation2d currentHeading = position.getRotation();
+        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+
+        // Third part - Run drive command and stop alignment when needed
+        // The only time it shouldn't is when the robot is too close to the target and break the math
+        double distance = targetPoint.getDistance(fieldLocation);
+        this.drive(
+          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0), // if the robot needs to stop at the end, ignore joystick input
+          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0),
+          (distance > 0.5) ? pidOutput : 0.0,
+          true
+        );
+      }, 
+      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
+      () -> m_autoAlignPID.atGoal() && stop, 
+      this
+    );
+  }
+
+  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
+  public Command odometryAutoDistance(Supplier<Translation2d> m_targetPoint, boolean stop) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Translation2d targetPoint = m_targetPoint.get();
+        m_autoDistancePID.reset(targetPoint.getDistance(getPose().getTranslation()));
+        m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
+      },
+      () -> {
+        // First part - calculate distance between robot and target
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        double distance = targetPoint.getDistance(fieldLocation);
+
+        // Second part - feed distance into PID
+        double pidOutput = m_autoDistancePID.calculate(distance, SwerveConstants.kAutoDistanceTarget);
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxMetersPerSecond, SwerveConstants.kMaxMetersPerSecond);
+
+        // Third part - Run drive command
+        this.drive(
+          -pidOutput,
+          0,
+          0,
+          false
+        );
+      }, 
+      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
+      () -> m_autoDistancePID.atGoal() && stop, 
+      this
+    );
+  }
+
+  public boolean isAutoAligned() {
+    return m_autoAlignPID.atGoal();
   }
 
   //#endregion
@@ -516,6 +626,11 @@ public class SwerveDrivebase extends SubsystemBase {
   * NamedCommands are used to bridge Pathplanner GUI to the rest of the code so other subsystems or commands can be triggered by it
   * Yes there is another driving method because Pathplanner needs it. The difference with this one is that it's robot relative and not field relative
   * We rely on Pathplanner for the initial pose/pose after auto inside of the pose estimator
+  * Another method for fetching the heading was created because of a bug that happens during an autonomous that is disabled abruptly
+    * (explained more in the basic section)
+  * stopAutonomousDrive() was created to another autonomous bug
+    * Happens in the same circumstances but where the robot will continue to move if it was in the auto before disconnection
+    * It is placed in the Robot class in autonomousExit() to ensure the robot stops when autonomous is exited in any way
   */
   //#region
   
@@ -636,6 +751,11 @@ public class SwerveDrivebase extends SubsystemBase {
       resetOdometry(startingPose);
     }, this);
 }
+
+  /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) */
+  public void stopAutonomousDrive() {
+    driveRobotRelative(new ChassisSpeeds());
+  }
 
   //#endregion
 

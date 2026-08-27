@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
@@ -130,9 +132,11 @@ public class Shooter extends SubsystemBase {
         return targetPoint.getDistance(estimatedPose.getTranslation());
     }
 
-    public double getDynamicRPS(Pose2d estimatedPose, Translation2d targetPoint){ // calculates the RPS based on odometry (best used when the robot is still)
-        double distance = getDistance(estimatedPose, targetPoint);
-        return lookupVelocity(distance);
+    public Supplier<Double> getDynamicRPS(Supplier<Pose2d> estimatedPose, Supplier<Translation2d> targetPoint) {
+        return () -> {
+            double distance = getDistance(estimatedPose.get(), targetPoint.get());
+            return lookupVelocity(distance);
+        };
     }
 
     public void runUpperFlywheelMotors(double speed) {
@@ -169,11 +173,11 @@ public class Shooter extends SubsystemBase {
         return MathUtil.isNear(targetRPS, velocity, 5);
     }
 
-    public boolean isShooterAtSpeed(double targetRPS) {
+    public boolean isShooterAtSpeed(Supplier<Double> targetRPS) {
         double upperVelocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
         double lowerVelocity = m_lowerFlywheel.getVelocity().getValueAsDouble();
-        boolean isUpperAtSpeed = MathUtil.isNear(targetRPS, upperVelocity, 5);
-        boolean isLowerAtSpeed = MathUtil.isNear(targetRPS, lowerVelocity, 5);
+        boolean isUpperAtSpeed = MathUtil.isNear(targetRPS.get(), upperVelocity, 5);
+        boolean isLowerAtSpeed = MathUtil.isNear(targetRPS.get(), lowerVelocity, 5);
         return isUpperAtSpeed && isLowerAtSpeed;
     }
     
@@ -199,7 +203,6 @@ public class Shooter extends SubsystemBase {
     //     );
     // }
 
-
     public Command StopUpperFlywheelCommand(){
         return run(this::stopUpperFlywheelMotors);
     }
@@ -211,8 +214,6 @@ public class Shooter extends SubsystemBase {
     public Command stopBothFlywheelCommand(){
         return this.run(() -> stopBothFlywheelMotors());
     }
-
-    
 
     public Command ShootWithAprilTagCommand() {
         return new FunctionalCommand(
@@ -236,10 +237,33 @@ public class Shooter extends SubsystemBase {
         );
     }
 
-    public Command ShootWithoutAprilTagCommand(double rps) {
+    public Command ShootWithoutAprilTagCommand(double rps) { // for the subsystem controller commands
         return new FunctionalCommand(
             () -> {},
             () -> {
+                runUpperFlywheelMotors(rps);
+                // m_LedLights.setLEDMode(LEDMode.Charging);
+                if (isUpperAtSpeed(rps)) {
+                    runLowerFlywheelMotors(rps);
+                    // m_LedLights.setLEDMode(LEDMode.Shooting);
+
+                }
+            },
+            interrupted -> {
+                stopBothFlywheelMotors();
+                // m_LedLights.setLEDMode(LEDMode.Off);
+
+            },
+            () -> false,
+            this
+        );
+    }
+
+    public Command ShootWithoutAprilTagCommand(Supplier<Double> rpsSupplier) { // for the drivebase controller commands
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                double rps = rpsSupplier.get();
                 runUpperFlywheelMotors(rps);
                 // m_LedLights.setLEDMode(LEDMode.Charging);
                 if (isUpperAtSpeed(rps)) {
@@ -262,6 +286,22 @@ public class Shooter extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
+                runUpperFlywheelMotors(rps);
+                // m_LedLights.setLEDMode(LEDMode.Charging);
+            },
+            interrupted -> {
+                // m_LedLights.setLEDMode(LEDMode.Off);
+            },
+            () -> false,
+            this
+        );
+    }
+
+    public Command WarmUpShooter(Supplier<Double> rpsSupplier) { // only warms up the upper motors lol (but with dynamic rps)
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                double rps = rpsSupplier.get();
                 runUpperFlywheelMotors(rps);
                 // m_LedLights.setLEDMode(LEDMode.Charging);
             },

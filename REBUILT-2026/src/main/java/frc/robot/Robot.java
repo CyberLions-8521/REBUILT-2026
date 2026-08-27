@@ -7,11 +7,13 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.SwerveDrivebase;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -44,7 +46,9 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_drivebase.stopAutonomousDrive(); // written here to prevent autonomous drift problems
+  }
 
   @Override
   public void teleopInit() {

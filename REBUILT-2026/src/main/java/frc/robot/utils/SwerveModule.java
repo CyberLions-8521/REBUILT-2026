@@ -196,33 +196,15 @@ public class SwerveModule {
 
     /* -------------------------------------------------- Extraneous --------------------------------------------------
     * Extra methods leftover from when I started to modify the swerve module code
-    * It is not certain whether these are 100%, absolutely necessary in the module class
     * Nothing else really needed to be said
     */
     //#region
-
-    /** Returns the absolute CANcoder position in rotations. */
-    private double getCANCoderPosition() {
-        if (RobotBase.isSimulation()) return m_simTurnPosition.getRotations();
-        return m_CANcoder.getAbsolutePosition().getValueAsDouble();
-    }
 
     /** Logs key encoder and target values for this module to SmartDashboard. */
     public void logData(String motor){
         SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber(motor + " actual turn position", getTurnEncoderValueRotations());
         SmartDashboard.putNumber(motor + " desired turn position", m_desiredState.angle.getRotations());
-    }
-
-    /** Aligns the turn motor encoder with the absolute CANcoder reading. */
-    private void calibrateTurnEncoder() {
-        m_turnMotor.setPosition(m_CANcoder.getAbsolutePosition().getValueAsDouble());
-    }
-
-    /** Sets the drive encoder distance to the given value in meters. */
-    public void setEncoderDistance(double distance) {
-        if (RobotBase.isSimulation()) m_simDriveDistanceMeters = distance;
-        m_driveMotor.setPosition(distance);
     }
 
     /** Stops both the drive and turn motors. */
