@@ -46,7 +46,7 @@ public class RobotContainer {
   public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
 
   public RobotContainer() {
-    NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60, false));
+    NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60));
     NamedCommands.registerCommand("IntakePivotOut", m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
     NamedCommands.registerCommand("IntakeForDuration", m_intake.getIntakeCommand(0.6).withTimeout(4));
     NamedCommands.registerCommand("ShootForDuration", 
@@ -106,7 +106,7 @@ public class RobotContainer {
             ),
             m_drivebase.odometryAutoDistance(getAllianceHubLocation())
           ),
-          m_shooter.WarmUpShooter(60, false) // warm up the shooter ahead of time
+          m_shooter.WarmUpShooter(60) // warm up the shooter ahead of time
         ),
         Commands.parallel(
           m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPose(), getAllianceHubLocation())),

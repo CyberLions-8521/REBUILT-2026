@@ -6,6 +6,8 @@
 package frc.robot.utils;
 
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -14,6 +16,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Configs.SwerveConfigs;
@@ -25,20 +29,27 @@ public class SwerveModule {
 
     // ---------------------------------------------------- Fields ----------------------------------------------------
     //#region
-    private TalonFX m_driveMotor;
+    private TalonFX m_driveMotor; // basic section
     private TalonFX m_turnMotor; 
     private CANcoder m_CANcoder;
-
     private VelocityVoltage m_driveRequest;
     private PositionVoltage m_turnRequest;
-
     private SwerveModuleState m_desiredState = new SwerveModuleState();
 
-    private double m_simDriveDistanceMeters = 0.0;
+    private StatusSignal<Angle> m_drivePositionSignal; // odometry section
+    private StatusSignal<AngularVelocity> m_driveVelocitySignal;
+    private StatusSignal<Angle> m_turnPositionSignal;
+
+    private double m_simDriveDistanceMeters = 0.0; // simulation section
     private double m_simDriveVelocityMetersPerSecond = 0.0;
     private Rotation2d m_simTurnPosition = new Rotation2d();
 
     //#endregion
+
+
+
+
+
 
     /* ---------------------------------------------------- Basic ----------------------------------------------------
     * The basic methods needed for the drivebase to work
@@ -62,6 +73,10 @@ public class SwerveModule {
         zeroDriveEncoder();
         // calibrateTurnEncoder();
         configMagnets(-magnetOffset);
+
+        m_drivePositionSignal = m_driveMotor.getPosition();
+        m_driveVelocitySignal = m_driveMotor.getVelocity();
+        m_turnPositionSignal = m_turnMotor.getPosition();
     }
 
     /** Sets the target wheel speed and angle for this module. */
@@ -90,7 +105,7 @@ public class SwerveModule {
     /** Returns the current turn encoder position in rotations. */
     private double getTurnEncoderValueRotations() {
         if (RobotBase.isSimulation()) return m_simTurnPosition.getRotations();
-        return m_turnMotor.getPosition().getValueAsDouble();
+        return m_turnPositionSignal.getValueAsDouble();
     }
 
     /** Resets the drive encoder distance to zero. */
@@ -109,19 +124,21 @@ public class SwerveModule {
     /* --------------------------------------------------- Odometry ---------------------------------------------------
     * Most of the explanation and actual odometry/pose estimation is in SwerveDrivebase
     * The purpose of these methods are to return the data from each module so it can be fed into the pose estimator
+    * StatusSignal<T>s are used to return module data over the motors returning them directly for tracking the timestamp between updates
+        * They cache their data as well for less memory usage (I think) instead of repeatedly getting data from the motors
     */
     //#region
 
     /** Returns the current drive velocity in meters per second. */
     private double getDriveVelocityMetersPerSecond() {
         if (RobotBase.isSimulation()) return m_simDriveVelocityMetersPerSecond;
-        return m_driveMotor.getVelocity().getValueAsDouble();
+        return m_driveVelocitySignal.getValueAsDouble();
     }
 
     /** Returns the total drive distance traveled in meters. */
     public double getDriveDistance() {
         if (RobotBase.isSimulation()) return m_simDriveDistanceMeters;
-        return m_driveMotor.getPosition().getValueAsDouble();
+        return m_drivePositionSignal.getValueAsDouble();
     }
 
     /** Returns the module position used for swerve odometry. */
@@ -132,6 +149,20 @@ public class SwerveModule {
     /** Returns the module state used for kinematics and telemetry. */
     public SwerveModuleState getState() {
         return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
+    }
+
+    /** Updates all of the status signals in a singular method. */
+    public void refreshOdometryStatusSignals() {
+        BaseStatusSignal.refreshAll(
+            m_drivePositionSignal,
+            m_driveVelocitySignal,
+            m_turnPositionSignal
+        );
+    }
+
+    /** Returns the timstamp of the drive position status signal. */
+    public double getOdometryTimestampSeconds() {
+        return m_drivePositionSignal.getTimestamp().getTime();
     }
 
     //#endregion

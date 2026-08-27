@@ -258,22 +258,15 @@ public class Shooter extends SubsystemBase {
         );
     }
 
-    public Command WarmUpShooter(double rps, boolean stopWhenFinished) {
+    public Command WarmUpShooter(double rps) { // only warms up the upper motors lol
         return new FunctionalCommand(
             () -> {},
             () -> {
                 runUpperFlywheelMotors(rps);
                 // m_LedLights.setLEDMode(LEDMode.Charging);
-                if (isUpperAtSpeed(rps)) {
-                    runLowerFlywheelMotors(rps);
-                    // m_LedLights.setLEDMode(LEDMode.Shooting);
-
-                }
             },
             interrupted -> {
-                if (stopWhenFinished) stopBothFlywheelMotors();
                 // m_LedLights.setLEDMode(LEDMode.Off);
-
             },
             () -> false,
             this

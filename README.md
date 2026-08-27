@@ -12,7 +12,7 @@ Added:
 * Odometry-based auto-distance [✅]
 * Elastic dashboard 
 * Dynamic PID tuning [✅]
-* Limelight visionary pose estimation (likely needs to be configured correctly in RobotContainer)
+* Limelight visionary pose estimation
 
 The odometry based auto-align and auto-distancing can take in any Translation2d object (any point on the field) and can target it. So anything is possible including using it for slightly easier passing, etc.
 

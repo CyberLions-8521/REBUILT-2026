@@ -104,6 +104,8 @@ public class Constants {
         public static final double kLimelightYaw = 0.0;
 
         public static final double kMaxViableGyroRate = 720.0; // degrees 
+        public static final double kMaxTagDistance = 3.0;
+        public static final double kMaxPoseJump = 2.0;
     }
 
     public static final class ShooterConstants {

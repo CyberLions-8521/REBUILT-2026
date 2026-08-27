@@ -19,6 +19,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -47,22 +49,27 @@ public class SwerveDrivebase extends SubsystemBase {
   
   // ---------------------------------------------------- Fields ----------------------------------------------------
   //#region
-  private final SwerveModule m_frontLeft;
+  private final SwerveModule m_frontLeft; // basic section
   private final SwerveModule m_frontRight;
   private final SwerveModule m_backLeft;
   private final SwerveModule m_backRight;
-
   private final SwerveDriveKinematics m_kinematics;
-  private final SwerveDrivePoseEstimator m_poseEstimator;
-  private final Field2d m_field;
+  private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI); 
 
-  private Rotation2d m_simHeading = new Rotation2d();
+  private final SwerveDrivePoseEstimator m_poseEstimator; // odometry
+
+  private final Field2d m_field; // simulation section
+  private final FieldObject2d m_frontLeftObject2d;
+  private final FieldObject2d m_frontRighObject2d;
+  private final FieldObject2d m_backLeftObject2d;
+  private final FieldObject2d m_backRightObject2d;
+  private Rotation2d m_simHeading = new Rotation2d(); 
   private ChassisSpeeds m_lastRobotRelativeSpeeds = new ChassisSpeeds();
 
-  private ProfiledPIDController m_autoAlignPID;
+  private ProfiledPIDController m_autoAlignPID; // auto-alignment section
   private ProfiledPIDController m_autoDistancePID;
 
-  private double m_lastDriveP = SwerveConstants.kDriveP;
+  private double m_lastDriveP = SwerveConstants.kDriveP; // extraneous section
   private double m_lastDriveV = SwerveConstants.kDriveV;
   private double m_lastTurnP = SwerveConstants.kTurnP;
   private double m_lastTurnD = SwerveConstants.kTurnD;
@@ -72,8 +79,6 @@ public class SwerveDrivebase extends SubsystemBase {
   private double m_lastAutoDistanceP = SwerveConstants.kAutoDistanceP;
   private double m_lastAutoDistanceI = SwerveConstants.kAutoDistanceI;
   private double m_lastAutoDistanceD = SwerveConstants.kAutoDistanceD;
-
-  private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
   
   //#endregion
 
@@ -134,7 +139,12 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePositions(), new Pose2d());
+    
     m_field = new Field2d();
+    m_frontLeftObject2d = m_field.getObject("Front Left Module");
+    m_frontRighObject2d = m_field.getObject("Front Right Module");
+    m_backLeftObject2d = m_field.getObject("Back Left Module");
+    m_backRightObject2d = m_field.getObject("Back Right Module");
 
     m_autoAlignPID = new ProfiledPIDController(
       SwerveConstants.kAutoAlignP, 
@@ -167,6 +177,9 @@ public class SwerveDrivebase extends SubsystemBase {
     SmartDashboard.putNumber("Auto-distance P", SwerveConstants.kAutoDistanceP);
     SmartDashboard.putNumber("Auto-distance I", SwerveConstants.kAutoDistanceI);
     SmartDashboard.putNumber("Auto-distance D", SwerveConstants.kAutoDistanceD);
+
+    // makes the pathplanner autos on the blue alliance on default
+    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Sim/Force Blue Autos", true); 
 
     setupPathPlanner();
   }
@@ -207,7 +220,12 @@ public class SwerveDrivebase extends SubsystemBase {
     getLimelightData();
     tunePIDControllers();
     
-    m_poseEstimator.update(getHeading(), getModulePositions());
+    refreshOdometryStatusSignals();
+    m_poseEstimator.updateWithTime(
+      getOdometryTimestampAvgSeconds(),
+      getHeading(),
+      getModulePositions()
+    );
 
     LimelightHelpers.PoseEstimate visionEstimation = getLimelightPose(LimelightConstants.limelightName);
     if (visionEstimation != null) {
@@ -223,7 +241,32 @@ public class SwerveDrivebase extends SubsystemBase {
       );
     }
     
-    m_field.setRobotPose(getPose());
+    Pose2d robotPose = getPose();
+    m_field.setRobotPose(robotPose);
+    m_frontLeftObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
+        m_frontLeft.getState().angle
+      )
+    ));
+    m_frontRighObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
+        m_frontRight.getState().angle
+      )
+    ));
+    m_backLeftObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(-SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
+        m_backLeft.getState().angle
+      )
+    ));
+    m_backRightObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(-SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
+        m_backRight.getState().angle
+      )
+    ));
 
   }
 
@@ -241,6 +284,8 @@ public class SwerveDrivebase extends SubsystemBase {
   * Standard deviation is used to tell the pose estimator/odometry how much to trust a sensor. 
   * The trust on vision is dynamic through # of tags, distance, etc.
   * Pathplanner is very important for odometry as it returns the field data for auto after it's done
+  * StatusSignal<T>s are used to return module data over the motors returning them directly for tracking the timestamp between updates
+    * They cache their data as well for less memory usage (I think) instead of repeatedly getting data from the motors
   */
   //#region
   
@@ -278,18 +323,38 @@ public class SwerveDrivebase extends SubsystemBase {
 
     LimelightHelpers.PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
-    if (estimate.tagCount == 0) return null; // If there are no tags in sight, return null
-
-    if (Math.abs(m_gyro.getRate()) > LimelightConstants.kMaxViableGyroRate) return null; // If there is too much rotational motion, return null
-    
-    if ( // Check x, y, and timestamp values
-      !Double.isFinite(estimate.pose.getX()) ||
-      !Double.isFinite(estimate.pose.getY()) ||
-      !Double.isFinite(estimate.timestampSeconds)
-    ) return null;
+    if (!isUsableVisionEstimate(estimate)) return null;
 
     return estimate;
 
+  }
+
+  /** Dedicated helper function to make sure the vision estimate is trustworthy and to reject all untrustworthy values. */
+  private boolean isUsableVisionEstimate(LimelightHelpers.PoseEstimate estimate) {
+    // check if there is no estimate or if there are no april tags in sight
+    if (estimate == null || estimate.tagCount == 0) return false; 
+
+    Pose2d visionPose = estimate.pose;
+
+    // Check x, y, and timestamp values
+    if ( 
+      !Double.isFinite(visionPose.getX()) ||
+      !Double.isFinite(visionPose.getY()) ||
+      !Double.isFinite(estimate.timestampSeconds)
+    ) return false;
+
+    // check if there is too much rotation for an accurate result
+    if (Math.abs(m_gyro.getRate()) > LimelightConstants.kMaxViableGyroRate) return false; 
+
+    // check if the tag is too far
+    if (estimate.avgTagDist > LimelightConstants.kMaxTagDistance) return false; 
+
+    double poseJump = visionPose.getTranslation().getDistance(getPose().getTranslation());
+
+    // check if the distances between the two poses are not too far given only one tag
+    if (estimate.tagCount == 1 && poseJump > LimelightConstants.kMaxPoseJump) return false; 
+
+    return true;
   }
 
   /** Returns a varying standard deviation value for visionary estimation depending on # of tags, distance from tags, etc. Smaller value = more trust, vice versa*/
@@ -297,6 +362,24 @@ public class SwerveDrivebase extends SubsystemBase {
     if (estimate.tagCount >= 2) return 0.25;
     else if (estimate.avgTagDist < 2.0) return 0.5;
     else return 1.5;
+  }
+
+  /** Refreshes all StatusSignal<T>s accross all swerve modules */
+  private void refreshOdometryStatusSignals() {
+    m_frontLeft.refreshOdometryStatusSignals();
+    m_frontRight.refreshOdometryStatusSignals();
+    m_backLeft.refreshOdometryStatusSignals();
+    m_backRight.refreshOdometryStatusSignals();
+  }
+
+  /** Calculates the average timestamp between updates from all modules */
+  private double getOdometryTimestampAvgSeconds() {
+    return (
+      m_frontLeft.getOdometryTimestampSeconds()
+      + m_frontRight.getOdometryTimestampSeconds()
+      + m_backLeft.getOdometryTimestampSeconds()
+      + m_backRight.getOdometryTimestampSeconds()
+    ) / 4.0;
   }
 
   //#endregion
@@ -326,6 +409,12 @@ public class SwerveDrivebase extends SubsystemBase {
     m_frontRight.updateSim(delay);
     m_backLeft.updateSim(delay);
     m_backRight.updateSim(delay);
+  }
+
+  /** Lets me flip the alliance the autos are based on dynamically in simulation */
+  private boolean shouldFlipPathForAlliance() {
+    if (RobotBase.isSimulation() && SmartDashboard.getBoolean("Sim/Force Blue Autos", true)) return false;
+    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 
   //#endregion
@@ -407,8 +496,8 @@ public class SwerveDrivebase extends SubsystemBase {
           false
         );
       }, 
-      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> false, 
+      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
+      () -> m_autoDistancePID.atGoal(), 
       this
     );
   }
@@ -488,18 +577,21 @@ public class SwerveDrivebase extends SubsystemBase {
           ),
           config,
           // The robot configuration
-          () -> {
-            // Boolean supplier that controls when the path will be mirrored for the red alliance
-            // This will flip the path being followed to the red side of the field.
-            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-            var alliance = DriverStation.getAlliance();
-            if (alliance.isPresent())
-            {
-              return alliance.get() == DriverStation.Alliance.Red;
-            }
-            return false;
-          },
+          // () -> {
+          //   // Boolean supplier that controls when the path will be mirrored for the red alliance
+          //   // This will flip the path being followed to the red side of the field.
+          //   // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          //   var alliance = DriverStation.getAlliance();
+          //   if (alliance.isPresent())
+          //   {
+          //     return alliance.get() == DriverStation.Alliance.Red;
+          //   }
+          //   return false;
+          // },
+          this::shouldFlipPathForAlliance,
+
           this
           // Reference to this subsystem to set requirements
                            );
@@ -537,7 +629,7 @@ public class SwerveDrivebase extends SubsystemBase {
         return;
       }
 
-      if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      if (shouldFlipPathForAlliance()) {
         startingPose = FlippingUtil.flipFieldPose(startingPose);
       }
 
