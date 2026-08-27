@@ -24,11 +24,13 @@ Please test my code and don't trust it blindly...
 
 * Includes 2 Translation2d objects that allow the odometry-alignment commands to point to either hub depending on the alliance
 * Includes 9 autos designed in PathPlanner
-    * No movement but still updates the starting pose for odometry [L/M/R]
+    * No movement but still updates the starting pose for odometry [L/M/R] (Emergency stop equivalent)
     * Only shoot the preloaded fuel [L/M/R]
     * Shoot the preloaded fuel and collect from the neutral zone [L/R]
     * Collect fuel from the outpost and shoot [R]
 
 ## Controls
 
-<img src="/image-assets/bindings.png" width="700">
+<div align="center">
+    <img src="/image-assets/bindings.png" width="800">
+</div>

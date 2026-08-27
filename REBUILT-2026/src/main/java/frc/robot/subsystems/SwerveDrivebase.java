@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.Supplier;
+import java.util.spi.CalendarNameProvider;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -465,7 +466,7 @@ public class SwerveDrivebase extends SubsystemBase {
   //#region
 
   /** Auto-align to a certain point on the field using odometry */
-  public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean stop) {
+  public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
     return new FunctionalCommand(
       () -> {
         // compacted math of below to set the current position and target before command runs
@@ -490,14 +491,179 @@ public class SwerveDrivebase extends SubsystemBase {
         // The only time it shouldn't is when the robot is too close to the target and break the math
         double distance = m_targetPoint.getDistance(fieldLocation);
         this.drive(
-          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0), // if the robot needs to stop at the end, ignore joystick input
-          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0),
+          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, 
+          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
           (distance > 0.5) ? pidOutput : 0.0,
           true
         );
       }, 
       (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> m_autoAlignPID.atGoal() && stop, 
+      () -> false, 
+      this
+    );
+  }
+
+  /** Overload that ignores joystick input and will terminate at the end for the next command */
+  public Command odometryAutoAlign(Translation2d m_targetPoint) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Pose2d position = getPose();
+        Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle();
+        m_autoAlignPID.reset(position.getRotation().getRadians());
+        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+      },
+      () -> {
+        // First part - calculate dynamic heading
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
+        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
+
+        // Second part - convert dynamic heading to be suitable with the drive method
+        Rotation2d currentHeading = position.getRotation();
+        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+
+        // Third part - Run drive command and stop alignment when needed
+        // The only time it shouldn't is when the robot is too close to the target and break the math
+        double distance = m_targetPoint.getDistance(fieldLocation);
+        this.drive(
+          0.0, // if the robot needs to stop at the end, do not move 
+          0.0,
+          (distance > 0.5) ? pidOutput : 0.0,
+          true
+        );
+      }, 
+      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
+      () -> m_autoAlignPID.atGoal(), 
+      this
+    );
+  }
+
+  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
+  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
+        m_autoAlignPID.reset(position.getRotation().getRadians());
+        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+      },
+      () -> {
+        // First part - calculate dynamic heading
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
+        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
+
+        // Second part - convert dynamic heading to be suitable with the drive method
+        Rotation2d currentHeading = position.getRotation();
+        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+
+        // Third part - Run drive command and stop alignment when needed
+        // The only time it shouldn't is when the robot is too close to the target and break the math
+        double distance = targetPoint.getDistance(fieldLocation);
+        this.drive(
+          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, // if the robot needs to stop at the end, ignore joystick input
+          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
+          (distance > 0.5) ? pidOutput : 0.0,
+          true
+        );
+      }, 
+      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
+      () -> false, 
+      this
+    );
+  }
+
+  /** Overload that ignores joystick input and will terminate at the end for the next command */
+  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
+        m_autoAlignPID.reset(position.getRotation().getRadians());
+        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+      },
+      () -> {
+        // First part - calculate dynamic heading
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
+        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
+
+        // Second part - convert dynamic heading to be suitable with the drive method
+        Rotation2d currentHeading = position.getRotation();
+        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+
+        // Third part - Run drive command and stop alignment when needed
+        // The only time it shouldn't is when the robot is too close to the target and break the math
+        double distance = targetPoint.getDistance(fieldLocation);
+        this.drive(
+          0.0, // if the robot needs to stop at the end, do not move
+          0.0,
+          (distance > 0.5) ? pidOutput : 0.0,
+          true
+        );
+      }, 
+      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
+      () -> m_autoAlignPID.atGoal(), 
+      this
+    );
+  }
+
+  /** Special overload that allows for a shooter to run in parallel accurately */
+  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean isShooterInParallel) {
+    return new FunctionalCommand(
+      () -> {
+        // compacted math of below to set the current position and target before command runs
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
+        m_autoAlignPID.reset(position.getRotation().getRadians());
+        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+      },
+      () -> {
+        // First part - calculate dynamic heading
+        Translation2d targetPoint = m_targetPoint.get();
+        Pose2d position = getPose();
+        Translation2d fieldLocation = position.getTranslation();
+        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
+        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
+
+        // Second part - convert dynamic heading to be suitable with the drive method
+        Rotation2d currentHeading = position.getRotation();
+        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+
+        // Third part - Run drive command and stop alignment when needed
+        // The only time it shouldn't is when the robot is too close to the target and break the math
+        double distance = targetPoint.getDistance(fieldLocation);
+        double xInput = -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond; 
+        double yInput = -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond;
+        if (isShooterInParallel) {
+          // scale down the max joystick value if a shooter is running in parallel so it can shoot accurately
+          xInput *= 0.2;
+          yInput *= 0.2;
+        }
+        this.drive(
+          xInput,
+          yInput,
+          (distance > 0.5) ? pidOutput : 0.0,
+          true
+        );
+      }, 
+      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
+      () -> false, 
       this
     );
   }
@@ -530,46 +696,6 @@ public class SwerveDrivebase extends SubsystemBase {
       }, 
       (interrupted) -> drive(0.0, 0.0, 0.0, true), 
       () -> m_autoDistancePID.atGoal() && stop, 
-      this
-    );
-  }
-
-  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
-  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean stop) {
-    return new FunctionalCommand(
-      () -> {
-        // compacted math of below to set the current position and target before command runs
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
-      },
-      () -> {
-        // First part - calculate dynamic heading
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = MathUtil.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = targetPoint.getDistance(fieldLocation);
-        this.drive(
-          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0), // if the robot needs to stop at the end, ignore joystick input
-          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond * ((stop) ? 0.0 : 1.0),
-          (distance > 0.5) ? pidOutput : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> m_autoAlignPID.atGoal() && stop, 
       this
     );
   }
@@ -608,6 +734,7 @@ public class SwerveDrivebase extends SubsystemBase {
     );
   }
 
+  /** Checks if the auto-align command is aligned */
   public boolean isAutoAligned() {
     return m_autoAlignPID.atGoal();
   }

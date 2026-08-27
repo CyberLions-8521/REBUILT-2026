@@ -32,7 +32,7 @@ public class RobotContainer {
   Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
   Indexer m_indexer = new Indexer();
-  LEDLights m_lights = new LEDLights(m_shooter);
+  LEDLights m_lights = new LEDLights(m_shooter, getAllianceHubLocation());
   
   private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
 
@@ -95,17 +95,12 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-    // auto-align, auto distance, and shoot - x
+    // auto-align, auto distance, and shoot - x [EXPERIMENTAL]
     m_driveController.x().whileTrue(
       new SequentialCommandGroup(
         Commands.deadline(
           new SequentialCommandGroup(
-            m_drivebase.odometryAutoAlign(
-              getAllianceHubLocation(), 
-              getJoystickValues(m_driveController::getLeftY, vx_limiter), // joystick input does nothing lol
-              getJoystickValues(m_driveController::getLeftX, vy_limiter), // cause stop makes it ignored
-              true
-            ),
+            m_drivebase.odometryAutoAlign(getAllianceHubLocation()),
             m_drivebase.odometryAutoDistance(getAllianceHubLocation(), true)
           ),
           m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) // warm up the upper rollers ahead of time
@@ -129,7 +124,7 @@ public class RobotContainer {
           getAllianceHubLocation(), 
           getJoystickValues(m_driveController::getLeftY, vx_limiter),
           getJoystickValues(m_driveController::getLeftX, vy_limiter),
-          false
+          true
         ),
         Commands.either(
           m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())), 
@@ -151,8 +146,7 @@ public class RobotContainer {
       m_drivebase.odometryAutoAlign(
         getAllianceHubLocation(),
         getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-        getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-        false
+        getJoystickValues(m_driveController::getLeftX, vy_limiter)
         )
     );
 
