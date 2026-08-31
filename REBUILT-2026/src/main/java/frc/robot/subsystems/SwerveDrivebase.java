@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import java.util.function.Supplier;
-import java.util.spi.CalendarNameProvider;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -178,19 +177,20 @@ public class SwerveDrivebase extends SubsystemBase {
 
     SmartDashboard.putData("Field", m_field); // puts robot data on the field for simulation
 
-    SmartDashboard.putNumber("Drive P", SwerveConstants.kDriveP);
-    SmartDashboard.putNumber("Drive V (feed forward)", SwerveConstants.kDriveV);
-    SmartDashboard.putNumber("Turn P", SwerveConstants.kTurnP);
-    SmartDashboard.putNumber("Turn D", SwerveConstants.kTurnD);
-    SmartDashboard.putNumber("Auto-align P", SwerveConstants.kAutoAlignP);
-    SmartDashboard.putNumber("Auto-align I", SwerveConstants.kAutoAlignI);
-    SmartDashboard.putNumber("Auto-align D", SwerveConstants.kAutoAlignD);
-    SmartDashboard.putNumber("Auto-distance P", SwerveConstants.kAutoDistanceP);
-    SmartDashboard.putNumber("Auto-distance I", SwerveConstants.kAutoDistanceI);
-    SmartDashboard.putNumber("Auto-distance D", SwerveConstants.kAutoDistanceD);
+    SmartDashboard.putNumber("PID Constants/Drive P", SwerveConstants.kDriveP);
+    SmartDashboard.putNumber("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
+    SmartDashboard.putNumber("PID Constants/Turn P", SwerveConstants.kTurnP);
+    SmartDashboard.putNumber("PID Constants/Turn D", SwerveConstants.kTurnD);
+    SmartDashboard.putNumber("PID Constants/Auto-align P", SwerveConstants.kAutoAlignP);
+    SmartDashboard.putNumber("PID Constants/Auto-align I", SwerveConstants.kAutoAlignI);
+    SmartDashboard.putNumber("PID Constants/Auto-align D", SwerveConstants.kAutoAlignD);
+    SmartDashboard.putNumber("PID Constants/Auto-distance P", SwerveConstants.kAutoDistanceP);
+    SmartDashboard.putNumber("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
+    SmartDashboard.putNumber("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
 
     // makes the pathplanner autos on the blue alliance on default
-    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Sim/Force Blue Alliance", true); 
+    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Simulation/(Simulation Only) Blue Alliance", true); 
+    SmartDashboard.setDefaultBoolean("Odometry/Use Limelight pose", true);
 
     setupPathPlanner();
   }
@@ -242,7 +242,6 @@ public class SwerveDrivebase extends SubsystemBase {
   /** Updates Limelight data, odometry, and the dashboard field display each scheduler loop. */
   @Override
   public void periodic() { 
-    getLimelightData();
     tunePIDControllers();
     
     refreshOdometryStatusSignals();
@@ -252,8 +251,9 @@ public class SwerveDrivebase extends SubsystemBase {
       getModulePositions()
     );
 
+    boolean useVisionPoseToggle = SmartDashboard.getBoolean("Odometry/Use Limelight pose", true);
     LimelightHelpers.PoseEstimate visionEstimation = getLimelightPose(LimelightConstants.limelightName);
-    if (visionEstimation != null) {
+    if (visionEstimation != null && useVisionPoseToggle) {
       double xyStdDev = getStandardDeviation(visionEstimation);
       m_poseEstimator.addVisionMeasurement(
         visionEstimation.pose,
@@ -265,6 +265,7 @@ public class SwerveDrivebase extends SubsystemBase {
         )
       );
     }
+    postLimelightData(visionEstimation);
     
     Pose2d robotPose = getPose();
     m_field.setRobotPose(robotPose);
@@ -446,7 +447,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Lets me flip the alliance the autos are based on dynamically in simulation but still works for real use */
   public boolean shouldFlipPathForAlliance() {
-    if (RobotBase.isSimulation() && SmartDashboard.getBoolean("Sim/Force Blue Alliance", true)) return false;
+    if (RobotBase.isSimulation() && SmartDashboard.getBoolean("Simulation/(Simulation Only) Blue Alliance", true)) return false;
     return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 
@@ -899,16 +900,16 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Dynamically tune the PID controllers of the drivebase */
   public void tunePIDControllers () {
-    double driveP = SmartDashboard.getNumber("Drive P", SwerveConstants.kDriveP);
-    double driveV = SmartDashboard.getNumber("Drive V (feed forward)", SwerveConstants.kDriveV);
-    double turnP = SmartDashboard.getNumber("Turn P", SwerveConstants.kTurnP);
-    double turnD = SmartDashboard.getNumber("Turn D", SwerveConstants.kTurnD);
-    double autoAlignP = SmartDashboard.getNumber("Auto-align P", SwerveConstants.kAutoAlignP);
-    double autoAilgnI = SmartDashboard.getNumber("Auto-align I", SwerveConstants.kAutoAlignI);
-    double autoAlignD = SmartDashboard.getNumber("Auto-align D", SwerveConstants.kAutoAlignD);
-    double autoDistanceP = SmartDashboard.getNumber("Auto-distance P", SwerveConstants.kAutoDistanceP);
-    double autoDistanceI = SmartDashboard.getNumber("Auto-distance I", SwerveConstants.kAutoDistanceI);
-    double autoDistanceD = SmartDashboard.getNumber("Auto-distance D", SwerveConstants.kAutoDistanceD);
+    double driveP = SmartDashboard.getNumber("PID Constants/Drive P", SwerveConstants.kDriveP);
+    double driveV = SmartDashboard.getNumber("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
+    double turnP = SmartDashboard.getNumber("PID Constants/Turn P", SwerveConstants.kTurnP);
+    double turnD = SmartDashboard.getNumber("PID Constants/Turn D", SwerveConstants.kTurnD);
+    double autoAlignP = SmartDashboard.getNumber("PID Constants/Auto-align P", SwerveConstants.kAutoAlignP);
+    double autoAilgnI = SmartDashboard.getNumber("PID Constants/Auto-align I", SwerveConstants.kAutoAlignI);
+    double autoAlignD = SmartDashboard.getNumber("PID Constants/Auto-align D", SwerveConstants.kAutoAlignD);
+    double autoDistanceP = SmartDashboard.getNumber("PID Constants/Auto-distance P", SwerveConstants.kAutoDistanceP);
+    double autoDistanceI = SmartDashboard.getNumber("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
+    double autoDistanceD = SmartDashboard.getNumber("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
 
     if (driveP != m_lastDriveP || driveV != m_lastDriveV) {
       m_frontLeft.configDrivePID(driveP, driveV);
@@ -960,10 +961,13 @@ public class SwerveDrivebase extends SubsystemBase {
     m_backRight.logData("Back Right");
   }
 
-  /** Logs the Limelight target offsets to SmartDashboard. */
-  private void getLimelightData() {
-    SmartDashboard.putNumber("TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
-    SmartDashboard.putNumber("TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+  /** Logs Limelight data to SmartDashboard. */
+  private void postLimelightData(LimelightHelpers.PoseEstimate estimate) {
+    SmartDashboard.putBoolean("Limelight Data/Valid target", LimelightHelpers.getTV(LimelightConstants.limelightName));
+    SmartDashboard.putBoolean("Limelight Data/Valid for pose estimation", isUsableVisionEstimate(estimate));
+    SmartDashboard.putNumber("Limelight Data/TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("Limelight Data/TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
+    SmartDashboard.putNumber("Limelight Data/Tag Count", (isUsableVisionEstimate(estimate)) ? estimate.tagCount : 0);
   }
 
   /** Stops all four swerve modules. */

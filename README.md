@@ -1,6 +1,6 @@
 # Branch for my version of the robot code
 
-A little thing that I've been working on during my free-time and for the better of the robotics team. It might be useful for any competitions of REBUILT assuming that everything works. It is mostly the same code, but with the drivetrain code under improvements by me. Below:
+May be possibly used for the SoCal competition
 
 Anything below with a checkmark [✅] has been tested on the robot and confirmed to work.
 
@@ -17,10 +17,6 @@ Added:
 The odometry based auto-align and auto-distancing can take in any Translation2d object (any point on the field) and can target it. So anything is possible including using it for slightly easier passing, etc.
 
 (The branch Ethan-Drivebase is the original branch and the branch before I re-added the subsystems back onto the drivebase.)
-
-Please test my code and don't trust it blindly...
-
-## Bonus
 
 * Includes 2 Translation2d objects that allow the odometry-alignment commands to point to either hub depending on the alliance
 * Includes 9 autos designed in PathPlanner
