@@ -4,9 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.framework.TimedRobot;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 import frc.robot.subsystems.SwerveDrivebase;
 
 public class Robot extends TimedRobot {
@@ -63,14 +63,11 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopExit() {}
 
-  @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 
-  @Override
   public void testPeriodic() {}
 
-  @Override
   public void testExit() {}
 }

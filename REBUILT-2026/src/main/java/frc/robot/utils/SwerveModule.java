@@ -7,19 +7,21 @@ package frc.robot.utils;
 
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.smartdashboard.SmartDashboard;
 import frc.robot.utils.Configs.SwerveConfigs;
 import frc.robot.utils.Constants.SwerveConstants;
 
@@ -34,7 +36,7 @@ public class SwerveModule {
     private CANcoder m_CANcoder;
     private VelocityVoltage m_driveRequest;
     private PositionVoltage m_turnRequest;
-    private SwerveModuleState m_desiredState = new SwerveModuleState();
+    private SwerveModuleVelocity m_desiredState = new SwerveModuleVelocity();
 
     private StatusSignal<Angle> m_drivePositionSignal; // odometry section
     private StatusSignal<AngularVelocity> m_driveVelocitySignal;
@@ -62,9 +64,9 @@ public class SwerveModule {
 
     /** Creates a swerve module and applies the starting hardware configuration. */
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
-        m_driveMotor = new TalonFX(driveMotorPort, SwerveConstants.kCANBus);
-        m_turnMotor  = new TalonFX(turnMotorPort, SwerveConstants.kCANBus);
-        m_CANcoder = new CANcoder(CANCoderPort, SwerveConstants.kCANBus);
+        m_driveMotor = new TalonFX(driveMotorPort, new CANBus(SwerveConstants.kCANBus));
+        m_turnMotor  = new TalonFX(turnMotorPort, new CANBus(SwerveConstants.kCANBus));
+        m_CANcoder = new CANcoder(CANCoderPort, new CANBus(SwerveConstants.kCANBus));
 
         m_driveRequest = new VelocityVoltage(0);
         m_turnRequest = new PositionVoltage(0);
@@ -80,14 +82,14 @@ public class SwerveModule {
     }
 
     /** Sets the target wheel speed and angle for this module. */
-    public void setDesiredState(SwerveModuleState targetState) {
+    public void setDesiredState(SwerveModuleVelocity targetState) {
         Rotation2d currentRotation = Rotation2d.fromRotations(getTurnEncoderValueRotations());
-        targetState.optimize(currentRotation);
+        SwerveModuleVelocity optimizedTargetState = targetState.optimize(currentRotation);
 
-        m_driveMotor.setControl(m_driveRequest.withVelocity(targetState.speedMetersPerSecond));
-        m_turnMotor.setControl(m_turnRequest.withPosition(targetState.angle.getRotations()));
+        m_driveMotor.setControl(m_driveRequest.withVelocity(optimizedTargetState.velocity));
+        m_turnMotor.setControl(m_turnRequest.withPosition(optimizedTargetState.angle.getRotations()));
 
-        m_desiredState = targetState; 
+        m_desiredState = optimizedTargetState; 
     }
 
     /** Applies the absolute encoder magnet offset in rotations. */
@@ -147,8 +149,8 @@ public class SwerveModule {
     }
 
     /** Returns the module state used for kinematics and telemetry. */
-    public SwerveModuleState getState() {
-        return new SwerveModuleState(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
+    public SwerveModuleVelocity getState() {
+        return new SwerveModuleVelocity(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
     }
 
     /** Updates all of the status signals in a singular method. */
@@ -182,7 +184,7 @@ public class SwerveModule {
 
     /** Updates the simulated module position and velocity over the given loop delay. */
     public void updateSim(double delay) {
-        m_simDriveVelocityMetersPerSecond = m_desiredState.speedMetersPerSecond;
+        m_simDriveVelocityMetersPerSecond = m_desiredState.velocity;
         m_simTurnPosition = m_desiredState.angle;
         m_simDriveDistanceMeters += m_simDriveVelocityMetersPerSecond * delay;
     }
@@ -209,8 +211,8 @@ public class SwerveModule {
 
     /** Stops both the drive and turn motors. */
     public void stop() {
-        m_driveMotor.set(0);
-        m_turnMotor.set(0);
+        m_driveMotor.setThrottle(0.0);
+        m_turnMotor.setThrottle(0.0);
     }
 
     /** Updates the drive motor PID and feedforward constants. */

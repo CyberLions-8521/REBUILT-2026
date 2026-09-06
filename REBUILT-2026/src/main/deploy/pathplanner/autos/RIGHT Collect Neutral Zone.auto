@@ -7,44 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RightStartPointToCenter"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RightOverBump"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "IntakePivotOut"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RightNeutralSweep"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeForDuration"
-                }
-              }
-            ]
+            "pathName": "RightStartToSweep"
           }
         },
         {
@@ -76,6 +39,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Right Autos",
   "choreoAuto": false
 }

@@ -12,9 +12,11 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
+import com.limelightvision.Limelight;
 
 import frc.robot.utils.Constants.IndexerConstants;
 import frc.robot.utils.Constants.IntakeConstants;
+import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 /** Add your docs here. */
@@ -23,7 +25,7 @@ public class Configs {
     public static final class SwerveConfigs {
         public static final TalonFXConfiguration driveConfigs = new TalonFXConfiguration();
         public static final TalonFXConfiguration turnConfigs = new TalonFXConfiguration();
-
+        public static final Limelight.PoseEstimateConfig mt2Config = Limelight.PoseEstimateConfig.defaultMT2();
         public static final MagnetSensorConfigs magnetConfigs = new MagnetSensorConfigs();
 
         static {
@@ -56,6 +58,11 @@ public class Configs {
             magnetConfigs
                 .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
                 .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
+            
+            mt2Config
+                .withMinTagCount(1)
+                .withStdDevXY(LimelightConstants.kBaseStdDev, LimelightConstants.kMinStdDev, LimelightConstants.kMaxStdDev)
+                .withStdDevTheta(Limelight.PoseEstimateConfig.UNTRUSTED);
         }
     }
 

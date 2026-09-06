@@ -8,26 +8,25 @@ import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.math.filter.SlewRateLimiter;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.util.Units;
+import org.wpilib.driverstation.Gamepad;
+import org.wpilib.smartdashboard.SendableChooser;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.RunCommand;
+import org.wpilib.command2.SequentialCommandGroup;
+import org.wpilib.command2.button.CommandGamepad;
 import frc.robot.subsystems.*;
 import frc.robot.utils.Constants.IntakeConstants;
-import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
-  CommandXboxController m_driveController = new CommandXboxController(0);
-  CommandXboxController m_subsystemController = new CommandXboxController(1);
+  CommandGamepad m_driveController = new CommandGamepad(0);
+  CommandGamepad m_subsystemController = new CommandGamepad(1);
   SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
   Shooter m_shooter = new Shooter();
   Intake m_intake = new Intake();
@@ -61,16 +60,6 @@ public class RobotContainer {
       )
     );
 
-    LimelightHelpers.setCameraPose_RobotSpace(
-      LimelightConstants.limelightName, 
-      LimelightConstants.kLimelightForwardOffset,  // Forward (m)
-      LimelightConstants.kLimelightSideOffset,  // Side (m)
-      LimelightConstants.kLimelightUpOffset,  // Up (m)
-      LimelightConstants.kLimelightRoll,  // Roll (deg)
-      LimelightConstants.kLimelightPitch,  // Pitch (deg)
-      LimelightConstants.kLimelightYaw   // Yaw (deg)
-    );
-
     configureBindings();
     configureAutos();
   }
@@ -96,7 +85,7 @@ public class RobotContainer {
       () -> true));
 
     // auto-align, auto distance, and shoot - x [EXPERIMENTAL]
-    m_driveController.x().whileTrue(
+    m_driveController.button(Gamepad.Button.WEST_FACE).whileTrue(
       new SequentialCommandGroup(
         Commands.deadline(
           new SequentialCommandGroup(
@@ -118,7 +107,7 @@ public class RobotContainer {
     );
 
     // auto-align and dynamic shooting - a [EXPERIMENTAL]
-    m_driveController.a().whileTrue(
+    m_driveController.button(Gamepad.Button.SOUTH_FACE).whileTrue(
       Commands.parallel(
         m_drivebase.odometryAutoAlign(
           getAllianceHubLocation(), 
@@ -142,7 +131,7 @@ public class RobotContainer {
     );
 
     // auto-align only - b
-    m_driveController.b().whileTrue(
+    m_driveController.button(Gamepad.Button.EAST_FACE).whileTrue(
       m_drivebase.odometryAutoAlign(
         getAllianceHubLocation(),
         getJoystickValues(m_driveController::getLeftY, vx_limiter), 
@@ -158,9 +147,9 @@ public class RobotContainer {
 
     // shoot
     m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
-    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60));
-    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55));
-    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45));
+    m_subsystemController.button(Gamepad.Button.NORTH_FACE).whileTrue(m_shooter.ShootWithoutAprilTagCommand(60)); // y
+    m_subsystemController.button(Gamepad.Button.EAST_FACE).whileTrue(m_shooter.ShootWithoutAprilTagCommand(55)); // b
+    m_subsystemController.button(Gamepad.Button.SOUTH_FACE).whileTrue(m_shooter.ShootWithoutAprilTagCommand(45)); // a
 
     // indexer
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
@@ -173,8 +162,8 @@ public class RobotContainer {
 
     // intake rollers
     m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
-    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65));
-    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4));
+    m_subsystemController.button(Gamepad.Button.WEST_FACE).whileTrue(m_intake.getIntakeCommand(0.65)); // x
+    m_subsystemController.button(Gamepad.Button.WEST_FACE).whileTrue(m_indexer.runIndexerCommand(0.4)); // x
 
   }
 

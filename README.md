@@ -2,6 +2,15 @@
 
 May be possibly used for the SoCal competition
 
+**Currently based on WPILIB 2027 Alpha 5**
+
+**Vendor Dependencies:**
+* **Commands v2**
+* **CTRE-Phoenix (v6)**
+* **LimelightLib 2**
+* **PathplannerLib**
+* **REVLib**
+
 Anything below with a checkmark [✅] has been tested on the robot and confirmed to work.
 
 Added:
@@ -22,7 +31,7 @@ The odometry based auto-align and auto-distancing can take in any Translation2d 
 * Includes 9 autos designed in PathPlanner
     * No movement but still updates the starting pose for odometry [L/M/R] (Emergency stop equivalent)
     * Only shoot the preloaded fuel [L/M/R]
-    * Shoot the preloaded fuel and collect from the neutral zone [L/R]
+    * Collect from the neutral zone [L/R]
     * Collect fuel from the outpost and shoot [R]
 
 ## Controls

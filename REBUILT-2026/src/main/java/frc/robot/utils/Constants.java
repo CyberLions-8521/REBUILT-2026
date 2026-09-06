@@ -4,7 +4,7 @@
 
 package frc.robot.utils;
 
-import edu.wpi.first.math.util.Units;
+import org.wpilib.math.util.Units;
 
 public class Constants {
 
@@ -103,9 +103,13 @@ public class Constants {
         public static final double kLimelightPitch = 15.0;
         public static final double kLimelightYaw = 0.0;
 
-        public static final double kMaxViableGyroRate = 720.0; // degrees 
+        public static final double kMaxViableGyroRate = Units.degreesToRadians(720.0);
         public static final double kMaxTagDistance = 3.0;
         public static final double kMaxPoseJump = 2.0;
+
+        public static final double kMinStdDev = 0.25;
+        public static final double kMaxStdDev = 1.5;
+        public static final double kBaseStdDev = 0.5;
     }
 
     public static final class ShooterConstants {

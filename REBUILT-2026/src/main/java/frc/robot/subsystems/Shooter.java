@@ -2,24 +2,24 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.limelightvision.Limelight;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
-import frc.robot.subsystems.LEDLights.LEDMode;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.FunctionalCommand;
+import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Configs.ShooterConfigs;
 import frc.robot.utils.Constants.ShooterConstants;
 
@@ -35,7 +35,7 @@ public class Shooter extends SubsystemBase {
     private final InterpolatingDoubleTreeMap velocityTable = new InterpolatingDoubleTreeMap();
     private double m_currentRange = 0.0;
     private Pose3d targetPoseRobot;
-
+    private Limelight m_camera = SwerveDrivebase.getInstance().getLimelightCamera();
 
     //global consts (for readability)
     private static final double g = ShooterConstants.kGravity;
@@ -44,20 +44,19 @@ public class Shooter extends SubsystemBase {
     private static final int[] validIDs = {2, 5, 4, 10, 18, 21, 20, 26};
 
     public Shooter() {
-        LimelightHelpers.SetFiducialIDFiltersOverride("limeilght", validIDs);
         // main motors
 
         //top left motor
-        m_upperFlywheelLeader = new TalonFX(ShooterConstants.kShooterTopLeftID, ShooterConstants.kCanbusName);
+        m_upperFlywheelLeader = new TalonFX(ShooterConstants.kShooterTopLeftID, new CANBus(ShooterConstants.kCanbusName));
         m_upperFlywheelLeader.getConfigurator().apply(ShooterConfigs.upperFlywheelConfigs);
 
         //top right motor
-        m_upperFlywheelFollower = new TalonFX(ShooterConstants.kShooterTopRightID, ShooterConstants.kCanbusName);
+        m_upperFlywheelFollower = new TalonFX(ShooterConstants.kShooterTopRightID, new CANBus(ShooterConstants.kCanbusName));
         m_upperFlywheelFollower.getConfigurator().apply(ShooterConfigs.lowerFlywheelConfigs);   
         m_upperFlywheelFollower.setControl(new Follower(m_upperFlywheelLeader.getDeviceID(), MotorAlignmentValue.Opposed));
 
         //bottom right motor
-        m_lowerFlywheel = new TalonFX(ShooterConstants.kShooterBottomRightID, ShooterConstants.kCanbusName);
+        m_lowerFlywheel = new TalonFX(ShooterConstants.kShooterBottomRightID, new CANBus(ShooterConstants.kCanbusName));
         m_lowerFlywheel.getConfigurator().apply(ShooterConfigs.lowerFlywheelConfigs);
         
         // slot 1 = flywheel
@@ -78,7 +77,7 @@ public class Shooter extends SubsystemBase {
     // -------------------- METHODS --------------------
 
     // Lookup Tables
-    // https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html
+    // https://github.wpilib.org/allwpilib/docs/release/java/org.wpilib.math/interpolation/InterpolatingDoubleTreeMap.html
 
     public void createLookupTable(){
         // distance, velocity
@@ -140,7 +139,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runUpperFlywheelMotors(double speed) {
-        speed = MathUtil.clamp(speed,
+        speed = Math.clamp(speed,
             ShooterConstants.kMinShooterVelocity,
             ShooterConstants.kMaxShooterVelocity);
 
@@ -148,7 +147,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runLowerFlywheelMotors(double speed) {
-        speed = MathUtil.clamp(speed,
+        speed = Math.clamp(speed,
             ShooterConstants.kMinShooterVelocity,
             ShooterConstants.kMaxShooterVelocity);
 
@@ -340,9 +339,10 @@ public class Shooter extends SubsystemBase {
         ShooterConstants.kFlywheelVelocityInput = SmartDashboard.getNumber("4) Flywheel Velocity Input", 0.0);
         
         // LIMELIGHT STATS
-        SmartDashboard.putBoolean("LL - Target Visible", LimelightHelpers.getTV("limelight"));
-        if(LimelightHelpers.getTV("limelight")){
-            targetPoseRobot = LimelightHelpers.getTargetPose3d_RobotSpace("limelight");
+        SmartDashboard.putBoolean("LL - Target Visible", m_camera.hasTarget());
+        if(m_camera.hasTarget()){
+            // original LimelightHelpers method was Pose3d, will have to deal with Pose2d + LimelightLib for now
+            targetPoseRobot = new Pose3d(m_camera.getPoseEstimate(Limelight.PoseEstimateType.MT2_WPIBLUE).pose);
 
             double x = targetPoseRobot.getX();
             double y = targetPoseRobot.getY();

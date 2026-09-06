@@ -6,25 +6,21 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.EmptyAnimation;
-import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
-import frc.robot.utils.Constants.LimelightConstants;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.RunCommand;
+import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Configs.CANdleConfigs;
 import frc.robot.utils.Constants.CANdleConstants;
 import frc.robot.utils.Constants.ShooterConstants;
-import frc.robot.subsystems.Shooter;
 
 public class LEDLights extends SubsystemBase {
 
@@ -44,7 +40,7 @@ public class LEDLights extends SubsystemBase {
     }
   }
 
-  private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, CANdleConstants.kCanbusName);
+  private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, new CANBus(CANdleConstants.kCanbusName));
   private LEDMode currentMode = LEDMode.Off;
   private Shooter m_shooter;
   private SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
@@ -76,7 +72,7 @@ public class LEDLights extends SubsystemBase {
   @Override
   public void periodic() {
 
-    boolean isAprilTagSeen = LimelightHelpers.getTV(LimelightConstants.limelightName); //checks if the april tag is visible
+    boolean isAprilTagSeen = m_drivebase.getLimelightCamera().hasTarget();
     boolean isAutoAligned = m_drivebase.isAutoAligned(); //checks if it is aligned
     double distance = m_shooter.getDistance(m_drivebase.getPose(), shooterTarget.get());
     boolean isInRange = distance >= ShooterConstants.kMinShooterRange && distance <= ShooterConstants.kMaxShooterRange; //not in deadzone
