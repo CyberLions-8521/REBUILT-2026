@@ -54,7 +54,7 @@ public class Constants {
         public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
-        public static final String kCANBus = "Circus Circle";   // name assigned in Phoenix Tuner X
+        public static final String kCANBus = "can_s1";   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
 
@@ -129,7 +129,7 @@ public class Constants {
 
 
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "can_s2";
         
         public static double kFlywheelVelocityInput = 0.0;
         public static final double kBottomMotorRatio = 0.8; // run the bottom hood slower for backspin (stabler shot)
@@ -180,7 +180,7 @@ public class Constants {
     }
 
     public static final class CANdleConstants {
-        public static final String kCanbusName = "Ryan";
+        public static final String kCanbusName = "can_s3";
 
         public static final int kLedCount = 256;
         public static final int kCANdleID = 15;
@@ -204,7 +204,7 @@ public class Constants {
         public static final double kRetractedEncoderPosition = -2; //set later
         public static final double kRetractedMiddleEncoderPosition = -2.5;
         
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "can_s0";
         public static final double kGearRatio = 14.5;              
         public static final double kGearCircumference = 0; 
         public static final double kMiddleEncoderPosition = -2.56; //for after ventura
@@ -224,7 +224,7 @@ public class Constants {
 
     public static class IndexerConstants {
     //======== Motor IDs ================================================================
-        public static final int kIndexerID = 0;     
+        public static final int kIndexerID = 9;     
 
     //======== Motor Configurations ================================================================
 
@@ -233,7 +233,7 @@ public class Constants {
 
     //======== Indexer Subsystem ================================================================
 
-        public static final String kCanbusName = "rio";
+        public static final String kCanbusName = "can_s4";
         public static final int kGearRatio = 0;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE
         
