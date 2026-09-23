@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    m_drivebase.stopAutonomousDrive(); // written here to prevent autonomous drift problems
+    //m_drivebase.stopAutonomousDrive(); // written here to prevent autonomous drift problems
   }
 
   @Override
@@ -63,11 +63,11 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopExit() {}
 
-  public void testInit() {
+  public void utilityInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 
-  public void testPeriodic() {}
+  public void utilityPeriodic() {}
 
-  public void testExit() {}
+  public void utilityExit() {}
 }

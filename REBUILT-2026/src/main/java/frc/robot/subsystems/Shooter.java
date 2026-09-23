@@ -10,13 +10,16 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.limelightvision.Limelight;
+import com.limelightvision.PoseEstimateType;
 
 import org.wpilib.math.util.MathUtil;
+import org.wpilib.telemetry.Telemetry;
+import org.wpilib.tunable.TunableDouble;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.SubsystemBase;
@@ -42,6 +45,8 @@ public class Shooter extends SubsystemBase {
     private static final double h = ShooterConstants.kDeltaHeight;
 
     private static final int[] validIDs = {2, 5, 4, 10, 18, 21, 20, 26};
+
+    private TunableDouble m_flywheelVelocityTunable = Tunables.addDouble("4) Flywheel Velocity Input", 0.0);
 
     public Shooter() {
         // main motors
@@ -317,41 +322,41 @@ public class Shooter extends SubsystemBase {
     private void debugInit() {
         
         // FLYWHEEL STATS
-        SmartDashboard.putNumber("1) Real Velocity (Leader)", 0.0);
-        SmartDashboard.putNumber("2) Real Velocity (Bottom)", 0.0);
-        SmartDashboard.putNumber("3) Requested Velocity", 0.0);
-        SmartDashboard.putNumber("4) Flywheel Velocity Input", 0.0);
+        Telemetry.log("1) Real Velocity (Leader)", 0.0);
+        Telemetry.log("2) Real Velocity (Bottom)", 0.0);
+        Telemetry.log("3) Requested Velocity", 0.0);
+        Telemetry.log("4) Flywheel Velocity Input", 0.0);
 
         // LIMELIGHT STATS
-        SmartDashboard.putNumber("LL - Target X (m)", 5.26);
-        SmartDashboard.putNumber("LL - Target Y (m)", 0.0);
-        SmartDashboard.putNumber("LL - Target Z (m)", 1.26);
-        SmartDashboard.putNumber("LL - Distance (m)", 5.41);
-        SmartDashboard.putBoolean("LL - Target Visible", false);
+        Telemetry.log("LL - Target X (m)", 5.26);
+        Telemetry.log("LL - Target Y (m)", 0.0);
+        Telemetry.log("LL - Target Z (m)", 1.26);
+        Telemetry.log("LL - Distance (m)", 5.41);
+        Telemetry.log("LL - Target Visible", false);
     }
         // 5.41^2 = 1.26^2 + X^2
     @Override
     public void periodic() {
         
         // FLYWHEEL STATS
-        SmartDashboard.putNumber("1) Real Velocity (Leader)", m_upperFlywheelLeader.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("2) Real Velocity (Bottom)", m_lowerFlywheel.getVelocity().getValueAsDouble());
-        ShooterConstants.kFlywheelVelocityInput = SmartDashboard.getNumber("4) Flywheel Velocity Input", 0.0);
+        Telemetry.log("1) Real Velocity (Leader)", m_upperFlywheelLeader.getVelocity().getValueAsDouble());
+        Telemetry.log("2) Real Velocity (Bottom)", m_lowerFlywheel.getVelocity().getValueAsDouble());
+        ShooterConstants.kFlywheelVelocityInput = m_flywheelVelocityTunable.get();
         
         // LIMELIGHT STATS
-        SmartDashboard.putBoolean("LL - Target Visible", m_camera.hasTarget());
+        Telemetry.log("LL - Target Visible", m_camera.hasTarget());
         if(m_camera.hasTarget()){
             // original LimelightHelpers method was Pose3d, will have to deal with Pose2d + LimelightLib for now
-            targetPoseRobot = new Pose3d(m_camera.getPoseEstimate(Limelight.PoseEstimateType.MT2_WPIBLUE).pose);
+            targetPoseRobot = new Pose3d(m_camera.getPoseEstimate(PoseEstimateType.MT2_WPIBLUE).pose);
 
             double x = targetPoseRobot.getX();
             double y = targetPoseRobot.getY();
             double z = targetPoseRobot.getZ();
 
-            SmartDashboard.putNumber("LL - Target X (m)", x);
-            SmartDashboard.putNumber("LL - Target Y (m)", y);
-            SmartDashboard.putNumber("LL - Target Z (m)", z);
-            SmartDashboard.putNumber("LL - Distance (m)", getDistance());
+            Telemetry.log("LL - Target X (m)", x);
+            Telemetry.log("LL - Target Y (m)", y);
+            Telemetry.log("LL - Target Z (m)", z);
+            Telemetry.log("LL - Distance (m)", getDistance());
         }
     }
 

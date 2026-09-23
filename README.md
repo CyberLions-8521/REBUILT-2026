@@ -2,13 +2,13 @@
 
 May be possibly used for the SoCal competition
 
-**Currently based on WPILIB 2027 Alpha 5**
+**Currently based on WPILIB 2027 Alpha 7**
 
 **Vendor Dependencies:**
 * **Commands v2**
 * **CTRE-Phoenix (v6)**
 * **LimelightLib 2**
-* **PathplannerLib**
+* **PathplannerLib (currently does not work in alpha 7 YET)**
 * **REVLib**
 
 Anything below with a checkmark [✅] has been tested on the robot and confirmed to work.

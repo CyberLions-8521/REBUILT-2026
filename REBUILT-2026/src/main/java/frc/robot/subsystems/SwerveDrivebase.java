@@ -7,13 +7,15 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.limelightvision.Limelight;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.util.FlippingUtil;
+import com.limelightvision.PoseEstimate;
+import com.limelightvision.PoseEstimateType;
+// import com.pathplanner.lib.auto.AutoBuilder;
+// import com.pathplanner.lib.commands.PathPlannerAuto;
+// import com.pathplanner.lib.commands.PathfindingCommand;
+// import com.pathplanner.lib.config.PIDConstants;
+// import com.pathplanner.lib.config.RobotConfig;
+// import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+// import com.pathplanner.lib.util.FlippingUtil;
 import org.wpilib.math.controller.ProfiledPIDController;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
 import org.wpilib.math.geometry.Rotation2d;
@@ -29,16 +31,16 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.driverstation.Alliance;
-import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.driverstation.MatchState;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.imu.OnboardIMU;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.FieldObject2d;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.telemetry.Telemetry;
+import org.wpilib.tunable.TunableBoolean;
+import org.wpilib.tunable.TunableDouble;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
-import org.wpilib.command2.CommandScheduler;
-import org.wpilib.command2.Commands;
 import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Constants.LimelightConstants;
@@ -71,6 +73,7 @@ public class SwerveDrivebase extends SubsystemBase {
     )
   );
   private Limelight m_camera = new Limelight(LimelightConstants.limelightName, m_cameraPoseRobotSpace);
+  private TunableBoolean m_limelightToggleTunable = Tunables.addBoolean("Odometry/Use Limelight pose", true);
 
   private final Field2d m_field; // simulation section
   private final FieldObject2d m_frontLeftObject2d;
@@ -79,21 +82,22 @@ public class SwerveDrivebase extends SubsystemBase {
   private final FieldObject2d m_backRightObject2d;
   private Rotation2d m_simHeading = new Rotation2d(); 
   private ChassisVelocities m_lastRobotRelativeSpeeds = new ChassisVelocities();
+  private TunableBoolean m_simToggleTunable = Tunables.addBoolean("Simulation/(Simulation Only) Blue Alliance", false);
 
   private ProfiledPIDController m_autoAlignPID; // auto-alignment section
   private ProfiledPIDController m_autoDistancePID;
 
-  private double m_lastDriveP = SwerveConstants.kDriveP; // extraneous section
-  private double m_lastDriveV = SwerveConstants.kDriveV;
-  private double m_lastTurnP = SwerveConstants.kTurnP;
-  private double m_lastTurnD = SwerveConstants.kTurnD;
-  private double m_lastAutoAlignP = SwerveConstants.kAutoAlignP;
-  private double m_lastAutoAlignI = SwerveConstants.kAutoAlignI;
-  private double m_lastAutoAlignD = SwerveConstants.kAutoAlignD;
-  private double m_lastAutoDistanceP = SwerveConstants.kAutoDistanceP;
-  private double m_lastAutoDistanceI = SwerveConstants.kAutoDistanceI;
-  private double m_lastAutoDistanceD = SwerveConstants.kAutoDistanceD;
-  
+  private TunableDouble m_pDriveTunable = Tunables.addDouble("PID Constants/Drive P", SwerveConstants.kDriveP); // extraneous section
+  private TunableDouble m_vDriveTunable = Tunables.addDouble("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
+  private TunableDouble m_pTurnTunable = Tunables.addDouble("PID Constants/Turn P", SwerveConstants.kTurnP);
+  private TunableDouble m_dTurnTunable = Tunables.addDouble("PID Constants/Turn D", SwerveConstants.kTurnD);
+  private TunableDouble m_pAutoAlignTunable = Tunables.addDouble("PID Constants/Auto-align P", SwerveConstants.kAutoAlignP);
+  private TunableDouble m_iAutoAlignTunable = Tunables.addDouble("PID Constants/Auto-align I", SwerveConstants.kAutoAlignI);
+  private TunableDouble m_dAutoAlignTunable = Tunables.addDouble("PID Constants/Auto-align D", SwerveConstants.kAutoAlignD);
+  private TunableDouble m_pAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance P", SwerveConstants.kAutoDistanceP);
+  private TunableDouble m_iAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
+  private TunableDouble m_dAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
+
   //#endregion
 
 
@@ -187,27 +191,9 @@ public class SwerveDrivebase extends SubsystemBase {
     );
     m_autoDistancePID.setTolerance(SwerveConstants.kAutoDistanceTolerance);
 
-    SmartDashboard.putNumber("turnP", 0);
-    SmartDashboard.putNumber("turnD", 0);
+    Telemetry.log("Field", m_field); // puts robot data on the field for simulation
 
-    SmartDashboard.putData("Field", m_field); // puts robot data on the field for simulation
-
-    SmartDashboard.putNumber("PID Constants/Drive P", SwerveConstants.kDriveP);
-    SmartDashboard.putNumber("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
-    SmartDashboard.putNumber("PID Constants/Turn P", SwerveConstants.kTurnP);
-    SmartDashboard.putNumber("PID Constants/Turn D", SwerveConstants.kTurnD);
-    SmartDashboard.putNumber("PID Constants/Auto-align P", SwerveConstants.kAutoAlignP);
-    SmartDashboard.putNumber("PID Constants/Auto-align I", SwerveConstants.kAutoAlignI);
-    SmartDashboard.putNumber("PID Constants/Auto-align D", SwerveConstants.kAutoAlignD);
-    SmartDashboard.putNumber("PID Constants/Auto-distance P", SwerveConstants.kAutoDistanceP);
-    SmartDashboard.putNumber("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
-    SmartDashboard.putNumber("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
-
-    // makes the pathplanner autos on the blue alliance on default
-    if (RobotBase.isSimulation()) SmartDashboard.setDefaultBoolean("Simulation/(Simulation Only) Blue Alliance", false); 
-    SmartDashboard.setDefaultBoolean("Odometry/Use Limelight pose", true);
-
-    setupPathPlanner();
+    // setupPathPlanner();
   }
 
   public static SwerveDrivebase getInstance() {
@@ -219,7 +205,7 @@ public class SwerveDrivebase extends SubsystemBase {
     SwerveModuleVelocity[] m_swerveModuleStates;
     if(fieldRelative) {
       m_swerveModuleStates = m_kinematics.toSwerveModuleVelocities(
-        //ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getDriverHeading())
+        //ChassisVelocities.fromFieldRelativeSpeeds(vx, vy, omega, getDriverHeading())
         new ChassisVelocities(vx, vy, omega).toRobotRelative(getDriverHeading())
       );
     } else {
@@ -267,10 +253,10 @@ public class SwerveDrivebase extends SubsystemBase {
       getModulePositions()
     );
 
-    boolean useVisionPoseToggle = SmartDashboard.getBoolean("Odometry/Use Limelight pose", true);
-    if (useVisionPoseToggle) {
+    boolean useVisionPoseToggle = m_limelightToggleTunable.get(); 
+    if (useVisionPoseToggle && RobotBase.isReal()) {
       Limelight.setSharedRobotOrientation(getFieldHeading().getDegrees()); 
-      for (var estimate : m_camera.readAcceptedPoseEstimates(Limelight.PoseEstimateType.MT2_WPIBLUE)) {
+      for (var estimate : m_camera.readAcceptedPoseEstimates(PoseEstimateType.MT2_WPIBLUE)) {
         m_poseEstimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, estimate.stdDevs);
         postLimelightData(estimate);
       }
@@ -302,6 +288,8 @@ public class SwerveDrivebase extends SubsystemBase {
         m_backRight.getState().angle
       )
     ));
+
+    Telemetry.log("Field", m_field);
 
   }
 
@@ -402,7 +390,7 @@ public class SwerveDrivebase extends SubsystemBase {
   /** Lets me flip the alliance the autos are based on dynamically in simulation but still works for real use */
   public boolean shouldFlipPathForAlliance() {
     if (RobotBase.isSimulation()) 
-      return SmartDashboard.getBoolean("Simulation/(Simulation Only) Blue Alliance", false);
+      return m_simToggleTunable.get(); 
     return MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
   }
 
@@ -421,35 +409,41 @@ public class SwerveDrivebase extends SubsystemBase {
   */
   //#region
 
+  /** Resets the auto-align PID for the commands */
+  private void setupAutoAlignPID(Translation2d m_targetPoint) {
+    Pose2d position = getPose();
+    Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle().orElse(new Rotation2d()); // simple fix for Optational<Rotation2d> change
+    m_autoAlignPID.reset(position.getRotation().getRadians());
+    m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+  }
+
+  /** Calculates the PID output of the current angle to the targeted angle of the robot */
+  private double getAutoAlignOutput(Translation2d m_targetPoint) {
+    Pose2d position = getPose();
+    Translation2d fieldLocation = position.getTranslation();
+    Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
+    Rotation2d dynamicHeading = vectorBetweenPoints.getAngle().orElse(new Rotation2d()); // simple fix for Optational<Rotation2d> change
+
+    // Second part - convert dynamic heading to be suitable with the drive method
+    Rotation2d currentHeading = position.getRotation();
+    double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
+    pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+    return pidOutput;
+  }
+
   /** Auto-align to a certain point on the field using odometry */
   public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Pose2d position = getPose();
-        Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+        setupAutoAlignPID(m_targetPoint);
       },
       () -> {
-        // First part - calculate dynamic heading
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = m_targetPoint.getDistance(fieldLocation);
+        // Do not auto-align near target to not break the math
+        double distance = m_targetPoint.getDistance(getPose().getTranslation());
         this.drive(
           -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, 
           -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
-          (distance > 0.5) ? pidOutput : 0.0,
+          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint) : 0.0,
           true
         );
       }, 
@@ -463,31 +457,15 @@ public class SwerveDrivebase extends SubsystemBase {
   public Command odometryAutoAlign(Translation2d m_targetPoint) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Pose2d position = getPose();
-        Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+        setupAutoAlignPID(m_targetPoint);
       },
       () -> {
-        // First part - calculate dynamic heading
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = m_targetPoint.getDistance(fieldLocation);
+        // Do not auto-align near target to not break the math
+        double distance = m_targetPoint.getDistance(getPose().getTranslation());
         this.drive(
           0.0, // if the robot needs to stop at the end, do not move 
           0.0,
-          (distance > 0.5) ? pidOutput : 0.0,
+          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint) : 0.0,
           true
         );
       }, 
@@ -501,33 +479,15 @@ public class SwerveDrivebase extends SubsystemBase {
   public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+        setupAutoAlignPID(m_targetPoint.get());
       },
       () -> {
-        // First part - calculate dynamic heading
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = targetPoint.getDistance(fieldLocation);
+        // Do not auto-align near target to not break the math
+        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
         this.drive(
           -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, // if the robot needs to stop at the end, ignore joystick input
           -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
-          (distance > 0.5) ? pidOutput : 0.0,
+          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
           true
         );
       }, 
@@ -541,33 +501,15 @@ public class SwerveDrivebase extends SubsystemBase {
   public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+        setupAutoAlignPID(m_targetPoint.get());
       },
       () -> {
-        // First part - calculate dynamic heading
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = targetPoint.getDistance(fieldLocation);
+        // Do not auto-align near target to not break the math
+        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
         this.drive(
           0.0, // if the robot needs to stop at the end, do not move
           0.0,
-          (distance > 0.5) ? pidOutput : 0.0,
+          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
           true
         );
       }, 
@@ -581,29 +523,11 @@ public class SwerveDrivebase extends SubsystemBase {
   public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean isShooterInParallel) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Rotation2d targetHeading = targetPoint.minus(position.getTranslation()).getAngle();
-        m_autoAlignPID.reset(position.getRotation().getRadians());
-        m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
+        setupAutoAlignPID(m_targetPoint.get());
       },
       () -> {
-        // First part - calculate dynamic heading
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        Translation2d vectorBetweenPoints = targetPoint.minus(fieldLocation);
-        Rotation2d dynamicHeading = vectorBetweenPoints.getAngle();
-
-        // Second part - convert dynamic heading to be suitable with the drive method
-        Rotation2d currentHeading = position.getRotation();
-        double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
-
-        // Third part - Run drive command and stop alignment when needed
-        // The only time it shouldn't is when the robot is too close to the target and break the math
-        double distance = targetPoint.getDistance(fieldLocation);
+        // Do not auto-align near target to not break the math
+        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
         double xInput = -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond; 
         double yInput = -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond;
         if (isShooterInParallel) {
@@ -614,7 +538,7 @@ public class SwerveDrivebase extends SubsystemBase {
         this.drive(
           xInput,
           yInput,
-          (distance > 0.5) ? pidOutput : 0.0,
+          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
           true
         );
       }, 
@@ -624,27 +548,34 @@ public class SwerveDrivebase extends SubsystemBase {
     );
   }
 
+  /** Resets the auto-distance PID for the commands */
+  private void setupAutoDistancePID(Translation2d m_targetPoint) {
+    m_autoDistancePID.reset(m_targetPoint.getDistance(getPose().getTranslation()));
+    m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
+  }
+
+  /** Calculates the PID output of the current distance to the targeted distance off a certain Translation2d of the robot */
+  private double getAutoDistanceOutput(Translation2d m_targetPoint) {
+    // First part - calculate distance between robot and target
+    Pose2d position = getPose();
+    Translation2d fieldLocation = position.getTranslation();
+    double distance = m_targetPoint.getDistance(fieldLocation);
+
+    // Second part - feed distance into PID
+    double pidOutput = m_autoDistancePID.calculate(distance, SwerveConstants.kAutoDistanceTarget);
+    pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxMetersPerSecond, SwerveConstants.kMaxMetersPerSecond);
+    return -pidOutput; // negative for some reason i dont remember
+  }
+
   /** Auto-distance to a certain point on the field (assuming that the robot is facing it already) */
   public Command odometryAutoDistance(Translation2d m_targetPoint, boolean stop) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        m_autoDistancePID.reset(m_targetPoint.getDistance(getPose().getTranslation()));
-        m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
+        setupAutoDistancePID(m_targetPoint);
       },
       () -> {
-        // First part - calculate distance between robot and target
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        double distance = m_targetPoint.getDistance(fieldLocation);
-
-        // Second part - feed distance into PID
-        double pidOutput = m_autoDistancePID.calculate(distance, SwerveConstants.kAutoDistanceTarget);
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxMetersPerSecond, SwerveConstants.kMaxMetersPerSecond);
-
-        // Third part - Run drive command
         this.drive(
-          -pidOutput,
+          getAutoDistanceOutput(m_targetPoint),
           0,
           0,
           false
@@ -660,25 +591,11 @@ public class SwerveDrivebase extends SubsystemBase {
   public Command odometryAutoDistance(Supplier<Translation2d> m_targetPoint, boolean stop) {
     return new FunctionalCommand(
       () -> {
-        // compacted math of below to set the current position and target before command runs
-        Translation2d targetPoint = m_targetPoint.get();
-        m_autoDistancePID.reset(targetPoint.getDistance(getPose().getTranslation()));
-        m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
+        setupAutoDistancePID(m_targetPoint.get());
       },
       () -> {
-        // First part - calculate distance between robot and target
-        Translation2d targetPoint = m_targetPoint.get();
-        Pose2d position = getPose();
-        Translation2d fieldLocation = position.getTranslation();
-        double distance = targetPoint.getDistance(fieldLocation);
-
-        // Second part - feed distance into PID
-        double pidOutput = m_autoDistancePID.calculate(distance, SwerveConstants.kAutoDistanceTarget);
-        pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxMetersPerSecond, SwerveConstants.kMaxMetersPerSecond);
-
-        // Third part - Run drive command
         this.drive(
-          -pidOutput,
+          getAutoDistanceOutput(m_targetPoint.get()),
           0,
           0,
           false
@@ -717,128 +634,128 @@ public class SwerveDrivebase extends SubsystemBase {
   */
   //#region
   
-  /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
-  private void driveRobotRelative(ChassisVelocities speedsRobotRelative) {
-    SwerveModuleVelocity[] moduleStates = m_kinematics.toSwerveModuleVelocities(speedsRobotRelative);
+//   /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
+//   private void driveRobotRelative(ChassisVelocities speedsRobotRelative) {
+//     SwerveModuleVelocity[] moduleStates = m_kinematics.toSwerveModuleVelocities(speedsRobotRelative);
 
-    moduleStates = SwerveDriveKinematics.desaturateWheelVelocities(
-      moduleStates,
-      SwerveConstants.kMaxMetersPerSecond
-    );
+//     moduleStates = SwerveDriveKinematics.desaturateWheelVelocities(
+//       moduleStates,
+//       SwerveConstants.kMaxMetersPerSecond
+//     );
 
-    m_frontLeft.setDesiredState(moduleStates[0]);
-    m_frontRight.setDesiredState(moduleStates[1]);
-    m_backLeft.setDesiredState(moduleStates[2]);
-    m_backRight.setDesiredState(moduleStates[3]);
+//     m_frontLeft.setDesiredState(moduleStates[0]);
+//     m_frontRight.setDesiredState(moduleStates[1]);
+//     m_backLeft.setDesiredState(moduleStates[2]);
+//     m_backRight.setDesiredState(moduleStates[3]);
 
-    m_lastRobotRelativeSpeeds = m_kinematics.toChassisVelocities(moduleStates);
-  }
+//     m_lastRobotRelativeSpeeds = m_kinematics.toChassisVelocities(moduleStates);
+//   }
 
-  /** Returns the robot-relative chassis speed used by PathPlanner. */
-  private ChassisVelocities getRobotVelocity() {
-    return m_kinematics.toChassisVelocities(
-      new SwerveModuleVelocity[] {
-        m_frontLeft.getState(),
-        m_frontRight.getState(),
-        m_backLeft.getState(),
-        m_backRight.getState()
-      }
-    );
-  }
+//   /** Returns the robot-relative chassis speed used by PathPlanner. */
+//   private ChassisVelocities getRobotVelocity() {
+//     return m_kinematics.toChassisVelocities(
+//       new SwerveModuleVelocity[] {
+//         m_frontLeft.getState(),
+//         m_frontRight.getState(),
+//         m_backLeft.getState(),
+//         m_backRight.getState()
+//       }
+//     );
+//   }
 
-  /** Setup AutoBuilder for PathPlanner */
-  private void setupPathPlanner()
-  {
-    // Load the RobotConfig from the GUI settings. You should probably
-    // store this in your Constants file
-    RobotConfig config;
-    try
-    {
-      config = RobotConfig.fromGUISettings();
+//   /** Setup AutoBuilder for PathPlanner */
+//   private void setupPathPlanner()
+//   {
+//     // Load the RobotConfig from the GUI settings. You should probably
+//     // store this in your Constants file
+//     RobotConfig config;
+//     try
+//     {
+//       config = RobotConfig.fromGUISettings();
 
-      // Configure AutoBuilder last
-      AutoBuilder.configure(
-          this::getPose,
-          // Robot pose supplier
-          this::resetOdometry,
-          // Method to reset odometry (will be called if your auto has a starting pose)
-          this::getRobotVelocity,
-          // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
-          (speedsRobotRelative, moduleFeedForwards) -> driveRobotRelative(speedsRobotRelative),
-          // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
-          new PPHolonomicDriveController(
-              // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(SwerveConstants.kTranslationP, SwerveConstants.kTranslationI, SwerveConstants.kTranslationD),
-              // Translation PID constants
-              new PIDConstants(SwerveConstants.kRotationP, SwerveConstants.kRotationI, SwerveConstants.kRotationD)
-              // Rotation PID constants
-          ),
-          config,
-          // The robot configuration
+//       // Configure AutoBuilder last
+//       AutoBuilder.configure(
+//           this::getPose,
+//           // Robot pose supplier
+//           this::resetOdometry,
+//           // Method to reset odometry (will be called if your auto has a starting pose)
+//           this::getRobotVelocity,
+//           // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
+//           (speedsRobotRelative, moduleFeedForwards) -> driveRobotRelative(speedsRobotRelative),
+//           // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
+//           new PPHolonomicDriveController(
+//               // PPHolonomicController is the built in path following controller for holonomic drive trains
+//               new PIDConstants(SwerveConstants.kTranslationP, SwerveConstants.kTranslationI, SwerveConstants.kTranslationD),
+//               // Translation PID constants
+//               new PIDConstants(SwerveConstants.kRotationP, SwerveConstants.kRotationI, SwerveConstants.kRotationD)
+//               // Rotation PID constants
+//           ),
+//           config,
+//           // The robot configuration
 
-          // () -> {
-          //   // Boolean supplier that controls when the path will be mirrored for the red alliance
-          //   // This will flip the path being followed to the red side of the field.
-          //   // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+//           // () -> {
+//           //   // Boolean supplier that controls when the path will be mirrored for the red alliance
+//           //   // This will flip the path being followed to the red side of the field.
+//           //   // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-          //   var alliance = DriverStation.getAlliance();
-          //   if (alliance.isPresent())
-          //   {
-          //     return alliance.get() == DriverStation.Alliance.Red;
-          //   }
-          //   return false;
-          // },
-          this::shouldFlipPathForAlliance,
+//           //   var alliance = MatchState.getAlliance();
+//           //   if (alliance.isPresent())
+//           //   {
+//           //     return alliance.get() == Alliance.RED;
+//           //   }
+//           //   return false;
+//           // },
+//           this::shouldFlipPathForAlliance,
 
-          this
-          // Reference to this subsystem to set requirements
-                           );
+//           this
+//           // Reference to this subsystem to set requirements
+//                            );
 
-    } catch (Exception e)
-    {
-      // Handle exception as needed
-      e.printStackTrace();
-    }
+//     } catch (Exception e)
+//     {
+//       // Handle exception as needed
+//       e.printStackTrace();
+//     }
 
-    //Preload PathPlanner Path finding
-    // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
-  }
+//     //Preload PathPlanner Path finding
+//     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
+//     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+//   }
 
-  /** Return Pathplanner auto command */
-  public Command getAutonomousCommand(String pathName)
-  {
-    // Create a path following command using AutoBuilder. This will also trigger event markers.
-    return new PathPlannerAuto(pathName);
-  }
+//   /** Return Pathplanner auto command */
+//   public Command getAutonomousCommand(String pathName)
+//   {
+//     // Create a path following command using AutoBuilder. This will also trigger event markers.
+//     return new PathPlannerAuto(pathName);
+//   }
 
-  /** Resets odometry based on the starting position of a Pathplanner auto. Useful for when the robot cannot move during auto but still requires a pose. */
-  public Command resetPoseFromAuto(String autoName) {
-    PathPlannerAuto sourceAuto = new PathPlannerAuto(autoName);
+//   /** Resets odometry based on the starting position of a Pathplanner auto. Useful for when the robot cannot move during auto but still requires a pose. */
+//   public Command resetPoseFromAuto(String autoName) {
+//     PathPlannerAuto sourceAuto = new PathPlannerAuto(autoName);
 
-    return Commands.runOnce(() -> {
-      Pose2d startingPose = sourceAuto.getStartingPose();
+//     return Commands.runOnce(() -> {
+//       Pose2d startingPose = sourceAuto.getStartingPose();
 
-      if (startingPose == null) {
-        DriverStationErrors.reportError(
-          "PathPlanner auto \"" + autoName + "\" does not have a starting pose.",
-          false
-        );
-        return;
-      }
+//       if (startingPose == null) {
+//         DriverStationErrors.reportError(
+//           "PathPlanner auto \"" + autoName + "\" does not have a starting pose.",
+//           false
+//         );
+//         return;
+//       }
 
-      if (shouldFlipPathForAlliance()) {
-        startingPose = FlippingUtil.flipFieldPose(startingPose);
-      }
+//       if (shouldFlipPathForAlliance()) {
+//         startingPose = FlippingUtil.flipFieldPose(startingPose);
+//       }
 
-      resetOdometry(startingPose);
-    }, this);
-}
+//       resetOdometry(startingPose);
+//     }, this);
+// }
 
-  /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) */
-  public void stopAutonomousDrive() {
-    driveRobotRelative(new ChassisVelocities());
-  }
+//   /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) */
+//   public void stopAutonomousDrive() {
+//     driveRobotRelative(new ChassisVelocities());
+//   }
 
   //#endregion
 
@@ -855,61 +772,47 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Dynamically tune the PID controllers of the drivebase */
   public void tunePIDControllers () {
-    double driveP = SmartDashboard.getNumber("PID Constants/Drive P", SwerveConstants.kDriveP);
-    double driveV = SmartDashboard.getNumber("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
-    double turnP = SmartDashboard.getNumber("PID Constants/Turn P", SwerveConstants.kTurnP);
-    double turnD = SmartDashboard.getNumber("PID Constants/Turn D", SwerveConstants.kTurnD);
-    double autoAlignP = SmartDashboard.getNumber("PID Constants/Auto-align P", SwerveConstants.kAutoAlignP);
-    double autoAilgnI = SmartDashboard.getNumber("PID Constants/Auto-align I", SwerveConstants.kAutoAlignI);
-    double autoAlignD = SmartDashboard.getNumber("PID Constants/Auto-align D", SwerveConstants.kAutoAlignD);
-    double autoDistanceP = SmartDashboard.getNumber("PID Constants/Auto-distance P", SwerveConstants.kAutoDistanceP);
-    double autoDistanceI = SmartDashboard.getNumber("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
-    double autoDistanceD = SmartDashboard.getNumber("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
+    double driveP = m_pDriveTunable.get(); 
+    double driveV = m_vDriveTunable.get(); 
+    double turnP = m_pTurnTunable.get(); 
+    double turnD = m_dTurnTunable.get(); 
+    double autoAlignP = m_pAutoAlignTunable.get(); 
+    double autoAilgnI = m_iAutoAlignTunable.get(); 
+    double autoAlignD = m_dAutoAlignTunable.get(); 
+    double autoDistanceP = m_pAutoDistanceTunable.get(); 
+    double autoDistanceI = m_iAutoDistanceTunable.get(); 
+    double autoDistanceD = m_dAutoDistanceTunable.get(); 
 
-    if (driveP != m_lastDriveP || driveV != m_lastDriveV) {
+    if (m_pDriveTunable.hasChanged() || m_vDriveTunable.hasChanged()) { 
       m_frontLeft.configDrivePID(driveP, driveV);
       m_frontRight.configDrivePID(driveP, driveV);
       m_backLeft.configDrivePID(driveP, driveV);
       m_backRight.configDrivePID(driveP, driveV);
-
-      m_lastDriveP = driveP;
-      m_lastDriveV = driveV; 
     }
 
-    if (turnP != m_lastTurnP || turnD != m_lastTurnD) {
+    if (m_pTurnTunable.hasChanged() || m_dTurnTunable.hasChanged()) { 
       m_frontLeft.configTurnPID(turnP, turnD);
       m_frontRight.configTurnPID(turnP, turnD);
       m_backLeft.configTurnPID(turnP, turnD);
       m_backRight.configTurnPID(turnP, turnD);
-    
-      m_lastTurnP = turnP;
-      m_lastTurnD = turnD;
     }
 
-    if (autoAlignP != m_lastAutoAlignP || autoAilgnI != m_lastAutoAlignI || autoAlignD != m_lastAutoAlignD) {
+    if (m_pAutoAlignTunable.hasChanged() || m_iAutoAlignTunable.hasChanged() || m_dAutoAlignTunable.hasChanged()) { 
       m_autoAlignPID.setP(autoAlignP);
       m_autoAlignPID.setI(autoAilgnI);
       m_autoAlignPID.setD(autoAlignD);
-
-      m_lastAutoAlignP = autoAlignP;
-      m_lastAutoAlignI = autoAilgnI;
-      m_lastAutoAlignD = autoAlignD;
     }
 
-    if (m_lastAutoDistanceP != autoDistanceP || m_lastAutoDistanceI != autoDistanceI || m_lastAutoDistanceD != autoDistanceD) {
+    if (m_pAutoDistanceTunable.hasChanged() || m_iAutoDistanceTunable.hasChanged() || m_dAutoDistanceTunable.hasChanged()) { 
       m_autoDistancePID.setP(autoDistanceP);
       m_autoDistancePID.setI(autoDistanceI);
       m_autoDistancePID.setD(autoDistanceD);
-
-      m_lastAutoDistanceP = autoDistanceP;
-      m_lastAutoDistanceI = autoDistanceI;
-      m_lastAutoDistanceD = autoDistanceD;
     }
   }
 
   /** Logs gyro and module telemetry to SmartDashboard. */
   public void logData() {
-    SmartDashboard.putNumber("gyro", getRawGyroHeading().getDegrees());
+    Telemetry.log("gyro", getRawGyroHeading().getDegrees());
     m_frontLeft.logData("Front Left");
     m_frontRight.logData("Front Right");
     m_backLeft.logData("Back Left");
@@ -917,16 +820,16 @@ public class SwerveDrivebase extends SubsystemBase {
   }
 
   /** Logs Limelight data to SmartDashboard. */
-  private void postLimelightData(Limelight.PoseEstimate estimate) {
+  private void postLimelightData(PoseEstimate estimate) {
     // SmartDashboard.putBoolean("Limelight Data/Valid target", LimelightHelpers.getTV
     // SmartDashboard.putBoolean("Limelight Data/Valid for pose estimation", isUsableVisionEstimate(estimate));
     // SmartDashboard.putNumber("Limelight Data/TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
     // SmartDashboard.putNumber("Limelight Data/TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
     // SmartDashboard.putNumber("Limelight Data/Tag Count", (isUsableVisionEstimate(estimate)) ? estimate.tagCount : 0);
     
-    SmartDashboard.putNumber("Limelight Data/TX (degrees)", m_camera.getTXDegrees());
-    SmartDashboard.putNumber("Limelight Data/TY (degrees)", m_camera.getTYDegrees());
-    SmartDashboard.putNumber("Limelight Data/Tag Count", estimate.fieldedTagCount);
+    Telemetry.log("Limelight Data/TX (degrees)", m_camera.getTXDegrees());
+    Telemetry.log("Limelight Data/TY (degrees)", m_camera.getTYDegrees());
+    Telemetry.log("Limelight Data/Tag Count", estimate.fieldedTagCount);
   }
 
   /** Stops all four swerve modules. */

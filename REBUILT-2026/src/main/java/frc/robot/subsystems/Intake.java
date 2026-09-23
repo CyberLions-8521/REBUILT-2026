@@ -6,12 +6,15 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.InstantCommand;
 import org.wpilib.command2.RunCommand;
 import org.wpilib.command2.SubsystemBase;
+import org.wpilib.telemetry.Telemetry;
+import org.wpilib.tunable.TunableDouble;
+import org.wpilib.tunable.Tunables;
+
 import frc.robot.utils.Configs.IntakeConfigs;
 import frc.robot.utils.Constants.IntakeConstants;
 
@@ -22,6 +25,12 @@ public class Intake extends SubsystemBase {
 
     private VelocityVoltage m_intakeController;
     private PositionVoltage m_pivotController;
+
+    private TunableDouble m_pPivotTunable = Tunables.addDouble("pivot P", IntakeConstants.pivotP);
+    private TunableDouble m_dPivotTunable = Tunables.addDouble("pivot D", IntakeConstants.pivotD);
+    private TunableDouble m_gPivotTunable = Tunables.addDouble("intake P", IntakeConstants.pivotG);
+    private TunableDouble m_pRollerTunable = Tunables.addDouble("intake P", IntakeConstants.rollerP);
+    private TunableDouble m_vRollerTunable = Tunables.addDouble("intake V", IntakeConstants.rollerV);
 
     public Intake(){
         m_intake = new TalonFX(IntakeConstants.kIntakeID, new CANBus(IntakeConstants.kCanbusName));
@@ -35,15 +44,15 @@ public class Intake extends SubsystemBase {
 
         resetPivotEncoders();
 
-        SmartDashboard.putNumber("pivot P", IntakeConstants.pivotP);
-        SmartDashboard.putNumber("pivot D", IntakeConstants.pivotD);
-        SmartDashboard.putNumber("pivot G", IntakeConstants.pivotG);
-        SmartDashboard.putNumber("intake P", IntakeConstants.rollerP);
-        SmartDashboard.putNumber("intake V", IntakeConstants.rollerV);
+        Telemetry.log("pivot P", IntakeConstants.pivotP);
+        Telemetry.log("pivot D", IntakeConstants.pivotD);
+        Telemetry.log("pivot G", IntakeConstants.pivotG);
+        Telemetry.log("intake P", IntakeConstants.rollerP);
+        Telemetry.log("intake V", IntakeConstants.rollerV);
     }
 
     private void logData(){
-        SmartDashboard.putNumber("Pivot Position", getPivotPosition());
+        Telemetry.log("Pivot Position", getPivotPosition());
     }
 
     public Command getResetEncoderPosition() {
@@ -84,11 +93,11 @@ public class Intake extends SubsystemBase {
     public void tunePID() {
         Slot0Configs m_pivotConfig = new Slot0Configs();
         Slot0Configs m_intakeConfig = new Slot0Configs();
-        double pivotP = SmartDashboard.getNumber("pivot P", IntakeConstants.pivotP);
-        double pivotD = SmartDashboard.getNumber("pivot D", IntakeConstants.pivotD);
-        double pivotG = SmartDashboard.getNumber("intake P", IntakeConstants.pivotG);
-        double intakeP = SmartDashboard.getNumber("intake P", IntakeConstants.rollerP);
-        double intakeV = SmartDashboard.getNumber("intake V", IntakeConstants.rollerV);
+        double pivotP = m_pPivotTunable.get(); 
+        double pivotD = m_dPivotTunable.get(); 
+        double pivotG = m_gPivotTunable.get(); 
+        double intakeP = m_pRollerTunable.get(); 
+        double intakeV = m_vRollerTunable.get(); 
 
         if (pivotP != IntakeConstants.pivotP || pivotD != IntakeConstants.pivotD || pivotG != IntakeConstants.pivotG) { 
             m_pivotConfig.kP = pivotP;

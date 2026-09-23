@@ -21,7 +21,8 @@ import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.framework.RobotBase;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.telemetry.Telemetry;
+
 import frc.robot.utils.Configs.SwerveConfigs;
 import frc.robot.utils.Constants.SwerveConstants;
 
@@ -204,9 +205,9 @@ public class SwerveModule {
 
     /** Logs key encoder and target values for this module to SmartDashboard. */
     public void logData(String motor){
-        SmartDashboard.putNumber(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble());
-        SmartDashboard.putNumber(motor + " actual turn position", getTurnEncoderValueRotations());
-        SmartDashboard.putNumber(motor + " desired turn position", m_desiredState.angle.getRotations());
+        Telemetry.log(motor + " CANcoder", m_CANcoder.getAbsolutePosition().getValueAsDouble());
+        Telemetry.log(motor + " actual turn position", getTurnEncoderValueRotations());
+        Telemetry.log(motor + " desired turn position", m_desiredState.angle.getRotations());
     }
 
     /** Stops both the drive and turn motors. */
