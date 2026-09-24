@@ -85,26 +85,26 @@ public class RobotContainer {
       () -> true));
 
     // auto-align, auto distance, and shoot - x [EXPERIMENTAL]
-    m_driveController.x().whileTrue(
-      new SequentialCommandGroup(
-        Commands.deadline(
-          new SequentialCommandGroup(
-            m_drivebase.odometryAutoAlign(getAllianceHubLocation()),
-            m_drivebase.odometryAutoDistance(getAllianceHubLocation(), true)
-          ),
-          m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) // warm up the upper rollers ahead of time
-        ),
-        Commands.parallel(
-          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())),
-          new SequentialCommandGroup(
-            Commands.waitUntil(() -> 
-              m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-            ).withTimeout(5),
-            m_indexer.runIndexerCommand(0.4)
-          )
-        )
-      )
-    );
+    // m_driveController.x().whileTrue(
+    //   new SequentialCommandGroup(
+    //     Commands.deadline(
+    //       new SequentialCommandGroup(
+    //         m_drivebase.odometryAutoAlign(getAllianceHubLocation()),
+    //         m_drivebase.odometryAutoDistance(getAllianceHubLocation(), true)
+    //       ),
+    //       m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) // warm up the upper rollers ahead of time
+    //     ),
+    //     Commands.parallel(
+    //       m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())),
+    //       new SequentialCommandGroup(
+    //         Commands.waitUntil(() -> 
+    //           m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+    //         ).withTimeout(5),
+    //         m_indexer.runIndexerCommand(0.4)
+    //       )
+    //     )
+    //   )
+    // );
 
     // auto-align and dynamic shooting - a [EXPERIMENTAL]
     m_driveController.a().whileTrue(

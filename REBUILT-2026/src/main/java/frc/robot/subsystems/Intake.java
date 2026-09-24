@@ -79,7 +79,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setIntakeSpeed(double speed){
-        m_intake.setControl(m_intakeController.withVelocity(speed));
+        m_intake.setControl(m_intakeController.withVelocity(-speed));
     }
 
     public void resetPivotEncoders(){
