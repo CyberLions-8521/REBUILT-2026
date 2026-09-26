@@ -58,6 +58,8 @@ public class Constants {
 
         public static final double kSlewRateLimiter = 3.0;
 
+        public static final double kYawOffset = 180.0;
+
     //======== Tuning ==================================================================
 
         public static final double kDriveP = 3.5; //set later 3.5 (oriingal)

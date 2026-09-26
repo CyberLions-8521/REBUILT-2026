@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.math.filter.SlewRateLimiter;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.util.Units;
 import org.wpilib.telemetry.Telemetry;
@@ -17,7 +19,6 @@ import org.wpilib.tunable.Selectable;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
-import org.wpilib.command2.SequentialCommandGroup;
 import org.wpilib.command2.button.CommandXboxController;
 
 import frc.robot.subsystems.*;
@@ -25,6 +26,7 @@ import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
 public class RobotContainer {
+  //#region
   CommandXboxController m_driveController = new CommandXboxController(0);
   CommandXboxController m_subsystemController = new CommandXboxController(1);
   SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
@@ -43,6 +45,12 @@ public class RobotContainer {
   // Both hub locations are relative to the blue alliance
   public static final Translation2d blueHubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
   public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
+
+  //TEMPORARY starting pose objects
+  public static final Pose2d leftStartingPose = new Pose2d(3.5, 7.4, new Rotation2d());
+  public static final Pose2d middleStartingPose = new Pose2d(3.5, 4.05, new Rotation2d());
+  public static final Pose2d rightStartingPose = new Pose2d(3.5, 0.65, new Rotation2d());
+  //#endregion
 
   public RobotContainer() {
     // NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60));
@@ -66,7 +74,8 @@ public class RobotContainer {
 
   private void configureBindings() {
 
-    //======================== Drive controller ==============================================
+    //======================== Drive controller ============================================== 
+    // #region
 
     // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
@@ -84,30 +93,42 @@ public class RobotContainer {
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-    // auto-align, auto distance, and shoot - x [EXPERIMENTAL]
-    // m_driveController.x().whileTrue(
-    //   new SequentialCommandGroup(
-    //     Commands.deadline(
-    //       new SequentialCommandGroup(
-    //         m_drivebase.odometryAutoAlign(getAllianceHubLocation()),
-    //         m_drivebase.odometryAutoDistance(getAllianceHubLocation(), true)
-    //       ),
-    //       m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) // warm up the upper rollers ahead of time
-    //     ),
-    //     Commands.parallel(
-    //       m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())),
-    //       new SequentialCommandGroup(
-    //         Commands.waitUntil(() -> 
-    //           m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //         ).withTimeout(5),
-    //         m_indexer.runIndexerCommand(0.4)
-    //       )
-    //     )
-    //   )
-    // );
+    //#endregion
 
-    // auto-align and dynamic shooting - a [EXPERIMENTAL]
-    m_driveController.a().whileTrue(
+    //======================== Subsystems controller ==============================================
+    //#region
+
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
+    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
+
+    // shoot manually 
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60)); 
+
+    // indexer
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
+
+    // intake pivot
+    m_subsystemController.dpadUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
+    m_subsystemController.dpadDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+    m_subsystemController.dpadLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+
+    // intake rollers
+    m_subsystemController.y().whileTrue(m_intake.getIntakeCommand(0.65)); 
+    m_subsystemController.y().whileTrue(m_indexer.runIndexerCommand(0.4)); 
+    m_subsystemController.b().whileTrue(m_intake.getIntakeCommand(0.75));
+
+    // auto-align commands
+    m_subsystemController.leftTrigger().whileTrue( // auto-align only
+      m_drivebase.odometryAutoAlign(
+        getAllianceHubLocation(),
+        getJoystickValues(m_driveController::getLeftY, vx_limiter), 
+        getJoystickValues(m_driveController::getLeftX, vy_limiter)
+      )
+    );
+
+    m_subsystemController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
       Commands.parallel(
         m_drivebase.odometryAutoAlign(
           getAllianceHubLocation(), 
@@ -130,40 +151,7 @@ public class RobotContainer {
       )
     );
 
-    // auto-align only - b
-    m_driveController.b().whileTrue(
-      m_drivebase.odometryAutoAlign(
-        getAllianceHubLocation(),
-        getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-        getJoystickValues(m_driveController::getLeftX, vy_limiter)
-        )
-    );
-
-    //======================== Subsystems controller ==============================================
-
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
-    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
-
-    // shoot
-    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithAprilTagCommand());
-    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60)); // y
-    m_subsystemController.b().whileTrue(m_shooter.ShootWithoutAprilTagCommand(55)); // b
-    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45)); // a
-
-    // indexer
-    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
-    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
-
-    // intake pivot
-    m_subsystemController.dpadUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
-    m_subsystemController.dpadDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
-    m_subsystemController.dpadLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
-
-    // intake rollers
-    m_subsystemController.leftTrigger().whileTrue(m_intake.getIntakeCommand(0.75));
-    m_subsystemController.x().whileTrue(m_intake.getIntakeCommand(0.65)); // x
-    m_subsystemController.x().whileTrue(m_indexer.runIndexerCommand(0.4)); // x
+    //#endregion
 
   }
 
@@ -204,6 +192,11 @@ public class RobotContainer {
     // m_autoChooser.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
     // m_autoChooser.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
     // m_autoChooser.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
+
+    //TEMPORARY
+    m_autoChooser.add("LEFT Reset Pose Only", m_drivebase.resetPoseFromAuto(leftStartingPose));
+    m_autoChooser.addDefault("MIDDLE Reset Pose Only", m_drivebase.resetPoseFromAuto(middleStartingPose));
+    m_autoChooser.add("RIGHT Reset Pose Only", m_drivebase.resetPoseFromAuto(rightStartingPose));
 
     Telemetry.log("Auto Chooser", m_autoChooser);
   }

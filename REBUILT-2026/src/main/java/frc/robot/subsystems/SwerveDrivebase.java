@@ -41,6 +41,7 @@ import org.wpilib.tunable.TunableBoolean;
 import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
 import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Constants.LimelightConstants;
@@ -224,7 +225,9 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Returns the current robot heading based on the raw gyro value. */
   public Rotation2d getRawGyroHeading() { 
-    return Rotation2d.fromRadians(-m_gyro.getYawRadians()); 
+    Rotation2d angle = Rotation2d.fromRadians(-m_gyro.getYawRadians());
+    if (RobotBase.isReal()) return angle.plus(Rotation2d.fromDegrees(SwerveConstants.kYawOffset)); // compensates for real life SystemCore positioning
+    return angle;  
   }
 
   /** Returns the current robot heading based on the field and odometry. */
@@ -751,6 +754,13 @@ public class SwerveDrivebase extends SubsystemBase {
 //       resetOdometry(startingPose);
 //     }, this);
 // }
+
+/** Optional overload that resets odometry based off a given pose. Useful for when the robot cannot move but still requires a pose */
+public Command resetPoseFromAuto(Pose2d pose) {
+  return Commands.runOnce(() -> {
+    resetOdometry(pose);
+  }, this);
+}
 
 //   /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) */
 //   public void stopAutonomousDrive() {
