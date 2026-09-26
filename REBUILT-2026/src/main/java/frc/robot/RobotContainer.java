@@ -14,8 +14,8 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.util.Units;
-import org.wpilib.telemetry.Telemetry;
 import org.wpilib.tunable.Selectable;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
@@ -35,7 +35,7 @@ public class RobotContainer {
   Indexer m_indexer = new Indexer();
   LEDLights m_lights = new LEDLights(m_shooter, getAllianceHubLocation());
   
-  private final Selectable<Command> m_autoChooser = new Selectable<>();
+  private final Selectable<Command> m_autoSelectable = new Selectable<>();
 
   public static final SlewRateLimiter vx_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
   public static final SlewRateLimiter vy_limiter = new SlewRateLimiter(SwerveConstants.kSlewRateLimiter);
@@ -180,29 +180,29 @@ public class RobotContainer {
     };
   }
 
-  // Sendable Chooser Autos
+  // Selectable Autos
 
   public void configureAutos() {  
-    // m_autoChooser.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
-    // m_autoChooser.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
-    // m_autoChooser.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
-    // m_autoChooser.setDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
-    // m_autoChooser.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
-    // m_autoChooser.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
-    // m_autoChooser.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
-    // m_autoChooser.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
-    // m_autoChooser.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
+    // m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
+    // m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
+    // m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
+    // m_autoSelectable.setDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+    // m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
+    // m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
+    // m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
+    // m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
+    // m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
 
     //TEMPORARY
-    m_autoChooser.add("LEFT Reset Pose Only", m_drivebase.resetPoseFromAuto(leftStartingPose));
-    m_autoChooser.addDefault("MIDDLE Reset Pose Only", m_drivebase.resetPoseFromAuto(middleStartingPose));
-    m_autoChooser.add("RIGHT Reset Pose Only", m_drivebase.resetPoseFromAuto(rightStartingPose));
+    m_autoSelectable.add("LEFT Reset Pose Only", m_drivebase.resetPoseFromAuto(leftStartingPose));
+    m_autoSelectable.addDefault("MIDDLE Reset Pose Only", m_drivebase.resetPoseFromAuto(middleStartingPose));
+    m_autoSelectable.add("RIGHT Reset Pose Only", m_drivebase.resetPoseFromAuto(rightStartingPose));
 
-    Telemetry.log("Auto Chooser", m_autoChooser);
+    Tunables.publish("Auto Selectable", m_autoSelectable);
   }
 
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
+    return m_autoSelectable.getSelected();
   }
   
 }
