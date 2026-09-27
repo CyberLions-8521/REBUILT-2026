@@ -4,6 +4,7 @@
 
 package frc.robot.utils;
 
+import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.math.util.Units;
 
 public class Constants {
@@ -54,7 +55,7 @@ public class Constants {
         public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
         public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
 
-        public static final String kCANBus = "can_s1";   // name assigned in Phoenix Tuner X
+        public static final CANPort kCANBus = CANPort.CAN_S1;   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
 
@@ -76,13 +77,13 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 25.0;
+        public static final double kAutoAlignP = 8.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
-        public static final double kAutoDistanceP = 35.0;
+        public static final double kAutoDistanceP = 5.0;
         public static final double kAutoDistanceI = 0.0;
-        public static final double kAutoDistanceD = 0.5;
+        public static final double kAutoDistanceD = 0.0;
         public static final double kAutoDistanceTarget = 2.5; // meters
 
     //======== Pathplanner ==================================================================
@@ -182,7 +183,7 @@ public class Constants {
     }
 
     public static final class CANdleConstants {
-        public static final String kCanbusName = "can_s3";
+        public static final CANPort kCanbusName = CANPort.CAN_S3;
 
         public static final int kLedCount = 256;
         public static final int kCANdleID = 15;
@@ -206,15 +207,15 @@ public class Constants {
         public static final double kRetractedEncoderPosition = -2; //set later
         public static final double kRetractedMiddleEncoderPosition = -2.5;
         
-        public static final String kCanbusName = "can_s0";
+        public static final CANPort kCanbusName = CANPort.CAN_S0;
         public static final double kGearRatio = 14.5;              
         public static final double kGearCircumference = 0; 
         public static final double kMiddleEncoderPosition = -2.56; //for after ventura
 
         public static  double rollerP = 0;
-        public static  double rollerV = 0;
+        public static  double rollerV = 10;
 
-        public static  double pivotP = 0;
+        public static  double pivotP = 1;
         public static  double pivotD = 0;
         public static  double pivotG = 0;
 
@@ -235,7 +236,7 @@ public class Constants {
 
     //======== Indexer Subsystem ================================================================
 
-        public static final String kCanbusName = "can_s4";
+        public static final CANPort kCanbusName = CANPort.CAN_S4;
         public static final int kGearRatio = 0;               //NEED TO CHANGE
         public static final int kGearCircumference = 0;       //NEED TO CHANGE
         

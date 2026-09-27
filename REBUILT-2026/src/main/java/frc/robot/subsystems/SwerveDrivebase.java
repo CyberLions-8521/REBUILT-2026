@@ -225,8 +225,8 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Returns the current robot heading based on the raw gyro value. */
   public Rotation2d getRawGyroHeading() { 
-    Rotation2d angle = Rotation2d.fromRadians(-m_gyro.getYawRadians());
-    if (RobotBase.isReal()) return angle.plus(Rotation2d.fromDegrees(SwerveConstants.kYawOffset)); // compensates for real life SystemCore positioning
+    Rotation2d angle = Rotation2d.fromRadians(m_gyro.getYawRadians());
+    if (RobotBase.isReal()) return angle.plus(Rotation2d.fromDegrees(SwerveConstants.kYawOffset)); // compensates for gyro errors
     return angle;  
   }
 

@@ -11,6 +11,7 @@ import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.InstantCommand;
 import org.wpilib.command2.RunCommand;
 import org.wpilib.command2.SubsystemBase;
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.telemetry.Telemetry;
 import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.Tunables;
@@ -28,7 +29,7 @@ public class Intake extends SubsystemBase {
 
     private TunableDouble m_pPivotTunable = Tunables.addDouble("pivot P", IntakeConstants.pivotP);
     private TunableDouble m_dPivotTunable = Tunables.addDouble("pivot D", IntakeConstants.pivotD);
-    private TunableDouble m_gPivotTunable = Tunables.addDouble("intake P", IntakeConstants.pivotG);
+    private TunableDouble m_gPivotTunable = Tunables.addDouble("intake G", IntakeConstants.pivotG);
     private TunableDouble m_pRollerTunable = Tunables.addDouble("intake P", IntakeConstants.rollerP);
     private TunableDouble m_vRollerTunable = Tunables.addDouble("intake V", IntakeConstants.rollerV);
 
@@ -44,15 +45,11 @@ public class Intake extends SubsystemBase {
 
         resetPivotEncoders();
 
-        Telemetry.log("pivot P", IntakeConstants.pivotP);
-        Telemetry.log("pivot D", IntakeConstants.pivotD);
-        Telemetry.log("pivot G", IntakeConstants.pivotG);
-        Telemetry.log("intake P", IntakeConstants.rollerP);
-        Telemetry.log("intake V", IntakeConstants.rollerV);
     }
 
     private void logData(){
         Telemetry.log("Pivot Position", getPivotPosition());
+        Telemetry.log("Intake Velocity", m_intake.getVelocity().getValueAsDouble());
     }
 
     public Command getResetEncoderPosition() {
@@ -70,7 +67,7 @@ public class Intake extends SubsystemBase {
                 setPivotPosition(position);
             }, 
             interrupted -> m_pivot.setThrottle(0), 
-            () -> m_pivot.getPosition().getValueAsDouble() <= position - 0.1 || m_pivot.getPosition().getValueAsDouble() >= position + 0.1,
+            () -> MathUtil.isNear(m_pivot.getPosition().getValueAsDouble(), position, 0.1),//m_pivot.getPosition().getValueAsDouble() <= position - 0.1 || m_pivot.getPosition().getValueAsDouble() >= position + 0.1,
             this);
     }
 
@@ -122,6 +119,6 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         logData();
-        tunePID();
+        //tunePID();
     }
 }

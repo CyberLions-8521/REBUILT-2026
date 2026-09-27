@@ -20,6 +20,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
 import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.driverstation.DriverStationErrors;
 
 import frc.robot.subsystems.*;
 import frc.robot.utils.Constants.IntakeConstants;
@@ -103,7 +104,7 @@ public class RobotContainer {
     m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
 
     // shoot manually 
-    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60)); 
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45)); 
 
     // indexer
     m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
@@ -115,9 +116,13 @@ public class RobotContainer {
     m_subsystemController.dpadLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
 
     // intake rollers
-    m_subsystemController.y().whileTrue(m_intake.getIntakeCommand(0.65)); 
-    m_subsystemController.y().whileTrue(m_indexer.runIndexerCommand(0.4)); 
-    m_subsystemController.b().whileTrue(m_intake.getIntakeCommand(0.75));
+    m_subsystemController.y().whileTrue(
+      Commands.parallel(
+        m_intake.getIntakeCommand(0.65),
+        m_indexer.runIndexerCommand(0.4)
+      )
+    );
+    m_subsystemController.b().whileTrue(m_intake.getIntakeCommand(1));
 
     // auto-align commands
     m_subsystemController.leftTrigger().whileTrue( // auto-align only
@@ -158,8 +163,8 @@ public class RobotContainer {
   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
     return new RunCommand(
       () -> m_drivebase.drive(
-        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
-        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond, // no negative cuz it flips joystick input
+        vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         -omega.get() * multiplier * SwerveConstants.kMaxAngularSpeed, 
         fieldRelative.get()),
       m_drivebase);    

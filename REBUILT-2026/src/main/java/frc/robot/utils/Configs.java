@@ -106,7 +106,7 @@ public class Configs {
 
         static {
             pivotConfigs.Slot0
-                .withKP(0)
+                .withKP(IntakeConstants.pivotP)
                 .withKD(0)
                 .withKI(0);
             pivotConfigs.CurrentLimits
@@ -119,9 +119,10 @@ public class Configs {
                 .withSensorToMechanismRatio(IntakeConstants.kGearRatio / IntakeConstants.kGearCircumference);
         
             rollerConfigs.Slot0
-                .withKP(0)
+                .withKP(IntakeConstants.rollerP)
                 .withKD(0)
-                .withKI(0);
+                .withKI(0)
+                .withKV(IntakeConstants.rollerV);
             rollerConfigs.CurrentLimits
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(IntakeConstants.intakeCurrentLimit);
