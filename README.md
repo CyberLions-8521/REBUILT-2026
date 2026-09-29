@@ -19,7 +19,7 @@ Added:
 * Pathplanner [✅]
 * Odometry-based auto-align [✅]
 * Odometry-based auto-distance [✅]
-* Elastic dashboard 
+* Elastic dashboard [✅]
 * Dynamic PID tuning [✅]
 * Limelight visionary pose estimation
 

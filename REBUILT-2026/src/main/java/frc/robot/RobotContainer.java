@@ -20,7 +20,6 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
 import org.wpilib.command2.button.CommandXboxController;
-import org.wpilib.driverstation.DriverStationErrors;
 
 import frc.robot.subsystems.*;
 import frc.robot.utils.Constants.IntakeConstants;
@@ -141,17 +140,19 @@ public class RobotContainer {
           getJoystickValues(m_driveController::getLeftX, vy_limiter),
           true
         ),
-        Commands.either(
-          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())), 
-          m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())), 
-          () -> m_drivebase.isAutoAligned()
+        Commands.sequence(
+          Commands.deadline(
+            Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
+            m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          ),
+          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
         ),
-        Commands.either(
-          m_indexer.runIndexerCommand(0.4), 
-          m_indexer.stopIndexerCommand(), 
-          () -> 
+        Commands.sequence(
+          Commands.waitUntil(() ->
             m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
             && m_drivebase.isAutoAligned()
+          ),
+          m_indexer.runIndexerCommand(0.4)
         )
       )
     );
@@ -163,8 +164,8 @@ public class RobotContainer {
   private Command getDriveCommand(double multiplier, Supplier<Double> vx, Supplier<Double> vy, Supplier<Double> omega, Supplier<Boolean> fieldRelative) {
     return new RunCommand(
       () -> m_drivebase.drive(
-        vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond, // no negative cuz it flips joystick input
-        vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
+        -vx.get() * multiplier * SwerveConstants.kMaxMetersPerSecond, // no negative cuz it flips joystick input
+        -vy.get() * multiplier * SwerveConstants.kMaxMetersPerSecond,
         -omega.get() * multiplier * SwerveConstants.kMaxAngularSpeed, 
         fieldRelative.get()),
       m_drivebase);    
@@ -188,6 +189,8 @@ public class RobotContainer {
   // Selectable Autos
 
   public void configureAutos() {  
+    // for autos that do nothing and only reset odometry use resetPoseFromAuto cuz initializeStartingPose() does not work during comp.
+
     // m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
     // m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
     // m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
@@ -199,9 +202,9 @@ public class RobotContainer {
     // m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
 
     //TEMPORARY
-    m_autoSelectable.add("LEFT Reset Pose Only", m_drivebase.resetPoseFromAuto(leftStartingPose));
-    m_autoSelectable.addDefault("MIDDLE Reset Pose Only", m_drivebase.resetPoseFromAuto(middleStartingPose));
-    m_autoSelectable.add("RIGHT Reset Pose Only", m_drivebase.resetPoseFromAuto(rightStartingPose));
+    m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto(leftStartingPose));
+    m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto(middleStartingPose));
+    m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto(rightStartingPose));
 
     Tunables.publish("Auto Selectable", m_autoSelectable);
   }

@@ -25,6 +25,7 @@ public class Configs {
     public static final class SwerveConfigs {
         public static final TalonFXConfiguration driveConfigs = new TalonFXConfiguration();
         public static final TalonFXConfiguration turnConfigs = new TalonFXConfiguration();
+        public static final PoseEstimateConfig mt1Config = PoseEstimateConfig.defaultMT1();
         public static final PoseEstimateConfig mt2Config = PoseEstimateConfig.defaultMT2();
         public static final MagnetSensorConfigs magnetConfigs = new MagnetSensorConfigs();
 
@@ -59,9 +60,18 @@ public class Configs {
                 .withAbsoluteSensorDiscontinuityPoint(SwerveConstants.kCANcoderAbsDiscontPoint)
                 .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive);
             
+            mt1Config
+                .withMinTagCount(2)
+                .withMaxAvgTagDistance(LimelightConstants.kMaxAvgTagDistanceMT1)
+                .withStdDevXY(LimelightConstants.kBaseStdDevMT1, LimelightConstants.kMinStdDevMT1, LimelightConstants.kMaxStdDevMT1)
+                .withStdDevTheta(LimelightConstants.kThetaStdDevMT1);
+
+
             mt2Config
                 .withMinTagCount(1)
-                .withStdDevXY(LimelightConstants.kBaseStdDev, LimelightConstants.kMinStdDev, LimelightConstants.kMaxStdDev)
+                .withMaxSingleTagDistance(LimelightConstants.kMaxSingleTagDistance)
+                .withMaxAvgTagDistance(LimelightConstants.kMaxAvgTagDistanceMT2)
+                .withStdDevXY(LimelightConstants.kBaseStdDevMT2, LimelightConstants.kMinStdDevMT2, LimelightConstants.kMaxStdDevMT2)
                 .withStdDevTheta(PoseEstimateConfig.UNTRUSTED);
         }
     }

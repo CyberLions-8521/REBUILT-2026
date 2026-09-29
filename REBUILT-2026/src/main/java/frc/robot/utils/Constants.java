@@ -53,13 +53,11 @@ public class Constants {
         public static final double kTrackWidth = Units.inchesToMeters(22.5625);   // y-direction of robot, set later
 
         public static final double kMaxMetersPerSecond = 3.3; //oriignal is 4.4 
-        public static final double kMaxAngularSpeed = 2 * Math.PI;  // radians
+        public static final double kMaxAngularSpeed = 1.5 * Math.PI;  // radians
 
         public static final CANPort kCANBus = CANPort.CAN_S1;   // name assigned in Phoenix Tuner X
 
         public static final double kSlewRateLimiter = 3.0;
-
-        public static final double kYawOffset = 180.0;
 
     //======== Tuning ==================================================================
 
@@ -77,7 +75,7 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 8.0;
+        public static final double kAutoAlignP = 12.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
@@ -86,7 +84,7 @@ public class Constants {
         public static final double kAutoDistanceD = 0.0;
         public static final double kAutoDistanceTarget = 2.5; // meters
 
-    //======== Pathplanner ==================================================================
+    //======== Pathplanner/Autonomous ==================================================================
         public static final double kTranslationP = 5.0;
         public static final double kTranslationI = 0.0;
         public static final double kTranslationD = 0.0;
@@ -95,6 +93,10 @@ public class Constants {
         public static final double kRotationI = 0.0;
         public static final double kRotationD = 0.0;
 
+        public static final String kLeftDefaultPose = "LEFT Shoot Preloaded"; // taking starting positions from Pathplanner autos
+        public static final String kMiddleDefaultPose = "MIDDLE Shoot Preloaded";
+        public static final String kRightDefaultPose = "RIGHT Shoot Preloaded";
+
     }
 
     public static final class LimelightConstants {
@@ -102,17 +104,24 @@ public class Constants {
         public static final double kLimelightForwardOffset = Units.inchesToMeters(12.5);
         public static final double kLimelightSideOffset = 0.0;
         public static final double kLimelightUpOffset = Units.inchesToMeters(10);
-        public static final double kLimelightRoll = 0.0;
-        public static final double kLimelightPitch = 15.0;
-        public static final double kLimelightYaw = 0.0;
+        public static final double kLimelightRoll = Units.degreesToRadians(0.0);
+        public static final double kLimelightPitch = Units.degreesToRadians(15.0); // 15 degrees
+        public static final double kLimelightYaw = Units.degreesToRadians(0.0);
 
-        public static final double kMaxViableGyroRate = Units.degreesToRadians(720.0);
-        public static final double kMaxTagDistance = 3.0;
-        public static final double kMaxPoseJump = 2.0;
+        public static final double kMaxViableGyroRate = Units.degreesToRadians(360.0);
+        public static final double kMaxSingleTagDistance = 2.0;
 
-        public static final double kMinStdDev = 0.25;
-        public static final double kMaxStdDev = 1.5;
-        public static final double kBaseStdDev = 0.5;
+        public static final double kMaxAvgTagDistanceMT1 = 3.0;
+        public static final double kMaxAvgTagDistanceMT2 = 4.0;
+
+        public static final double kMinStdDevMT1 = 0.1;
+        public static final double kMaxStdDevMT1 = 1.0;
+        public static final double kBaseStdDevMT1 = 0.3;
+        public static final double kThetaStdDevMT1 = Units.degreesToRadians(5.0);
+
+        public static final double kMinStdDevMT2 = 0.25;
+        public static final double kMaxStdDevMT2 = 1.5;
+        public static final double kBaseStdDevMT2 = 0.5;
     }
 
     public static final class ShooterConstants {

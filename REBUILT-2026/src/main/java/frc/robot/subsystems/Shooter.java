@@ -181,7 +181,11 @@ public class Shooter extends SubsystemBase {
         double upperVelocity = m_upperFlywheelLeader.getVelocity().getValueAsDouble();
         double lowerVelocity = m_lowerFlywheel.getVelocity().getValueAsDouble();
         boolean isUpperAtSpeed = MathUtil.isNear(targetRPS.get(), upperVelocity, 5);
-        boolean isLowerAtSpeed = MathUtil.isNear(targetRPS.get(), lowerVelocity, 5);
+        boolean isLowerAtSpeed = MathUtil.isNear(
+            targetRPS.get() * ShooterConstants.kBottomMotorRatio,
+            lowerVelocity,
+            5
+        );
         return isUpperAtSpeed && isLowerAtSpeed;
     }
     

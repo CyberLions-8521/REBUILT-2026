@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.swerve.ffi.SwerveNative.pose_t;
 import com.limelightvision.Limelight;
 import com.limelightvision.PoseEstimate;
 import com.limelightvision.PoseEstimateType;
@@ -31,7 +32,9 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.driverstation.Alliance;
+//import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.driverstation.MatchState;
+//import org.wpilib.driverstation.MatchType;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.imu.OnboardIMU;
 import org.wpilib.smartdashboard.Field2d;
@@ -83,7 +86,7 @@ public class SwerveDrivebase extends SubsystemBase {
   private final FieldObject2d m_backRightObject2d;
   private Rotation2d m_simHeading = new Rotation2d(); 
   private ChassisVelocities m_lastRobotRelativeSpeeds = new ChassisVelocities();
-  private TunableBoolean m_simToggleTunable = Tunables.addBoolean("Simulation/(Simulation Only) Blue Alliance", false);
+  private TunableBoolean m_simToggleTunable = Tunables.addBoolean("Simulation/(Simulation Only) Blue Alliance", true);
 
   private ProfiledPIDController m_autoAlignPID; // auto-alignment section
   private ProfiledPIDController m_autoDistancePID;
@@ -167,8 +170,17 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, SwerveConstants.kTrackWidth / 2),
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getRawGyroHeading(), getModulePositions(), new Pose2d());
-    m_camera.withPoseEstimateConfig_MT2(SwerveConfigs.mt2Config);
+
+    m_poseEstimator = new SwerveDrivePoseEstimator(
+      m_kinematics, 
+      getRawGyroHeading(), 
+      getModulePositions(), 
+      new Pose2d()
+    );
+    
+    m_camera
+      .withPoseEstimateConfig_MT1(SwerveConfigs.mt1Config)
+      .withPoseEstimateConfig_MT2(SwerveConfigs.mt2Config);
     
     m_field = new Field2d();
     m_frontLeftObject2d = m_field.getObject("Front Left Module");
@@ -192,11 +204,10 @@ public class SwerveDrivebase extends SubsystemBase {
     );
     m_autoDistancePID.setTolerance(SwerveConstants.kAutoDistanceTolerance);
 
-    Telemetry.log("Field", m_field); // puts robot data on the field for simulation
-
     // setupPathPlanner();
   }
 
+  /** Returns the instance of the SwerveDrivebase singleton */
   public static SwerveDrivebase getInstance() {
     return SwerveSingleton.instance;
   }
@@ -225,9 +236,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
   /** Returns the current robot heading based on the raw gyro value. */
   public Rotation2d getRawGyroHeading() { 
-    Rotation2d angle = Rotation2d.fromRadians(m_gyro.getYawRadians());
-    if (RobotBase.isReal()) return angle.plus(Rotation2d.fromDegrees(SwerveConstants.kYawOffset)); // compensates for gyro errors
-    return angle;  
+    return Rotation2d.fromRadians(m_gyro.getYawRadians());
   }
 
   /** Returns the current robot heading based on the field and odometry. */
@@ -257,42 +266,34 @@ public class SwerveDrivebase extends SubsystemBase {
     );
 
     boolean useVisionPoseToggle = m_limelightToggleTunable.get(); 
+    boolean isValidYawRate = Math.abs(m_gyro.getGyroRateZ()) <= LimelightConstants.kMaxViableGyroRate; 
+
     if (useVisionPoseToggle && RobotBase.isReal()) {
       Limelight.setSharedRobotOrientation(getFieldHeading().getDegrees()); 
-      for (var estimate : m_camera.readAcceptedPoseEstimates(PoseEstimateType.MT2_WPIBLUE)) {
-        m_poseEstimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, estimate.stdDevs);
-        postLimelightData(estimate);
-      }
-    }
-    
-    Pose2d robotPose = getPose();
-    m_field.setRobotPose(robotPose);
-    m_frontLeftObject2d.setPose(robotPose.transformBy(
-      new Transform2d(
-        new Translation2d(SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
-        m_frontLeft.getState().angle
-      )
-    ));
-    m_frontRighObject2d.setPose(robotPose.transformBy(
-      new Transform2d(
-        new Translation2d(SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
-        m_frontRight.getState().angle
-      )
-    ));
-    m_backLeftObject2d.setPose(robotPose.transformBy(
-      new Transform2d(
-        new Translation2d(-SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
-        m_backLeft.getState().angle
-      )
-    ));
-    m_backRightObject2d.setPose(robotPose.transformBy(
-      new Transform2d(
-        new Translation2d(-SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
-        m_backRight.getState().angle
-      )
-    ));
+      
+      for (var frame : m_camera.readResultsQueue()) {
+        PoseEstimate mt1 =
+            m_camera.getPoseEstimate(frame, PoseEstimateType.MT1_WPIBLUE);
 
-    Telemetry.log("Field", m_field);
+        if (mt1.isValid() && isValidYawRate) {
+          // Two+ tags; use independent camera heading and position.
+          m_poseEstimator.addVisionMeasurement(
+              mt1.pose, mt1.timestampSeconds, mt1.stdDevs);
+        } else {
+          PoseEstimate mt2 =
+              m_camera.getPoseEstimate(frame, PoseEstimateType.MT2_WPIBLUE);
+
+          if (mt2.isValid()) {
+            // Fallback for position correction only.
+            m_poseEstimator.addVisionMeasurement(
+                mt2.pose, mt2.timestampSeconds, mt2.stdDevs);
+          }
+        }
+      }
+      
+    }
+
+    updateSimField();
 
   }
 
@@ -359,6 +360,55 @@ public class SwerveDrivebase extends SubsystemBase {
     ) / 4.0;
   }
 
+  /** 
+   * Will select 1 of 3 default starting poses to start odometry at. 
+   * Can be overriden by Pathplanner. 
+   * SHOULD BE CALLED IN ROBOT.JAVA 
+   * This method cannot be used during comp. because it only works for NONE and PRACTICE TYPES
+  */
+  // public void initializeStartingPose() {
+  //   MatchType type = MatchState.getMatchType();
+
+  //   // only preform this method NOT during comp.
+  //   if (type != MatchType.NONE) return;
+
+  //   int location = MatchState.getLocation().orElse(0);
+  //   PathPlannerAuto sourceAuto;
+  //   Pose2d startingPose;
+
+  //   switch (location) {
+  //     case 1:
+  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kLeftDefaultPose);
+  //       startingPose = sourceAuto.getStartingPose();
+  //       break;
+  //     case 2:
+  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kMiddleDefaultPose);
+  //       startingPose = sourceAuto.getStartingPose();
+  //       break;
+  //     case 3:
+  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kRightDefaultPose);
+  //       startingPose = sourceAuto.getStartingPose();
+  //       break;
+  //     default:
+  //       break;
+  //   }
+
+  //   if (startingPose == null) {
+  //       DriverStationErrors.reportError(
+  //         "Cannot initialize a starting pose.",
+  //         false
+  //       );
+  //       return;
+  //     }
+
+  //     if (shouldFlipPathForAlliance()) {
+  //       startingPose = FlippingUtil.flipFieldPose(startingPose);
+  //     }
+
+  //     resetOdometry(startingPose);
+
+  // }
+
   //#endregion
 
 
@@ -369,7 +419,6 @@ public class SwerveDrivebase extends SubsystemBase {
   /* -------------------------------------------------- Simulation --------------------------------------------------
   * As said in the module's description for its job during simulation, each module holds "fake" values of data - turn position, distance, and velocity
   * The false data of the gyroscope is the simulation heading
-    * getRawGyroHeading() is one of those methods that starts with the conditional for simulation, just like in the module code
   * The Field2d is used for both the actual robot movement out of simulation and the simulated movement during simulation
   * The best way to think of simulation is the ideal movement of the robot from input
   * Helped me to fix a lot of bugs lol
@@ -382,7 +431,7 @@ public class SwerveDrivebase extends SubsystemBase {
     double delay = 0.02;
     
     m_simHeading = m_simHeading.plus(Rotation2d.fromRadians(m_lastRobotRelativeSpeeds.omega * delay));
-    OnboardIMUSim.setYaw(-m_simHeading.getRadians());
+    OnboardIMUSim.setYaw(m_simHeading.getRadians());
 
     m_frontLeft.updateSim(delay);
     m_frontRight.updateSim(delay);
@@ -395,6 +444,40 @@ public class SwerveDrivebase extends SubsystemBase {
     if (RobotBase.isSimulation()) 
       return m_simToggleTunable.get(); 
     return MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
+  }
+
+  /** Updates the simulation field (should be called after pose estimation is updated) */
+  private void updateSimField() {
+    Pose2d robotPose = getPose();
+
+    m_field.setRobotPose(robotPose);
+
+    m_frontLeftObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
+        m_frontLeft.getState().angle
+      )
+    ));
+    m_frontRighObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
+        m_frontRight.getState().angle
+      )
+    ));
+    m_backLeftObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(-SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
+        m_backLeft.getState().angle
+      )
+    ));
+    m_backRightObject2d.setPose(robotPose.transformBy(
+      new Transform2d(
+        new Translation2d(-SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
+        m_backRight.getState().angle
+      )
+    ));
+
+    Telemetry.log("Field", m_field);
   }
 
   //#endregion
@@ -622,7 +705,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
 
   
-  /* -------------------------------------------------- Pathplanner -------------------------------------------------
+  /* -------------------------------------------------- Pathplanner/Autonomous -------------------------------------------------
   * Pathplanner is used to prevent hard-coding autos and makes it much easier on programming
   * I'm gonna be so fr, a lot of the Pathplanner code was copied from a guide ty YASS (Yet Another Software Suite)
   * A lot of Pathplanner code is setting up something called the AutoBuilder which converts paths in the GUI into commands
@@ -756,13 +839,27 @@ public class SwerveDrivebase extends SubsystemBase {
 // }
 
 /** Optional overload that resets odometry based off a given pose. Useful for when the robot cannot move but still requires a pose */
-public Command resetPoseFromAuto(Pose2d pose) {
+public Command resetPoseFromAuto(Pose2d poseBlueRelative) {
   return Commands.runOnce(() -> {
-    resetOdometry(pose);
+    if (shouldFlipPathForAlliance()) {
+      // resetOdometry(FlippingUtil.flipFieldPose(poseBlueRelative));
+      // return;
+
+      resetOdometry(
+        new Pose2d( // TEMPORARY REPLACMENT UNTIL PATHPLANNER IS AVALIABLE
+          16.54 - poseBlueRelative.getX(),
+          poseBlueRelative.getY(),
+          new Rotation2d(-poseBlueRelative.getRotation().getCos(), poseBlueRelative.getRotation().getSin())
+        )
+      );
+      return;
+    }
+    
+    resetOdometry(poseBlueRelative);
   }, this);
 }
 
-//   /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) */
+//   /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) SHOULD BE CALLED IN ROBOT.JAVA */
 //   public void stopAutonomousDrive() {
 //     driveRobotRelative(new ChassisVelocities());
 //   }
@@ -827,19 +924,6 @@ public Command resetPoseFromAuto(Pose2d pose) {
     m_frontRight.logData("Front Right");
     m_backLeft.logData("Back Left");
     m_backRight.logData("Back Right");
-  }
-
-  /** Logs Limelight data to SmartDashboard. */
-  private void postLimelightData(PoseEstimate estimate) {
-    // SmartDashboard.putBoolean("Limelight Data/Valid target", LimelightHelpers.getTV
-    // SmartDashboard.putBoolean("Limelight Data/Valid for pose estimation", isUsableVisionEstimate(estimate));
-    // SmartDashboard.putNumber("Limelight Data/TX (degrees)", LimelightHelpers.getTX(LimelightConstants.limelightName));
-    // SmartDashboard.putNumber("Limelight Data/TY (degrees)", LimelightHelpers.getTY(LimelightConstants.limelightName));
-    // SmartDashboard.putNumber("Limelight Data/Tag Count", (isUsableVisionEstimate(estimate)) ? estimate.tagCount : 0);
-    
-    Telemetry.log("Limelight Data/TX (degrees)", m_camera.getTXDegrees());
-    Telemetry.log("Limelight Data/TY (degrees)", m_camera.getTYDegrees());
-    Telemetry.log("Limelight Data/Tag Count", estimate.fieldedTagCount);
   }
 
   /** Stops all four swerve modules. */
