@@ -13,7 +13,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  private SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -47,7 +46,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    //m_drivebase.stopAutonomousDrive(); // written here to prevent autonomous drift problems
+    SwerveDrivebase.getInstance().stopAutonomousDrive(); // written here to prevent autonomous drift problems
   }
 
   @Override
@@ -55,8 +54,6 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-
-    //m_drivebase.initializeStartingPose();
   }
 
   @Override

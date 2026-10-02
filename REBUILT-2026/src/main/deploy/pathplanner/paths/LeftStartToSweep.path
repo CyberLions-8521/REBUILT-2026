@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 5.842428232748447,
+        "x": 4.656486246672582,
         "y": 5.5108313468721075
       },
       "prevControl": {
-        "x": 5.583718957299947,
-        "y": 5.516615726117632
+        "x": 4.2025728584128075,
+        "y": 5.577518100129244
       },
       "nextControl": {
-        "x": 6.307942118512928,
-        "y": 5.500423104436071
+        "x": 6.402883762200532,
+        "y": 5.2542590949423245
       },
       "isLocked": false,
       "linkedName": null
@@ -36,12 +36,12 @@
         "y": 7.0005330796335965
       },
       "prevControl": {
-        "x": 5.74552647631538,
-        "y": 7.038645905355039
+        "x": 5.791242236024845,
+        "y": 6.356823425022182
       },
       "nextControl": {
-        "x": 7.5215978696217345,
-        "y": 6.966363930046058
+        "x": 7.3630742795369075,
+        "y": 7.492697484450459
       },
       "isLocked": false,
       "linkedName": null
@@ -63,19 +63,46 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": 179.21760091965177
+      "rotationDegrees": 138.07740075111352
     },
     {
       "waypointRelativePos": 2,
       "rotationDegrees": 137.76385737091263
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone Bump",
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 1.4327830188679251,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 13.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 2.4587264150943406,
+      "maxWaypointRelativePos": 3.0,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 13.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "IntakePivotOut",
-      "waypointRelativePos": 0.5978773584905653,
+      "waypointRelativePos": 1.1426886792452833,
       "endWaypointRelativePos": null,
       "command": null
     },
@@ -95,14 +122,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 0.5,
     "rotation": 90.0
   },
   "reversed": false,
   "folder": "Left Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.69196114260015
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

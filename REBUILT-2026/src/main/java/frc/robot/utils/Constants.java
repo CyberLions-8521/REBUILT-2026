@@ -75,7 +75,7 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 12.0;
+        public static final double kAutoAlignP = 25.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
@@ -103,25 +103,20 @@ public class Constants {
         public static final String limelightName = "limelight";
         public static final double kLimelightForwardOffset = Units.inchesToMeters(12.5);
         public static final double kLimelightSideOffset = 0.0;
-        public static final double kLimelightUpOffset = Units.inchesToMeters(10);
+        public static final double kLimelightUpOffset = Units.inchesToMeters(23);
         public static final double kLimelightRoll = Units.degreesToRadians(0.0);
         public static final double kLimelightPitch = Units.degreesToRadians(15.0); // 15 degrees
         public static final double kLimelightYaw = Units.degreesToRadians(0.0);
 
         public static final double kMaxViableGyroRate = Units.degreesToRadians(360.0);
         public static final double kMaxSingleTagDistance = 2.0;
-
-        public static final double kMaxAvgTagDistanceMT1 = 3.0;
         public static final double kMaxAvgTagDistanceMT2 = 4.0;
-
-        public static final double kMinStdDevMT1 = 0.1;
-        public static final double kMaxStdDevMT1 = 1.0;
-        public static final double kBaseStdDevMT1 = 0.3;
-        public static final double kThetaStdDevMT1 = Units.degreesToRadians(5.0);
-
-        public static final double kMinStdDevMT2 = 0.25;
-        public static final double kMaxStdDevMT2 = 1.5;
+        public static final double kMinStdDevMT2 = 0.1;
+        public static final double kMaxStdDevMT2 = 1.0;
         public static final double kBaseStdDevMT2 = 0.5;
+        public static final double kStdDevDivision = 0.5; // no idea what this does
+        public static final double kFieldLength = 16.541;
+        public static final double kFieldWidth = 8.069;
     }
 
     public static final class ShooterConstants {

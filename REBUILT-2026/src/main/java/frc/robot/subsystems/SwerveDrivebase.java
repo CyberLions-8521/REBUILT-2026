@@ -6,17 +6,15 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.swerve.ffi.SwerveNative.pose_t;
 import com.limelightvision.Limelight;
-import com.limelightvision.PoseEstimate;
 import com.limelightvision.PoseEstimateType;
-// import com.pathplanner.lib.auto.AutoBuilder;
-// import com.pathplanner.lib.commands.PathPlannerAuto;
-// import com.pathplanner.lib.commands.PathfindingCommand;
-// import com.pathplanner.lib.config.PIDConstants;
-// import com.pathplanner.lib.config.RobotConfig;
-// import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-// import com.pathplanner.lib.util.FlippingUtil;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.FlippingUtil;
 import org.wpilib.math.controller.ProfiledPIDController;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
 import org.wpilib.math.geometry.Rotation2d;
@@ -32,9 +30,8 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.driverstation.Alliance;
-//import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.driverstation.MatchState;
-//import org.wpilib.driverstation.MatchType;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.imu.OnboardIMU;
 import org.wpilib.smartdashboard.Field2d;
@@ -44,6 +41,7 @@ import org.wpilib.tunable.TunableBoolean;
 import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.SubsystemBase;
@@ -64,6 +62,7 @@ public class SwerveDrivebase extends SubsystemBase {
   private final SwerveModule m_backRight;
   private final SwerveDriveKinematics m_kinematics;
   private final OnboardIMU m_gyro = new OnboardIMU(OnboardIMU.MountOrientation.FLAT);
+  private boolean m_pathPlannerAvailable = false;
 
   private final SwerveDrivePoseEstimator m_poseEstimator; // odometry
   private final Pose3d m_cameraPoseRobotSpace = new Pose3d(
@@ -179,8 +178,8 @@ public class SwerveDrivebase extends SubsystemBase {
     );
     
     m_camera
-      .withPoseEstimateConfig_MT1(SwerveConfigs.mt1Config)
-      .withPoseEstimateConfig_MT2(SwerveConfigs.mt2Config);
+      .withPoseEstimateConfig_MT2(SwerveConfigs.mt2Config)
+      .withTelemetry(true);
     
     m_field = new Field2d();
     m_frontLeftObject2d = m_field.getObject("Front Left Module");
@@ -204,7 +203,7 @@ public class SwerveDrivebase extends SubsystemBase {
     );
     m_autoDistancePID.setTolerance(SwerveConstants.kAutoDistanceTolerance);
 
-    // setupPathPlanner();
+    setupPathPlanner();
   }
 
   /** Returns the instance of the SwerveDrivebase singleton */
@@ -266,31 +265,20 @@ public class SwerveDrivebase extends SubsystemBase {
     );
 
     boolean useVisionPoseToggle = m_limelightToggleTunable.get(); 
-    boolean isValidYawRate = Math.abs(m_gyro.getGyroRateZ()) <= LimelightConstants.kMaxViableGyroRate; 
+    boolean isValidYawRate = Math.abs(m_gyro.getGyroRateZ()) <= LimelightConstants.kMaxViableGyroRate;
 
-    if (useVisionPoseToggle && RobotBase.isReal()) {
+    if (useVisionPoseToggle && RobotBase.isReal() && isValidYawRate) {
       Limelight.setSharedRobotOrientation(getFieldHeading().getDegrees()); 
-      
-      for (var frame : m_camera.readResultsQueue()) {
-        PoseEstimate mt1 =
-            m_camera.getPoseEstimate(frame, PoseEstimateType.MT1_WPIBLUE);
-
-        if (mt1.isValid() && isValidYawRate) {
-          // Two+ tags; use independent camera heading and position.
-          m_poseEstimator.addVisionMeasurement(
-              mt1.pose, mt1.timestampSeconds, mt1.stdDevs);
-        } else {
-          PoseEstimate mt2 =
-              m_camera.getPoseEstimate(frame, PoseEstimateType.MT2_WPIBLUE);
-
-          if (mt2.isValid()) {
-            // Fallback for position correction only.
-            m_poseEstimator.addVisionMeasurement(
-                mt2.pose, mt2.timestampSeconds, mt2.stdDevs);
-          }
-        }
+      for (var estimate : m_camera.readAcceptedPoseEstimates(PoseEstimateType.MT2_WPIBLUE)) {
+        m_poseEstimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, estimate.stdDevs);
       }
-      
+    }
+
+    m_camera.getLatestResults();
+    
+    if (m_camera.hasTarget()) {
+      Telemetry.log("LimelightData/Camera TX", m_camera.getTXDegrees());
+      Telemetry.log("LimelightData/Camera TY", m_camera.getTYDegrees());
     }
 
     updateSimField();
@@ -359,55 +347,6 @@ public class SwerveDrivebase extends SubsystemBase {
       + m_backRight.getOdometryTimestampSeconds()
     ) / 4.0;
   }
-
-  /** 
-   * Will select 1 of 3 default starting poses to start odometry at. 
-   * Can be overriden by Pathplanner. 
-   * SHOULD BE CALLED IN ROBOT.JAVA 
-   * This method cannot be used during comp. because it only works for NONE and PRACTICE TYPES
-  */
-  // public void initializeStartingPose() {
-  //   MatchType type = MatchState.getMatchType();
-
-  //   // only preform this method NOT during comp.
-  //   if (type != MatchType.NONE) return;
-
-  //   int location = MatchState.getLocation().orElse(0);
-  //   PathPlannerAuto sourceAuto;
-  //   Pose2d startingPose;
-
-  //   switch (location) {
-  //     case 1:
-  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kLeftDefaultPose);
-  //       startingPose = sourceAuto.getStartingPose();
-  //       break;
-  //     case 2:
-  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kMiddleDefaultPose);
-  //       startingPose = sourceAuto.getStartingPose();
-  //       break;
-  //     case 3:
-  //       sourceAuto = new PathPlannerAuto(SwerveConstants.kRightDefaultPose);
-  //       startingPose = sourceAuto.getStartingPose();
-  //       break;
-  //     default:
-  //       break;
-  //   }
-
-  //   if (startingPose == null) {
-  //       DriverStationErrors.reportError(
-  //         "Cannot initialize a starting pose.",
-  //         false
-  //       );
-  //       return;
-  //     }
-
-  //     if (shouldFlipPathForAlliance()) {
-  //       startingPose = FlippingUtil.flipFieldPose(startingPose);
-  //     }
-
-  //     resetOdometry(startingPose);
-
-  // }
 
   //#endregion
 
@@ -697,7 +636,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public boolean isAutoAligned() {
     return m_autoAlignPID.atGoal();
   }
-
+  
   //#endregion
 
 
@@ -720,138 +659,130 @@ public class SwerveDrivebase extends SubsystemBase {
   */
   //#region
   
-//   /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
-//   private void driveRobotRelative(ChassisVelocities speedsRobotRelative) {
-//     SwerveModuleVelocity[] moduleStates = m_kinematics.toSwerveModuleVelocities(speedsRobotRelative);
+  /** Drives the robot using robot-relative chassis speeds, as required by PathPlanner. */
+  private void driveRobotRelative(ChassisVelocities speedsRobotRelative) {
+    SwerveModuleVelocity[] moduleStates = m_kinematics.toSwerveModuleVelocities(speedsRobotRelative);
 
-//     moduleStates = SwerveDriveKinematics.desaturateWheelVelocities(
-//       moduleStates,
-//       SwerveConstants.kMaxMetersPerSecond
-//     );
+    moduleStates = SwerveDriveKinematics.desaturateWheelVelocities(
+      moduleStates,
+      SwerveConstants.kMaxMetersPerSecond
+    );
 
-//     m_frontLeft.setDesiredState(moduleStates[0]);
-//     m_frontRight.setDesiredState(moduleStates[1]);
-//     m_backLeft.setDesiredState(moduleStates[2]);
-//     m_backRight.setDesiredState(moduleStates[3]);
+    m_frontLeft.setDesiredState(moduleStates[0]);
+    m_frontRight.setDesiredState(moduleStates[1]);
+    m_backLeft.setDesiredState(moduleStates[2]);
+    m_backRight.setDesiredState(moduleStates[3]);
 
-//     m_lastRobotRelativeSpeeds = m_kinematics.toChassisVelocities(moduleStates);
-//   }
+    m_lastRobotRelativeSpeeds = m_kinematics.toChassisVelocities(moduleStates);
+  }
 
-//   /** Returns the robot-relative chassis speed used by PathPlanner. */
-//   private ChassisVelocities getRobotVelocity() {
-//     return m_kinematics.toChassisVelocities(
-//       new SwerveModuleVelocity[] {
-//         m_frontLeft.getState(),
-//         m_frontRight.getState(),
-//         m_backLeft.getState(),
-//         m_backRight.getState()
-//       }
-//     );
-//   }
+  /** Returns the robot-relative chassis speed used by PathPlanner. */
+  private ChassisVelocities getRobotVelocity() {
+    return m_kinematics.toChassisVelocities(
+      new SwerveModuleVelocity[] {
+        m_frontLeft.getState(),
+        m_frontRight.getState(),
+        m_backLeft.getState(),
+        m_backRight.getState()
+      }
+    );
+  }
 
-//   /** Setup AutoBuilder for PathPlanner */
-//   private void setupPathPlanner()
-//   {
-//     // Load the RobotConfig from the GUI settings. You should probably
-//     // store this in your Constants file
-//     RobotConfig config;
-//     try
-//     {
-//       config = RobotConfig.fromGUISettings();
+  /** Setup AutoBuilder for PathPlanner */
+  private void setupPathPlanner()
+  {
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    RobotConfig config;
+    try
+    {
+      config = RobotConfig.fromGUISettings();
 
-//       // Configure AutoBuilder last
-//       AutoBuilder.configure(
-//           this::getPose,
-//           // Robot pose supplier
-//           this::resetOdometry,
-//           // Method to reset odometry (will be called if your auto has a starting pose)
-//           this::getRobotVelocity,
-//           // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
-//           (speedsRobotRelative, moduleFeedForwards) -> driveRobotRelative(speedsRobotRelative),
-//           // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
-//           new PPHolonomicDriveController(
-//               // PPHolonomicController is the built in path following controller for holonomic drive trains
-//               new PIDConstants(SwerveConstants.kTranslationP, SwerveConstants.kTranslationI, SwerveConstants.kTranslationD),
-//               // Translation PID constants
-//               new PIDConstants(SwerveConstants.kRotationP, SwerveConstants.kRotationI, SwerveConstants.kRotationD)
-//               // Rotation PID constants
-//           ),
-//           config,
-//           // The robot configuration
+      // Configure AutoBuilder last
+      AutoBuilder.configure(
+          this::getPose,
+          // Robot pose supplier
+          this::resetOdometry,
+          // Method to reset odometry (will be called if your auto has a starting pose)
+          this::getRobotVelocity,
+          // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
+          (speedsRobotRelative, moduleFeedForwards) -> driveRobotRelative(speedsRobotRelative),
+          // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
+          new PPHolonomicDriveController(
+              // PPHolonomicController is the built in path following controller for holonomic drive trains
+              new PIDConstants(SwerveConstants.kTranslationP, SwerveConstants.kTranslationI, SwerveConstants.kTranslationD),
+              // Translation PID constants
+              new PIDConstants(SwerveConstants.kRotationP, SwerveConstants.kRotationI, SwerveConstants.kRotationD)
+              // Rotation PID constants
+          ),
+          config,
+          this::shouldFlipPathForAlliance,
+          this
+          // Reference to this subsystem to set requirements
+                           );
+      m_pathPlannerAvailable = true;
 
-//           // () -> {
-//           //   // Boolean supplier that controls when the path will be mirrored for the red alliance
-//           //   // This will flip the path being followed to the red side of the field.
-//           //   // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+    } catch (ExceptionInInitializerError e) {
+      // PathPlanner can throw this Error while its static RobotConfig Alerts are
+      // created. Do not let an optional autonomous library prevent teleop from
+      // starting; RobotContainer will omit PathPlanner autos in this state.
+      DriverStationErrors.reportError(
+          "PathPlanner failed to initialize; autonomous paths are disabled. "
+              + "Update the matching PathPlanner/WPILib alpha releases. Cause: "
+              + e.getException(),
+          false);
+      return;
+    } catch (Exception e) {
+      DriverStationErrors.reportError(
+          "PathPlanner failed to initialize; autonomous paths are disabled. Cause: " + e,
+          false);
+      return;
+    }
 
-//           //   var alliance = MatchState.getAlliance();
-//           //   if (alliance.isPresent())
-//           //   {
-//           //     return alliance.get() == Alliance.RED;
-//           //   }
-//           //   return false;
-//           // },
-//           this::shouldFlipPathForAlliance,
+    //Preload PathPlanner Path finding
+    // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
 
-//           this
-//           // Reference to this subsystem to set requirements
-//                            );
+  /** Whether PathPlanner initialized successfully and PathPlanner autos may be created. */
+  public boolean isPathPlannerAvailable() {
+    return m_pathPlannerAvailable;
+  }
 
-//     } catch (Exception e)
-//     {
-//       // Handle exception as needed
-//       e.printStackTrace();
-//     }
+  /** Return Pathplanner auto command */
+  public Command getAutonomousCommand(String pathName) {
+    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    return new PathPlannerAuto(pathName);
+  }
 
-//     //Preload PathPlanner Path finding
-//     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-//     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
-//   }
+  /** Resets odometry based on the starting position of a Pathplanner auto. Useful for when the robot cannot move during auto but still requires a pose. */
+  public Command resetPoseFromAuto(String autoName) {
+    PathPlannerAuto sourceAuto = new PathPlannerAuto(autoName);
 
-//   /** Return Pathplanner auto command */
-//   public Command getAutonomousCommand(String pathName)
-//   {
-//     // Create a path following command using AutoBuilder. This will also trigger event markers.
-//     return new PathPlannerAuto(pathName);
-//   }
+    return Commands.runOnce(() -> {
+      Pose2d startingPose = sourceAuto.getStartingPose();
 
-//   /** Resets odometry based on the starting position of a Pathplanner auto. Useful for when the robot cannot move during auto but still requires a pose. */
-//   public Command resetPoseFromAuto(String autoName) {
-//     PathPlannerAuto sourceAuto = new PathPlannerAuto(autoName);
+      if (startingPose == null) {
+        DriverStationErrors.reportError(
+          "PathPlanner auto \"" + autoName + "\" does not have a starting pose.",
+          false
+        );
+        return;
+      }
 
-//     return Commands.runOnce(() -> {
-//       Pose2d startingPose = sourceAuto.getStartingPose();
+      if (shouldFlipPathForAlliance()) {
+        startingPose = FlippingUtil.flipFieldPose(startingPose);
+      }
 
-//       if (startingPose == null) {
-//         DriverStationErrors.reportError(
-//           "PathPlanner auto \"" + autoName + "\" does not have a starting pose.",
-//           false
-//         );
-//         return;
-//       }
-
-//       if (shouldFlipPathForAlliance()) {
-//         startingPose = FlippingUtil.flipFieldPose(startingPose);
-//       }
-
-//       resetOdometry(startingPose);
-//     }, this);
-// }
+      resetOdometry(startingPose);
+    }, this);
+}
 
 /** Optional overload that resets odometry based off a given pose. Useful for when the robot cannot move but still requires a pose */
 public Command resetPoseFromAuto(Pose2d poseBlueRelative) {
   return Commands.runOnce(() -> {
     if (shouldFlipPathForAlliance()) {
-      // resetOdometry(FlippingUtil.flipFieldPose(poseBlueRelative));
-      // return;
-
-      resetOdometry(
-        new Pose2d( // TEMPORARY REPLACMENT UNTIL PATHPLANNER IS AVALIABLE
-          16.54 - poseBlueRelative.getX(),
-          poseBlueRelative.getY(),
-          new Rotation2d(-poseBlueRelative.getRotation().getCos(), poseBlueRelative.getRotation().getSin())
-        )
-      );
+      resetOdometry(FlippingUtil.flipFieldPose(poseBlueRelative));
       return;
     }
     
@@ -859,10 +790,10 @@ public Command resetPoseFromAuto(Pose2d poseBlueRelative) {
   }, this);
 }
 
-//   /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) SHOULD BE CALLED IN ROBOT.JAVA */
-//   public void stopAutonomousDrive() {
-//     driveRobotRelative(new ChassisVelocities());
-//   }
+  /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) SHOULD BE CALLED IN ROBOT.JAVA */
+  public void stopAutonomousDrive() {
+    driveRobotRelative(new ChassisVelocities());
+  }
 
   //#endregion
 

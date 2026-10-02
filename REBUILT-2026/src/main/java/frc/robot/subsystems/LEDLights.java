@@ -20,7 +20,6 @@ import org.wpilib.command2.RunCommand;
 import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Configs.CANdleConfigs;
 import frc.robot.utils.Constants.CANdleConstants;
-import frc.robot.utils.Constants.ShooterConstants;
 
 public class LEDLights extends SubsystemBase {
 
@@ -63,6 +62,7 @@ public class LEDLights extends SubsystemBase {
   // }
   public void setLEDMode(LEDMode newMode){
     currentMode = newMode;
+    m_CANdle.setControl(newMode.animation);
   }
 
   public Command setLEDCommand(LEDMode newMode) {
@@ -72,21 +72,21 @@ public class LEDLights extends SubsystemBase {
   @Override
   public void periodic() {
 
-    boolean isAprilTagSeen = m_drivebase.getLimelightCamera().hasTarget();
-    boolean isAutoAligned = m_drivebase.isAutoAligned(); //checks if it is aligned
-    double distance = m_shooter.getDistance(m_drivebase.getPose(), shooterTarget.get());
-    boolean isInRange = distance >= ShooterConstants.kMinShooterRange && distance <= ShooterConstants.kMaxShooterRange; //not in deadzone
+    // boolean isAprilTagSeen = m_drivebase.getLimelightCamera().hasTarget();
+    // boolean isAutoAligned = m_drivebase.isAutoAligned(); //checks if it is aligned
+    // double distance = m_shooter.getDistance(m_drivebase.getPose(), shooterTarget.get());
+    // boolean isInRange = distance >= ShooterConstants.kMinShooterRange && distance <= ShooterConstants.kMaxShooterRange; //not in deadzone
 
-    if (!isAprilTagSeen || !isInRange) {
-      currentMode = LEDMode.Off;
-    } else {
-      if (!isAutoAligned) {
-        currentMode = LEDMode.SeesAprilTag;
-      } else {
-        currentMode = LEDMode.AlignedToTarget;
-      }
-    }
+    // if (!isAprilTagSeen || !isInRange) {
+    //   currentMode = LEDMode.Off;
+    // } else {
+    //   if (!isAutoAligned) {
+    //     currentMode = LEDMode.SeesAprilTag;
+    //   } else {
+    //     currentMode = LEDMode.AlignedToTarget;
+    //   }
+    // }
 
-    m_CANdle.setControl(currentMode.animation);
+    // m_CANdle.setControl(currentMode.animation);
   }
 }

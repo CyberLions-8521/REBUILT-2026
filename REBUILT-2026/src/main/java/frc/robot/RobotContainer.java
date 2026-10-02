@@ -16,12 +16,17 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.util.Units;
 import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.Tunables;
+
+import com.pathplanner.lib.auto.NamedCommands;
+
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
+import org.wpilib.command2.SequentialCommandGroup;
 import org.wpilib.command2.button.CommandXboxController;
 
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.LEDLights.LEDMode;
 import frc.robot.utils.Constants.IntakeConstants;
 import frc.robot.utils.Constants.SwerveConstants;
 
@@ -46,27 +51,27 @@ public class RobotContainer {
   public static final Translation2d blueHubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
   public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
 
-  //TEMPORARY starting pose objects
+  //Backup starting pose objects
   public static final Pose2d leftStartingPose = new Pose2d(3.5, 7.4, new Rotation2d());
   public static final Pose2d middleStartingPose = new Pose2d(3.5, 4.05, new Rotation2d());
   public static final Pose2d rightStartingPose = new Pose2d(3.5, 0.65, new Rotation2d());
   //#endregion
 
   public RobotContainer() {
-    // NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60));
-    // NamedCommands.registerCommand("IntakePivotOut", m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
-    // NamedCommands.registerCommand("IntakeForDuration", m_intake.getIntakeCommand(0.6).withTimeout(4));
-    // NamedCommands.registerCommand("ShootForDuration", 
-    //   Commands.deadline(
-    //     new SequentialCommandGroup(
-    //       Commands.waitUntil(() -> 
-    //         m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //       ).withTimeout(5),
-    //       m_indexer.runIndexerCommand(0.4).withTimeout(5)
-    //     ),
-    //     m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //   )
-    // );
+    NamedCommands.registerCommand("WarmUpShooter", m_shooter.WarmUpShooter(60));
+    NamedCommands.registerCommand("IntakePivotOut", m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+    NamedCommands.registerCommand("IntakeForDuration", m_intake.getIntakeCommand(0.6).withTimeout(4));
+    NamedCommands.registerCommand("ShootForDuration", 
+      Commands.deadline(
+        new SequentialCommandGroup(
+          Commands.waitUntil(() -> 
+            m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          ).withTimeout(5),
+          m_indexer.runIndexerCommand(0.5).withTimeout(5)
+        ),
+        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+      )
+    );
 
     configureBindings();
     configureAutos();
@@ -157,6 +162,26 @@ public class RobotContainer {
       )
     );
 
+    //======================== LEDs ==============================================
+
+    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Off));
+
+    m_subsystemController.leftTrigger().whileTrue(
+      Commands.run(() -> {
+        if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+        else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+      }, m_lights)
+    );
+    m_subsystemController.rightTrigger().whileTrue(
+      Commands.run(() -> {
+        if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+        else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+      }, m_lights)
+    );
+
+    m_subsystemController.y().whileTrue(m_lights.setLEDCommand(LEDMode.Intaking));
+    m_subsystemController.b().whileTrue(m_lights.setLEDCommand(LEDMode.Intaking));
+
     //#endregion
 
   }
@@ -191,20 +216,21 @@ public class RobotContainer {
   public void configureAutos() {  
     // for autos that do nothing and only reset odometry use resetPoseFromAuto cuz initializeStartingPose() does not work during comp.
 
-    // m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
-    // m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
-    // m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
-    // m_autoSelectable.setDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
-    // m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
-    // m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
-    // m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
-    // m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
-    // m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
-
-    //TEMPORARY
-    m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto(leftStartingPose));
-    m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto(middleStartingPose));
-    m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto(rightStartingPose));
+    if (m_drivebase.isPathPlannerAvailable()) {
+      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
+      m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
+      m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
+      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
+      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
+      m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
+      m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
+    } else {
+      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto(leftStartingPose));
+      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto(middleStartingPose));
+      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto(rightStartingPose));
+    }
 
     Tunables.publish("Auto Selectable", m_autoSelectable);
   }
