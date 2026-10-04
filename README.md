@@ -28,11 +28,8 @@ The odometry based auto-align and auto-distancing can take in any Translation2d 
 (The branch Ethan-Drivebase is the original branch and the branch before I re-added the subsystems back onto the drivebase.)
 
 * Includes 2 Translation2d objects that allow the odometry-alignment commands to point to either hub depending on the alliance
-* Includes 9 autos designed in PathPlanner
-    * No movement but still updates the starting pose for odometry [L/M/R] (Emergency stop equivalent)
-    * Only shoot the preloaded fuel [L/M/R]
-    * Collect from the neutral zone [L/R]
-    * Collect fuel from the outpost and shoot [R]
+* Includes 7 autos designed in PathPlanner + 3 in code
+    * [List of autos here](/image-assets/autos/README.md)
 
 ## Controls
 

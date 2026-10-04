@@ -64,12 +64,26 @@ public class RobotContainer {
     NamedCommands.registerCommand("ShootForDuration", 
       Commands.deadline(
         new SequentialCommandGroup(
-          Commands.waitUntil(() -> 
-            m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          Commands.waitUntil(() ->
+            m_shooter.isShooterAtSpeed(
+              m_shooter.getDynamicRPS(
+                m_drivebase.getPoseSupplier(),
+                getAllianceHubLocation()
+              )
+            )
           ).withTimeout(5),
-          m_indexer.runIndexerCommand(0.5).withTimeout(5)
+          m_indexer.runIndexerCommand(0.5).withTimeout(10)
         ),
-        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+        m_shooter.ShootWithoutAprilTagCommand(
+          m_shooter.getDynamicRPS(
+            m_drivebase.getPoseSupplier(),
+            getAllianceHubLocation()
+          )
+        ),
+        Commands.sequence(
+          m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition),
+          Commands.waitSeconds(1.5)
+        )
       )
     );
 
@@ -215,10 +229,11 @@ public class RobotContainer {
     // for autos that do nothing and only reset odometry use resetPoseFromAuto cuz initializeStartingPose() does not work during comp.
 
     if (m_drivebase.isPathPlannerAvailable()) {
-      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
       m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
+      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
       m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
       m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.add("MIDDLE Shoot Outpost", m_drivebase.getAutonomousCommand("MIDDLE Shoot Outpost"));
       m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
       m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
       m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));

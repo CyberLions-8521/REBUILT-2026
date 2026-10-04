@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RightToOutpost"
+            "pathName": "MiddleToOutpost"
           }
         },
         {
@@ -29,7 +29,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RightOutpostPointToCenter"
+                  "pathName": "MiddleOutpostToCenter"
                 }
               },
               {
@@ -51,6 +51,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Right Autos",
+  "folder": "Middle Autos",
   "choreoAuto": false
 }
