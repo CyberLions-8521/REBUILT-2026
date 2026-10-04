@@ -6,8 +6,6 @@ package frc.robot;
 
 import java.util.function.Supplier;
 
-//import com.pathplanner.lib.auto.NamedCommands;
-
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.math.filter.SlewRateLimiter;
 import org.wpilib.math.geometry.Pose2d;
@@ -80,7 +78,7 @@ public class RobotContainer {
             getAllianceHubLocation()
           )
         ),
-        Commands.sequence(
+        Commands.repeatingSequence(
           m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition),
           Commands.waitSeconds(1.5)
         )

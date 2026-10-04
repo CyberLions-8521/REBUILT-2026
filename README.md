@@ -16,7 +16,7 @@ Anything below with a checkmark [✅] has been tested on the robot and confirmed
 Added:
 * Odometry [✅]
 * Simulation [✅]
-* Pathplanner 
+* Pathplanner [✅]
 * Odometry-based auto-align [✅]
 * Odometry-based auto-distance [✅]
 * Elastic dashboard [✅]

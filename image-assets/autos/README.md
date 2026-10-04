@@ -15,10 +15,6 @@
             <td> <p> Shoot preloaded fuel only </p> </td>
             <td> <img src="/image-assets/autos/left-shoot-preloaded" width="450" /> </td>
         </tr>
-        <tr>
-            <td> <p>  </p> </td>
-            <td> <img src="" width="450" /> </td>
-        </tr>
     </table>
 </div>
 
@@ -52,7 +48,7 @@
             <td> <p> Do nothing & reset odometry (in code) </p> </td>
         </tr>
         <tr>
-            <td> <p> Collect from the outpost and shoot (same as Left version but could not create gif) </p> </td>
+            <td> <p> Collect from the outpost and shoot (same as Middle version but could not create gif) </p> </td>
         </tr>
         <tr>
             <td> <p> Shoot preloaded fuel only </p> </td>
