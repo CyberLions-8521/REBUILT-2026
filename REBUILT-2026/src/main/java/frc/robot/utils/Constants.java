@@ -75,7 +75,7 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 25.0;
+        public static final double kAutoAlignP = 20.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
@@ -105,7 +105,7 @@ public class Constants {
         public static final double kLimelightSideOffset = 0.0;
         public static final double kLimelightUpOffset = Units.inchesToMeters(23);
         public static final double kLimelightRoll = Units.degreesToRadians(0.0);
-        public static final double kLimelightPitch = Units.degreesToRadians(15.0); // 15 degrees
+        public static final double kLimelightPitch = Units.degreesToRadians(-15.0); 
         public static final double kLimelightYaw = Units.degreesToRadians(0.0);
 
         public static final double kMaxViableGyroRate = Units.degreesToRadians(360.0);

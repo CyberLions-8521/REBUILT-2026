@@ -79,65 +79,45 @@ public class RobotContainer {
 
   private void configureBindings() {
 
-    //======================== Drive controller ============================================== 
-    // #region
-
-    // default drive 
     m_drivebase.setDefaultCommand(this.getDriveCommand(
       1,
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter),
       getJoystickValues(m_driveController::getRightX, omega_limiter),
-      () -> true));
+      () -> true
+    ));
+    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
+    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
+    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
+    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Off));
 
-    // brake drive - left trigger
-    m_driveController.leftTrigger().whileTrue(this.getDriveCommand(
+    //======================== Drive controller ============================================== 
+    // #region
+
+    // brake drive - left bumper
+    m_driveController.leftBumper().whileTrue(this.getDriveCommand(
       0.5, 
       getJoystickValues(m_driveController::getLeftY, vx_limiter),
       getJoystickValues(m_driveController::getLeftX, vy_limiter), 
       getJoystickValues(m_driveController::getRightX, omega_limiter), 
       () -> true));
 
-    //#endregion
-
-    //======================== Subsystems controller ==============================================
-    //#region
-
-    m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
-    m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
-    m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
-
-    // shoot manually 
-    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45)); 
-
-    // indexer
-    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.5));
-    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.2));
-
-    // intake pivot
-    m_subsystemController.dpadUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
-    m_subsystemController.dpadDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
-    m_subsystemController.dpadLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
-
-    // intake rollers
-    m_subsystemController.y().whileTrue(
-      Commands.parallel(
-        m_intake.getIntakeCommand(0.65),
-        m_indexer.runIndexerCommand(0.4)
-      )
-    );
-    m_subsystemController.b().whileTrue(m_intake.getIntakeCommand(1));
-
     // auto-align commands
-    m_subsystemController.leftTrigger().whileTrue( // auto-align only
-      m_drivebase.odometryAutoAlign(
-        getAllianceHubLocation(),
-        getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-        getJoystickValues(m_driveController::getLeftX, vy_limiter)
+    m_driveController.leftTrigger().whileTrue( // auto-align only
+      Commands.parallel(
+        m_drivebase.odometryAutoAlign(
+          getAllianceHubLocation(),
+          getJoystickValues(m_driveController::getLeftY, vx_limiter), 
+          getJoystickValues(m_driveController::getLeftX, vy_limiter)
+        ),
+        Commands.run(() -> {
+          if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+          else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+        }, m_lights)
       )
     );
 
-    m_subsystemController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
+    m_driveController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
       Commands.parallel(
         m_drivebase.odometryAutoAlign(
           getAllianceHubLocation(), 
@@ -158,29 +138,47 @@ public class RobotContainer {
             && m_drivebase.isAutoAligned()
           ),
           m_indexer.runIndexerCommand(0.4)
-        )
+        ),
+        Commands.run(() -> {
+          if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+          else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+        }, m_lights)
       )
     );
 
-    //======================== LEDs ==============================================
+    //#endregion
 
-    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Off));
+    //======================== Subsystems controller ==============================================
+    //#region
 
-    m_subsystemController.leftTrigger().whileTrue(
-      Commands.run(() -> {
-        if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-        else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
-      }, m_lights)
+    // shoot manually 
+    m_subsystemController.a().whileTrue(m_shooter.ShootWithoutAprilTagCommand(43)); // close 
+    m_subsystemController.x().whileTrue(m_shooter.ShootWithoutAprilTagCommand(45)); // middle
+    m_subsystemController.y().whileTrue(m_shooter.ShootWithoutAprilTagCommand(50)); // far
+    m_subsystemController.rightTrigger().whileTrue(m_shooter.ShootWithoutAprilTagCommand(60)); // pass
+
+    // indexer
+    m_subsystemController.rightBumper().whileTrue(m_indexer.runIndexerCommand(0.7));
+    m_subsystemController.leftBumper().whileTrue(m_indexer.runIndexerCommand(-0.4));
+
+    // intake pivot
+    m_subsystemController.dpadUp().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.retractedEncoderPosition).withTimeout(1));
+    m_subsystemController.dpadDown().onTrue(m_intake.setPivotPositionCommand(IntakeConstants.extendedEncoderPosition).withTimeout(1));
+    m_subsystemController.dpadLeft().whileTrue(m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition));
+
+    // intake
+    m_subsystemController.b().whileTrue(
+      Commands.parallel(
+        m_intake.getIntakeCommand(1),
+        m_lights.setLEDCommand(LEDMode.Intaking)
+      )
     );
-    m_subsystemController.rightTrigger().whileTrue(
-      Commands.run(() -> {
-        if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-        else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
-      }, m_lights)
+    m_subsystemController.dpadRight().whileTrue(
+      Commands.parallel(
+        m_intake.getIntakeCommand(-0.7),
+        m_lights.setLEDCommand(LEDMode.Intaking)
+      )
     );
-
-    m_subsystemController.y().whileTrue(m_lights.setLEDCommand(LEDMode.Intaking));
-    m_subsystemController.b().whileTrue(m_lights.setLEDCommand(LEDMode.Intaking));
 
     //#endregion
 
