@@ -85,21 +85,34 @@ public class Shooter extends SubsystemBase {
     // https://github.wpilib.org/allwpilib/docs/release/java/org.wpilib.math/interpolation/InterpolatingDoubleTreeMap.html
 
     public void createLookupTable(){
-        // distance, velocity
-        velocityTable.put(5.8, 63.0);
-        velocityTable.put(5.45, 62.4);
-        velocityTable.put(4.85,60.0);
-        velocityTable.put(4.35, 57.0);
-        velocityTable.put(4.1, 55.0);
-        velocityTable.put(3.9, 53.5);
-        velocityTable.put(3.5, 52.5);
-        velocityTable.put(3.25, 51.0);
-        velocityTable.put(2.85, 50.0);
-        velocityTable.put(2.585, 49.25);
-        velocityTable.put(2.3, 47.5);  
-        velocityTable.put(2.025, 46.0);
-        velocityTable.put(1.8, 45.0);
-        velocityTable.put(1.53, 44.0);
+        // distance (meters), velocity (RPS)
+
+        // new lookup table from real data
+        velocityTable.put(7.92, 60.0);
+        velocityTable.put(6.54, 55.0);
+        velocityTable.put(5.38, 50.0);
+        velocityTable.put(4.0, 45.0);
+        velocityTable.put(2.99, 40.0);
+        velocityTable.put(2.41, 35.0);
+        velocityTable.put(2.04, 30.0);
+        velocityTable.put(1.36, 25.0);
+        velocityTable.put(1.03, 20.0);
+
+        // old lookup table
+        // velocityTable.put(5.8, 63.0);
+        // velocityTable.put(5.45, 62.4);
+        // velocityTable.put(4.85,60.0);
+        // velocityTable.put(4.35, 57.0);
+        // velocityTable.put(4.1, 55.0);
+        // velocityTable.put(3.9, 53.5);
+        // velocityTable.put(3.5, 52.5);
+        // velocityTable.put(3.25, 51.0);
+        // velocityTable.put(2.85, 50.0);
+        // velocityTable.put(2.585, 49.25);
+        // velocityTable.put(2.3, 47.5);  
+        // velocityTable.put(2.025, 46.0);
+        // velocityTable.put(1.8, 45.0);
+        // velocityTable.put(1.53, 44.0);
     }
 
     public double lookupVelocity(double distance){
