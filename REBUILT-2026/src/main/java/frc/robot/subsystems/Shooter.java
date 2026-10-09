@@ -85,21 +85,32 @@ public class Shooter extends SubsystemBase {
     // https://github.wpilib.org/allwpilib/docs/release/java/org.wpilib.math/interpolation/InterpolatingDoubleTreeMap.html
 
     public void createLookupTable(){
-        // distance, velocity
-        velocityTable.put(5.8, 63.0);
-        velocityTable.put(5.45, 62.4);
-        velocityTable.put(4.85,60.0);
-        velocityTable.put(4.35, 57.0);
-        velocityTable.put(4.1, 55.0);
-        velocityTable.put(3.9, 53.5);
-        velocityTable.put(3.5, 52.5);
-        velocityTable.put(3.25, 51.0);
-        velocityTable.put(2.85, 50.0);
-        velocityTable.put(2.585, 49.25);
-        velocityTable.put(2.3, 47.5);  
-        velocityTable.put(2.025, 46.0);
-        velocityTable.put(1.8, 45.0);
-        velocityTable.put(1.53, 44.0);
+        // distance (meters), velocity (rps)
+
+        // new lookup table
+        velocityTable.put(3.50, 45.0);
+        velocityTable.put(3.81, 47.5);
+        velocityTable.put(4.13, 50.0);
+        velocityTable.put(4.71, 52.5);
+        velocityTable.put(5.15, 55.0);
+        velocityTable.put(5.8, 57.5);
+        velocityTable.put(6.2, 60.0);
+
+        // old lookup table
+        // velocityTable.put(5.8, 63.0);
+        // velocityTable.put(5.45, 62.4);
+        // velocityTable.put(4.85,60.0);
+        // velocityTable.put(4.35, 57.0);
+        // velocityTable.put(4.1, 55.0);
+        // velocityTable.put(3.9, 53.5);
+        // velocityTable.put(3.5, 52.5);
+        // velocityTable.put(3.25, 51.0);
+        // velocityTable.put(2.85, 50.0);
+        // velocityTable.put(2.585, 49.25);
+        // velocityTable.put(2.3, 47.5);  
+        // velocityTable.put(2.025, 46.0);
+        // velocityTable.put(1.8, 45.0);
+        // velocityTable.put(1.53, 44.0);
     }
 
     public double lookupVelocity(double distance){
@@ -189,6 +200,14 @@ public class Shooter extends SubsystemBase {
         return isUpperAtSpeed && isLowerAtSpeed;
     }
     
+    public boolean isShooterInRange(double distance) {
+        if(distance > ShooterConstants.kMaxShooterRange ||
+           distance < ShooterConstants.kMinShooterRange){
+            return false;
+        }
+        return true; 
+    }
+
     // // -------------------- COMMANDS --------------------
     // public Command runFlywheel(DoubleSupplier speed) {
     //     return new FunctionalCommand(

@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7797716938956312,
-        "y": 4.05
+        "x": 3.038549152558376,
+        "y": 3.7345178608794627
       },
       "isLocked": false,
       "linkedName": "MiddleDefaultStart"
     },
     {
       "anchor": {
-        "x": 2.218433921255163,
-        "y": 4.0354451214955365
+        "x": 1.107355811889973,
+        "y": 2.2604347826086952
       },
       "prevControl": {
-        "x": 3.291125166535485,
-        "y": 4.039469988073929
+        "x": 1.3425775356941385,
+        "y": 2.345115008462178
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 26.40677594566387
   },
   "reversed": false,
   "folder": "Middle Paths",

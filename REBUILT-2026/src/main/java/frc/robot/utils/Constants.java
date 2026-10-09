@@ -75,7 +75,7 @@ public class Constants {
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters
 
-        public static final double kAutoAlignP = 20.0;
+        public static final double kAutoAlignP = 16.0;
         public static final double kAutoAlignI = 0.0;
         public static final double kAutoAlignD = 0.5;
 
@@ -164,8 +164,8 @@ public class Constants {
         public static final double kShooterS = 0.25;
         public static final double kShooterV = 0.1185;
         // adjust these later
-        public static final double kMinShooterRange = 1.5; // minimum distance the robot can shoot from
-        public static final double kMaxShooterRange = 5.8; // maximum distance the robot can shoot from OR that the limelight can see
+        public static final double kMinShooterRange = 3.5; // minimum distance the robot can shoot from
+        public static final double kMaxShooterRange = 6.2; // maximum distance the robot can shoot from OR that the limelight can see
         public static final double kMinShooterVelocity = 0.0; // minimum velocity the robot must be
         public static final double kMaxShooterVelocity = 80.0;
 

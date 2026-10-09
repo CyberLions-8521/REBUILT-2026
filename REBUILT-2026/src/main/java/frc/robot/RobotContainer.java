@@ -152,7 +152,10 @@ public class RobotContainer {
           m_indexer.runIndexerCommand(0.4)
         ),
         Commands.run(() -> {
-          if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+          Pose2d position = m_drivebase.getPose();
+          Translation2d fieldLocation = position.getTranslation();
+          double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+          if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
           else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
         }, m_lights)
       )
