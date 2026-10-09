@@ -8,7 +8,7 @@ May be possibly used for the SoCal competition
 * **Commands v2**
 * **CTRE-Phoenix (v6)**
 * **LimelightLib 2**
-* **PathplannerLib (currently does not work in alpha 7 YET)**
+* **PathplannerLib**
 * **REVLib**
 
 Anything below with a checkmark [✅] has been tested on the robot and confirmed to work.
