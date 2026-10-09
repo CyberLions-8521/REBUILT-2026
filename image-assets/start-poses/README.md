@@ -11,7 +11,16 @@
 <div align="center">
     <table>
         <tr>
-            <td> <p> Left shoot preloaded only auto, Left do nothing  </p> </td>
+            <td> <p> AUTOS  </p> </td>
+            <td> <p> AUTO START POSES  </p> </td>
+        </tr>
+        <tr>
+            <td>
+                <ul>
+                    <li> Left shoot preloaded fuel </li>
+                    <li> Left do nothing</li>
+                </ul>
+            </td>
             <td> <img src="/image-assets/start-poses/start-1.png" width="500" /> </td>
         </tr>
         <tr>
@@ -19,7 +28,13 @@
             <td> <img src="/image-assets/start-poses/start-2.png" width="500" /> </td>
         </tr>
         <tr>
-            <td> <p> Middle shoot preloaded, middle do nothing, middle collect from outpost & shoot </p> </td>
+            <td>
+                <ul>
+                    <li> Middle shoot preloaded fuel </li>
+                    <li> Middle do nothing </li>
+                    <li> Middle collect from outpost & shoot </li>
+                </ul>
+            </td>
             <td> <img src="/image-assets/start-poses/start-3.png" width="500" /> </td>
         </tr>
         <tr>
@@ -27,7 +42,13 @@
             <td> <img src="/image-assets/start-poses/start-4.png" width="500" /> </td>
         </tr>
         <tr>
-            <td> <p> Right shoot preloaded, right do nothing, right collect from outpost & shoot </p> </td>
+            <td>
+                <ul>
+                    <li> Right shoot preloaded fuel </li>
+                    <li> Right do nothing </li>
+                    <li> Right collect from outpost & shoot </li>
+                </ul>
+            </td>
             <td> <img src="/image-assets/start-poses/start-5.png" width="500" /> </td>
         </tr>
     </table>

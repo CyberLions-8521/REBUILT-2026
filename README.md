@@ -31,6 +31,8 @@ The odometry based auto-align and auto-distancing can take in any Translation2d 
 * Includes 7 autos designed in PathPlanner + 3 in code
     * [List of autos here](/image-assets/autos/README.md)
 
+[User guide](/image-assets/start-poses/README.md)
+
 ## Controls
 
 <div align="center">
