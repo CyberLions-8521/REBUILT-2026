@@ -17,6 +17,7 @@
         <tr>
             <td>
                 <ul>
+                    <li> Left collect from depot & shoot </li>
                     <li> Left shoot preloaded fuel </li>
                     <li> Left do nothing</li>
                 </ul>
@@ -32,6 +33,7 @@
                 <ul>
                     <li> Middle shoot preloaded fuel </li>
                     <li> Middle do nothing </li>
+                    <li> Middle collect from depot & shoot </li>
                     <li> Middle collect from outpost & shoot </li>
                 </ul>
             </td>
@@ -55,7 +57,7 @@
 </div>
 
 Notes:
-* [**LIST OF ALL 10 AUTOS CLICK HERE**](/image-assets/autos/README.md)
+* [**LIST OF ALL 12 AUTOS CLICK HERE**](/image-assets/autos/README.md)
 * The dot is the **front** of the robot
 * Each start (green box shown in images) corresponds to different auto(s)
 * The "do nothing" autos should be used if you do not want to run the robot during auto

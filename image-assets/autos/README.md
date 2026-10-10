@@ -5,6 +5,10 @@
 <div align="center">
     <table>
         <tr>
+            <td> <p> Collect from depot zone & shoot </p> </td>
+            <td> <img src="/image-assets/autos/left-shoot-depot" width="700" /> </td>
+        </tr>
+        <tr>
             <td> <p> Collect from neutral zone & shoot </p> </td>
             <td> <img src="/image-assets/autos/left-collect-neutral-zone" width="700" /> </td>
         </tr>
@@ -23,6 +27,10 @@
 
 <div align="center">
     <table>
+        <tr>
+            <td> <p> Collect from the depot & shoot </p> </td>
+            <td> <img src="/image-assets/autos/middle-shoot-depot" width="700" /> </td>
+        </tr>
         <tr>
             <td> <p> Collect from the outpost & shoot </p> </td>
             <td> <img src="/image-assets/autos/middle-shoot-outpost" width="700" /> </td>
