@@ -123,35 +123,6 @@ public class RobotContainer {
           getJoystickValues(m_driveController::getLeftX, vy_limiter)
         ),
         Commands.run(() -> {
-          if (m_drivebase.isAutoAligned()) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-          else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
-        }, m_lights)
-      )
-    );
-
-    m_driveController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
-      Commands.parallel(
-        m_drivebase.odometryAutoAlign(
-          getAllianceHubLocation(), 
-          getJoystickValues(m_driveController::getLeftY, vx_limiter),
-          getJoystickValues(m_driveController::getLeftX, vy_limiter),
-          true
-        ),
-        Commands.sequence(
-          Commands.deadline(
-            Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
-            m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-          ),
-          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-        ),
-        Commands.sequence(
-          Commands.waitUntil(() ->
-            m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
-            && m_drivebase.isAutoAligned()
-          ),
-          m_indexer.runIndexerCommand(0.4)
-        ),
-        Commands.run(() -> {
           Pose2d position = m_drivebase.getPose();
           Translation2d fieldLocation = position.getTranslation();
           double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
@@ -160,6 +131,38 @@ public class RobotContainer {
         }, m_lights)
       )
     );
+
+    // m_driveController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
+    //   Commands.parallel(
+    //     m_drivebase.odometryAutoAlign(
+    //       getAllianceHubLocation(), 
+    //       getJoystickValues(m_driveController::getLeftY, vx_limiter),
+    //       getJoystickValues(m_driveController::getLeftX, vy_limiter),
+    //       true
+    //     ),
+    //     Commands.sequence(
+    //       Commands.deadline(
+    //         Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
+    //         m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+    //       ),
+    //       m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+    //     ),
+    //     Commands.sequence(
+    //       Commands.waitUntil(() ->
+    //         m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
+    //         && m_drivebase.isAutoAligned()
+    //       ),
+    //       m_indexer.runIndexerCommand(0.4)
+    //     ),
+    //     Commands.run(() -> {
+    //       Pose2d position = m_drivebase.getPose();
+    //       Translation2d fieldLocation = position.getTranslation();
+    //       double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+    //       if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+    //       else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+    //     }, m_lights)
+    //   )
+    // );
 
     //#endregion
 
@@ -192,6 +195,40 @@ public class RobotContainer {
       Commands.parallel(
         m_intake.getIntakeCommand(-0.7),
         m_lights.setLEDCommand(LEDMode.Intaking)
+      )
+    );
+
+    // auto-shoot (based off distance)
+    m_subsystemController.leftTrigger().whileTrue( 
+      Commands.parallel(
+        // m_drivebase.odometryAutoAlign(
+        //   getAllianceHubLocation(), 
+        //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
+        //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
+        //   true
+        // ),
+        Commands.sequence(
+          Commands.deadline(
+            Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
+            m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          ),
+          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+        )
+        // ,
+        // Commands.sequence(
+        //   Commands.waitUntil(() ->
+        //     m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
+        //     && m_drivebase.isAutoAligned()
+        //   ),
+        //   m_indexer.runIndexerCommand(0.4)
+        // ),
+        // Commands.run(() -> {
+        //   Pose2d position = m_drivebase.getPose();
+        //   Translation2d fieldLocation = position.getTranslation();
+        //   double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+        //   if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+        //   else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+        // }, m_lights)
       )
     );
 
