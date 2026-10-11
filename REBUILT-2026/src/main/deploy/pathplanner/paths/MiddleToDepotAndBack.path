@@ -36,7 +36,7 @@
         "y": 7.107644817101118
       },
       "prevControl": {
-        "x": 0.4940723953888311,
+        "x": 0.494072395388831,
         "y": 7.024766496925048
       },
       "nextControl": {
@@ -63,7 +63,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": -49.96974072811041
+      "rotationDegrees": -49.969740728110416
     },
     {
       "waypointRelativePos": 2,
@@ -102,7 +102,12 @@
       "name": "IntakeForDuration",
       "waypointRelativePos": 0.8316831683168315,
       "endWaypointRelativePos": 2.0990099009901027,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeForDuration"
+        }
+      }
     }
   ],
   "globalConstraints": {

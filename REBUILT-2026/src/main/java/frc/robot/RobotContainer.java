@@ -70,7 +70,7 @@ public class RobotContainer {
               )
             )
           ).withTimeout(5),
-          m_indexer.runIndexerCommand(0.5).withTimeout(10)
+          m_indexer.runIndexerCommand(0.5).withTimeout(15)
         ),
         m_shooter.ShootWithoutAprilTagCommand(
           m_shooter.getDynamicRPS(
@@ -80,7 +80,7 @@ public class RobotContainer {
         ),
         Commands.repeatingSequence(
           m_intake.setPivotPositionCommand(IntakeConstants.middleEncoderPosition),
-          Commands.waitSeconds(1.5)
+          Commands.waitSeconds(2.5)
         )
       )
     );
@@ -268,15 +268,15 @@ public class RobotContainer {
 
     if (m_drivebase.isPathPlannerAvailable()) {
       m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
-      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
+      m_autoSelectable.add("LEFT Do Nathan", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
       m_autoSelectable.add("LEFT Shoot Depot", m_drivebase.getAutonomousCommand("LEFT Shoot Depot"));
       m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
-      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.addDefault("MIDDLE Do Nathan", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
       m_autoSelectable.add("MIDDLE Shoot Depot", m_drivebase.getAutonomousCommand("MIDDLE Shoot Depot"));
       m_autoSelectable.add("MIDDLE Shoot Outpost", m_drivebase.getAutonomousCommand("MIDDLE Shoot Outpost"));
       m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
       m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
-      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
+      m_autoSelectable.add("RIGHT Do Nathan", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
       m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
       m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
     } else {

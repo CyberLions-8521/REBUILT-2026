@@ -102,15 +102,25 @@
   "eventMarkers": [
     {
       "name": "IntakePivotOut",
-      "waypointRelativePos": 1.0396039603960399,
-      "endWaypointRelativePos": 1.9207920792079247,
-      "command": null
+      "waypointRelativePos": 0.9455445544554457,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakePivotOut"
+        }
+      }
     },
     {
       "name": "IntakeForDuration",
-      "waypointRelativePos": 1.7900943396226412,
-      "endWaypointRelativePos": 3.0,
-      "command": null
+      "waypointRelativePos": 1.8069306930693076,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeForDuration"
+        }
+      }
     }
   ],
   "globalConstraints": {
