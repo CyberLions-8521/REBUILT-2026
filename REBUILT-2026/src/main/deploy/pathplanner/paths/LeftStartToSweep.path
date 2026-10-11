@@ -102,14 +102,14 @@
   "eventMarkers": [
     {
       "name": "IntakePivotOut",
-      "waypointRelativePos": 1.1426886792452833,
-      "endWaypointRelativePos": null,
+      "waypointRelativePos": 1.0396039603960399,
+      "endWaypointRelativePos": 1.9207920792079247,
       "command": null
     },
     {
       "name": "IntakeForDuration",
       "waypointRelativePos": 1.7900943396226412,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 3.0,
       "command": null
     }
   ],
@@ -122,7 +122,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
+    "velocity": 1.5,
     "rotation": 90.0
   },
   "reversed": false,
