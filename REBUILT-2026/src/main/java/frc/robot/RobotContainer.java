@@ -101,7 +101,7 @@ public class RobotContainer {
     m_intake.setDefaultCommand(m_intake.getIntakeCommand(0));
     m_indexer.setDefaultCommand(m_indexer.stopIndexerCommand());
     m_shooter.setDefaultCommand(m_shooter.stopBothFlywheelCommand());
-    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Off));
+    m_lights.setDefaultCommand(m_lights.setLEDCommand(LEDMode.Default));
 
     //======================== Drive controller ============================================== 
     // #region
@@ -127,7 +127,7 @@ public class RobotContainer {
           Translation2d fieldLocation = position.getTranslation();
           double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
           if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-          else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+          else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
         }, m_lights)
       )
     );
@@ -159,7 +159,7 @@ public class RobotContainer {
     //       Translation2d fieldLocation = position.getTranslation();
     //       double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
     //       if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-    //       else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+    //       else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
     //     }, m_lights)
     //   )
     // );
@@ -227,7 +227,7 @@ public class RobotContainer {
         //   Translation2d fieldLocation = position.getTranslation();
         //   double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
         //   if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-        //   else m_lights.setLEDMode(LEDMode.SeesAprilTag); // using SeesAprilTag as false condition for auto-align LOL cuz its red
+        //   else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
         // }, m_lights)
       )
     );

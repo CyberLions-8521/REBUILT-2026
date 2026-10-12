@@ -11,6 +11,7 @@ import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.controls.RainbowAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 
@@ -28,9 +29,10 @@ public class LEDLights extends SubsystemBase {
 
   public enum LEDMode {
     Off (new EmptyAnimation(0)),
-    SeesAprilTag (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,0,0))),
+    Default (new RainbowAnimation(0, CANdleConstants.kLedCount - 1)),
+    NotAlignedToTarget (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,0,0))),
     AlignedToTarget (new SolidColor(0, CANdleConstants.kLedCount -1).withColor(new RGBWColor(0, 255, 0))),  
-    Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,115,0)));
+    Intaking (new TwinkleAnimation(0, CANdleConstants.kLedCount - 1).withColor(new RGBWColor(255,255,0)));
 
     public final ControlRequest animation;
 
@@ -40,7 +42,7 @@ public class LEDLights extends SubsystemBase {
   }
 
   private final CANdle m_CANdle = new CANdle(CANdleConstants.kCANdleID, new CANBus(CANdleConstants.kCanbusName));
-  private LEDMode currentMode = LEDMode.Off;
+  private LEDMode currentMode = LEDMode.Default;
   private Shooter m_shooter;
   private SwerveDrivebase m_drivebase = SwerveDrivebase.getInstance();
   private Supplier<Translation2d> shooterTarget;
@@ -81,7 +83,7 @@ public class LEDLights extends SubsystemBase {
     //   currentMode = LEDMode.Off;
     // } else {
     //   if (!isAutoAligned) {
-    //     currentMode = LEDMode.SeesAprilTag;
+    //     currentMode = LEDMode.NotAlignedToTarget;
     //   } else {
     //     currentMode = LEDMode.AlignedToTarget;
     //   }
