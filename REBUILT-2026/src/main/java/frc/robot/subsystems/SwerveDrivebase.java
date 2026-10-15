@@ -53,7 +53,6 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.Commands;
-import org.wpilib.command2.FunctionalCommand;
 import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
@@ -444,15 +443,15 @@ public class SwerveDrivebase extends SubsystemBase {
   //#region
 
   /** Resets the auto-align PID for the commands */
-  private void setupAutoAlignPID(Translation2d m_targetPoint) {
+  public void setupAutoAlignPID(Translation2d m_targetPoint) {
     Pose2d position = getPose();
     Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle().orElse(new Rotation2d()); // simple fix for Optational<Rotation2d> change
     m_autoAlignPID.reset(position.getRotation().getRadians());
     m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
   }
 
-  /** Calculates the PID output of the current angle to the targeted angle of the robot */
-  private double getAutoAlignOutput(Translation2d m_targetPoint) {
+  /** Calculates the PID output of the current angle to the targeted angle of the robot (should be used as omega input) */
+  public double getAutoAlignOutput(Translation2d m_targetPoint, boolean asControllerInput) {
     Pose2d position = getPose();
     Translation2d fieldLocation = position.getTranslation();
     Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
@@ -462,134 +461,30 @@ public class SwerveDrivebase extends SubsystemBase {
     Rotation2d currentHeading = position.getRotation();
     double pidOutput = m_autoAlignPID.calculate(currentHeading.getRadians(), dynamicHeading.getRadians());
     pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxAngularSpeed, SwerveConstants.kMaxAngularSpeed);
+    
+    // Third part- check if distance from target is valid (to protect from auto-align freaking out)
+    double distance = m_targetPoint.getDistance(fieldLocation);
+    if (distance < 0.5) return 0.0;
+    
+    // Fourth part - normalize PID output between 0.0 - 1.0 to act as a controller if necessary
+    if (asControllerInput) return -(pidOutput / SwerveConstants.kMaxAngularSpeed); // normalize and flip for getDriveCommand in RobotContainer
     return pidOutput;
+    
   }
 
-  /** Auto-align to a certain point on the field using odometry */
-  public Command odometryAutoAlign(Translation2d m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoAlignPID(m_targetPoint);
-      },
-      () -> {
-        // Do not auto-align near target to not break the math
-        double distance = m_targetPoint.getDistance(getPose().getTranslation());
-        this.drive(
-          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, 
-          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
-          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint) : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> false, 
-      this
-    );
-  }
-
-  /** Overload that ignores joystick input and will terminate at the end for the next command */
-  public Command odometryAutoAlign(Translation2d m_targetPoint) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoAlignPID(m_targetPoint);
-      },
-      () -> {
-        // Do not auto-align near target to not break the math
-        double distance = m_targetPoint.getDistance(getPose().getTranslation());
-        this.drive(
-          0.0, // if the robot needs to stop at the end, do not move 
-          0.0,
-          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint) : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
-      () -> m_autoAlignPID.atGoal(), 
-      this
-    );
-  }
-
-  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
-  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoAlignPID(m_targetPoint.get());
-      },
-      () -> {
-        // Do not auto-align near target to not break the math
-        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
-        this.drive(
-          -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond, // if the robot needs to stop at the end, ignore joystick input
-          -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond,
-          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> false, 
-      this
-    );
-  }
-
-  /** Overload that ignores joystick input and will terminate at the end for the next command */
-  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoAlignPID(m_targetPoint.get());
-      },
-      () -> {
-        // Do not auto-align near target to not break the math
-        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
-        this.drive(
-          0.0, // if the robot needs to stop at the end, do not move
-          0.0,
-          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
-      () -> m_autoAlignPID.atGoal(), 
-      this
-    );
-  }
-
-  /** Special overload that allows for a shooter to run in parallel accurately */
-  public Command odometryAutoAlign(Supplier<Translation2d> m_targetPoint, Supplier<Double> i_vxInput, Supplier<Double> i_vyInput, boolean isShooterInParallel) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoAlignPID(m_targetPoint.get());
-      },
-      () -> {
-        // Do not auto-align near target to not break the math
-        double distance = m_targetPoint.get().getDistance(getPose().getTranslation());
-        double xInput = -i_vxInput.get() * SwerveConstants.kMaxMetersPerSecond; 
-        double yInput = -i_vyInput.get() * SwerveConstants.kMaxMetersPerSecond;
-        if (isShooterInParallel) {
-          // scale down the max joystick value if a shooter is running in parallel so it can shoot accurately
-          xInput *= 0.2;
-          yInput *= 0.2;
-        }
-        this.drive(
-          xInput,
-          yInput,
-          (distance > 0.5) ? getAutoAlignOutput(m_targetPoint.get()) : 0.0,
-          true
-        );
-      }, 
-      (interrupted) -> {}, // no need to stop the robot if the command ends prematurely because the default command covers it 
-      () -> false, 
-      this
-    );
+  /** Checks if the auto-align command is aligned */
+  public boolean isAutoAligned() {
+    return m_autoAlignPID.atGoal();
   }
 
   /** Resets the auto-distance PID for the commands */
-  private void setupAutoDistancePID(Translation2d m_targetPoint) {
+  public void setupAutoDistancePID(Translation2d m_targetPoint) {
     m_autoDistancePID.reset(m_targetPoint.getDistance(getPose().getTranslation()));
     m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
   }
 
-  /** Calculates the PID output of the current distance to the targeted distance off a certain Translation2d of the robot */
-  private double getAutoDistanceOutput(Translation2d m_targetPoint) {
+  /** Calculates the PID output of the current distance to the targeted distance off a certain Translation2d of the robot (should be used as x input, robot relative) */
+  public double getAutoDistanceOutput(Translation2d m_targetPoint, boolean asControllerInput) {
     // First part - calculate distance between robot and target
     Pose2d position = getPose();
     Translation2d fieldLocation = position.getTranslation();
@@ -598,54 +493,13 @@ public class SwerveDrivebase extends SubsystemBase {
     // Second part - feed distance into PID
     double pidOutput = m_autoDistancePID.calculate(distance, SwerveConstants.kAutoDistanceTarget);
     pidOutput = Math.clamp(pidOutput, -SwerveConstants.kMaxMetersPerSecond, SwerveConstants.kMaxMetersPerSecond);
-    return -pidOutput; // negative for some reason i dont remember
+    pidOutput = -pidOutput; // negative for some reason i dont remember
+    
+    // Third part - normalize PID output between 0.0 - 1.0 to act as a controller if necessary
+    if (asControllerInput) return -(pidOutput / SwerveConstants.kMaxMetersPerSecond);
+    return pidOutput; // negative for some reason i dont remember
   }
 
-  /** Auto-distance to a certain point on the field (assuming that the robot is facing it already) */
-  public Command odometryAutoDistance(Translation2d m_targetPoint, boolean stop) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoDistancePID(m_targetPoint);
-      },
-      () -> {
-        this.drive(
-          getAutoDistanceOutput(m_targetPoint),
-          0,
-          0,
-          false
-        );
-      }, 
-      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
-      () -> m_autoDistancePID.atGoal() && stop, 
-      this
-    );
-  }
-
-  /** Overload of the original command so that the target can change dynamically instead of being set when initially called */
-  public Command odometryAutoDistance(Supplier<Translation2d> m_targetPoint, boolean stop) {
-    return new FunctionalCommand(
-      () -> {
-        setupAutoDistancePID(m_targetPoint.get());
-      },
-      () -> {
-        this.drive(
-          getAutoDistanceOutput(m_targetPoint.get()),
-          0,
-          0,
-          false
-        );
-      }, 
-      (interrupted) -> drive(0.0, 0.0, 0.0, true), 
-      () -> m_autoDistancePID.atGoal() && stop, 
-      this
-    );
-  }
-
-  /** Checks if the auto-align command is aligned */
-  public boolean isAutoAligned() {
-    return m_autoAlignPID.atGoal();
-  }
-  
   //#endregion
 
 

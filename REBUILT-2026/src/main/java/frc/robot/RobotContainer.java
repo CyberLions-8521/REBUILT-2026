@@ -116,51 +116,60 @@ public class RobotContainer {
 
     // auto-align commands
     m_driveController.leftTrigger().whileTrue( // auto-align only
-      Commands.parallel(
-        m_drivebase.odometryAutoAlign(
-          getAllianceHubLocation(),
-          getJoystickValues(m_driveController::getLeftY, vx_limiter), 
-          getJoystickValues(m_driveController::getLeftX, vy_limiter)
-        ),
-        Commands.run(() -> {
-          Pose2d position = m_drivebase.getPose();
-          Translation2d fieldLocation = position.getTranslation();
-          double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-          if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-          else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
-        }, m_lights)
+      Commands.sequence(
+        Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
+        Commands.parallel(
+          this.getDriveCommand(
+            1, 
+            getJoystickValues(m_driveController::getLeftY, vx_limiter),
+            getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+            () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
+            () -> true
+          ),
+          Commands.run(() -> {
+            Pose2d position = m_drivebase.getPose();
+            Translation2d fieldLocation = position.getTranslation();
+            double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+            if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+            else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
+          }, m_lights)
+        )
       )
     );
 
     // m_driveController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
-    //   Commands.parallel(
-    //     m_drivebase.odometryAutoAlign(
-    //       getAllianceHubLocation(), 
-    //       getJoystickValues(m_driveController::getLeftY, vx_limiter),
-    //       getJoystickValues(m_driveController::getLeftX, vy_limiter),
-    //       true
-    //     ),
-    //     Commands.sequence(
-    //       Commands.deadline(
-    //         Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
-    //         m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+    //   Commands.sequence(
+    //     Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
+    //     Commands.parallel(
+    //       this.getDriveCommand(
+    //         0.2, 
+    //         getJoystickValues(m_driveController::getLeftY, vx_limiter),
+    //         getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+    //         () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
+    //         () -> true
     //       ),
-    //       m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //     ),
-    //     Commands.sequence(
-    //       Commands.waitUntil(() ->
-    //         m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
-    //         && m_drivebase.isAutoAligned()
+    //       Commands.sequence(
+    //         Commands.deadline(
+    //           Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
+    //           m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+    //         ),
+    //         m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
     //       ),
-    //       m_indexer.runIndexerCommand(0.4)
-    //     ),
-    //     Commands.run(() -> {
-    //       Pose2d position = m_drivebase.getPose();
-    //       Translation2d fieldLocation = position.getTranslation();
-    //       double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-    //       if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-    //       else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
-    //     }, m_lights)
+    //       Commands.sequence(
+    //         Commands.waitUntil(() ->
+    //           m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
+    //           && m_drivebase.isAutoAligned()
+    //         ),
+    //         m_indexer.runIndexerCommand(0.4)
+    //       ),
+    //       Commands.run(() -> {
+    //         Pose2d position = m_drivebase.getPose();
+    //         Translation2d fieldLocation = position.getTranslation();
+    //         double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+    //         if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+    //         else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
+    //       }, m_lights)
+    //     )
     //   )
     // );
 
@@ -200,35 +209,39 @@ public class RobotContainer {
 
     // auto-shoot (based off distance)
     m_subsystemController.leftTrigger().whileTrue( 
-      Commands.parallel(
-        // m_drivebase.odometryAutoAlign(
-        //   getAllianceHubLocation(), 
-        //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
-        //   getJoystickValues(m_driveController::getLeftX, vy_limiter),
-        //   true
-        // ),
-        Commands.sequence(
-          Commands.deadline(
-            Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
-            m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-          ),
-          m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+      Commands.sequence(
+        // Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
+        Commands.parallel(
+          // this.getDriveCommand(
+          //   0.2, 
+          //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
+          //   getJoystickValues(m_driveController::getLeftX, vy_limiter), 
+          //   () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
+          //   () -> true
+          // ),
+          Commands.sequence(
+            Commands.deadline(
+              Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
+              m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+            ),
+            m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
+          )
+          // ,
+          // Commands.sequence(
+          //   Commands.waitUntil(() ->
+          //     m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
+          //     && m_drivebase.isAutoAligned()
+          //   ),
+          //   m_indexer.runIndexerCommand(0.4)
+          // ),
+          // Commands.run(() -> {
+          //   Pose2d position = m_drivebase.getPose();
+          //   Translation2d fieldLocation = position.getTranslation();
+          //   double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
+          //   if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+          //   else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
+          // }, m_lights)
         )
-        // ,
-        // Commands.sequence(
-        //   Commands.waitUntil(() ->
-        //     m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
-        //     && m_drivebase.isAutoAligned()
-        //   ),
-        //   m_indexer.runIndexerCommand(0.4)
-        // ),
-        // Commands.run(() -> {
-        //   Pose2d position = m_drivebase.getPose();
-        //   Translation2d fieldLocation = position.getTranslation();
-        //   double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-        //   if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-        //   else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
-        // }, m_lights)
       )
     );
 
