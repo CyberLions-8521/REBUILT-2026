@@ -249,10 +249,10 @@ public class SwerveDrivebase extends SubsystemBase {
 
     /** Update odometry with gyro, module positions, and Limelight */
     public void update() {
-      m_frontLeft.refreshOdometryStatusSignals(); // refresh all status signals b4 updating odometry
-      m_frontRight.refreshOdometryStatusSignals();
-      m_backLeft.refreshOdometryStatusSignals();
-      m_backRight.refreshOdometryStatusSignals();
+      m_frontLeft.odometry.refreshStatusSignals(); // refresh all status signals b4 updating odometry
+      m_frontRight.odometry.refreshStatusSignals();
+      m_backLeft.odometry.refreshStatusSignals();
+      m_backRight.odometry.refreshStatusSignals();
       
       m_poseEstimator.updateWithTime(
         getTimestampAvgSeconds(),
@@ -277,10 +277,10 @@ public class SwerveDrivebase extends SubsystemBase {
     /** Returns all module positions in the order expected by the swerve kinematics. */
     private SwerveModulePosition[] getModulePositions() {
       return new SwerveModulePosition[] {
-        m_frontLeft.getPosition(),
-        m_frontRight.getPosition(),
-        m_backLeft.getPosition(),
-        m_backRight.getPosition()
+        m_frontLeft.odometry.getPosition(),
+        m_frontRight.odometry.getPosition(),
+        m_backLeft.odometry.getPosition(),
+        m_backRight.odometry.getPosition()
       };
     }
 
@@ -325,10 +325,10 @@ public class SwerveDrivebase extends SubsystemBase {
     /** Calculates the average timestamp between updates from all modules */
     private double getTimestampAvgSeconds() {
       return (
-        m_frontLeft.getOdometryTimestampSeconds()
-        + m_frontRight.getOdometryTimestampSeconds()
-        + m_backLeft.getOdometryTimestampSeconds()
-        + m_backRight.getOdometryTimestampSeconds()
+        m_frontLeft.odometry.getTimestampSeconds()
+        + m_frontRight.odometry.getTimestampSeconds()
+        + m_backLeft.odometry.getTimestampSeconds()
+        + m_backRight.odometry.getTimestampSeconds()
       ) / 4.0;
     }
 
@@ -368,10 +368,10 @@ public class SwerveDrivebase extends SubsystemBase {
       m_simHeading = m_simHeading.plus(Rotation2d.fromRadians(m_lastRobotRelativeSpeeds.omega * delay));
       OnboardIMUSim.setYaw(m_simHeading.getRadians());
 
-      m_frontLeft.updateSim(delay);
-      m_frontRight.updateSim(delay);
-      m_backLeft.updateSim(delay);
-      m_backRight.updateSim(delay);
+      m_frontLeft.simulation.update(delay);
+      m_frontRight.simulation.update(delay);
+      m_backLeft.simulation.update(delay);
+      m_backRight.simulation.update(delay);
     }
 
     /** Updates the simulation field (should be called after pose estimation is updated) */
@@ -383,25 +383,25 @@ public class SwerveDrivebase extends SubsystemBase {
       m_frontLeftObject2d.setPose(robotPose.transformBy(
         new Transform2d(
           new Translation2d(SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
-          m_frontLeft.getState().angle
+          m_frontLeft.odometry.getState().angle
         )
       ));
       m_frontRighObject2d.setPose(robotPose.transformBy(
         new Transform2d(
           new Translation2d(SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
-          m_frontRight.getState().angle
+          m_frontRight.odometry.getState().angle
         )
       ));
       m_backLeftObject2d.setPose(robotPose.transformBy(
         new Transform2d(
           new Translation2d(-SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
-          m_backLeft.getState().angle
+          m_backLeft.odometry.getState().angle
         )
       ));
       m_backRightObject2d.setPose(robotPose.transformBy(
         new Transform2d(
           new Translation2d(-SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
-          m_backRight.getState().angle
+          m_backRight.odometry.getState().angle
         )
       ));
 
@@ -547,10 +547,10 @@ public class SwerveDrivebase extends SubsystemBase {
     private ChassisVelocities getRobotVelocity() {
       return m_kinematics.toChassisVelocities(
         new SwerveModuleVelocity[] {
-          m_frontLeft.getState(),
-          m_frontRight.getState(),
-          m_backLeft.getState(),
-          m_backRight.getState()
+          m_frontLeft.odometry.getState(),
+          m_frontRight.odometry.getState(),
+          m_backLeft.odometry.getState(),
+          m_backRight.odometry.getState()
         }
       );
     }
@@ -698,17 +698,17 @@ public class SwerveDrivebase extends SubsystemBase {
       double autoDistanceD = m_dAutoDistanceTunable.get(); 
 
       if (m_pDriveTunable.hasChanged() || m_vDriveTunable.hasChanged()) { 
-        m_frontLeft.configDrivePID(driveP, driveV);
-        m_frontRight.configDrivePID(driveP, driveV);
-        m_backLeft.configDrivePID(driveP, driveV);
-        m_backRight.configDrivePID(driveP, driveV);
+        m_frontLeft.dynamicTuning.configDrivePID(driveP, driveV);
+        m_frontRight.dynamicTuning.configDrivePID(driveP, driveV);
+        m_backLeft.dynamicTuning.configDrivePID(driveP, driveV);
+        m_backRight.dynamicTuning.configDrivePID(driveP, driveV);
       }
 
       if (m_pTurnTunable.hasChanged() || m_dTurnTunable.hasChanged()) { 
-        m_frontLeft.configTurnPID(turnP, turnD);
-        m_frontRight.configTurnPID(turnP, turnD);
-        m_backLeft.configTurnPID(turnP, turnD);
-        m_backRight.configTurnPID(turnP, turnD);
+        m_frontLeft.dynamicTuning.configTurnPID(turnP, turnD);
+        m_frontRight.dynamicTuning.configTurnPID(turnP, turnD);
+        m_backLeft.dynamicTuning.configTurnPID(turnP, turnD);
+        m_backRight.dynamicTuning.configTurnPID(turnP, turnD);
       }
 
       if (m_pAutoAlignTunable.hasChanged() || m_iAutoAlignTunable.hasChanged() || m_dAutoAlignTunable.hasChanged()) { 
@@ -728,40 +728,25 @@ public class SwerveDrivebase extends SubsystemBase {
 
 }
 
+//#region
+/// NOTES: 
+/// - The drivebase controls each module by setting a desired state for it to follow 
+/// - Each swerve module actually uses both an absolute encoder and relative encoder 
+///    * The absolute encoder is used as the known origin for the relative encoder
+///    * The relative encoder is the main encoder as it works faster and better for when the robot is driving
+//#endregion
 class SwerveModule {
 
-    // ---------------------------------------------------- Fields ----------------------------------------------------
-    //#region
-    private TalonFX m_driveMotor; // basic section
+    private TalonFX m_driveMotor; 
     private TalonFX m_turnMotor; 
     private CANcoder m_CANcoder;
     private VelocityVoltage m_driveRequest;
     private PositionVoltage m_turnRequest;
     private SwerveModuleVelocity m_desiredState = new SwerveModuleVelocity();
 
-    private StatusSignal<Angle> m_drivePositionSignal; // odometry section
-    private StatusSignal<AngularVelocity> m_driveVelocitySignal;
-    private StatusSignal<Angle> m_turnPositionSignal;
-
-    private double m_simDriveDistanceMeters = 0.0; // simulation section
-    private double m_simDriveVelocityMetersPerSecond = 0.0;
-    private Rotation2d m_simTurnPosition = new Rotation2d();
-
-    //#endregion
-
-
-
-
-
-
-    /* ---------------------------------------------------- Basic ----------------------------------------------------
-    * The basic methods needed for the drivebase to work
-    * The drivebase controls each module by setting a desired state for it to follow 
-    * Each swerve module actually uses both an absolute encoder and relative encoder 
-        * The absolute encoder is used as the known origin for the relative encoder
-        * The relative encoder is the main encoder as it works faster and better for when the robot is driving
-    */
-    //#region
+    public ModuleOdometry odometry;
+    public ModuleSimulation simulation;
+    public ModuleDynamicTuning dynamicTuning;
 
     /** Creates a swerve module and applies the starting hardware configuration. */
     public SwerveModule(int driveMotorPort, int turnMotorPort, int CANCoderPort, double magnetOffset) {
@@ -769,17 +754,18 @@ class SwerveModule {
         m_turnMotor  = new TalonFX(turnMotorPort, new CANBus(SwerveConstants.kCANBus));
         m_CANcoder = new CANcoder(CANCoderPort, new CANBus(SwerveConstants.kCANBus));
 
+        odometry = new ModuleOdometry(); // should be declared here before encoders but after motor declaration
+        simulation = new ModuleSimulation(); // yeah the drivebase had it ez i know
+        dynamicTuning = new ModuleDynamicTuning();
+        
         m_driveRequest = new VelocityVoltage(0);
         m_turnRequest = new PositionVoltage(0);
 
         configMotors(CANCoderPort);
         zeroDriveEncoder();
-        // calibrateTurnEncoder();
         configMagnets(-magnetOffset);
 
-        m_drivePositionSignal = m_driveMotor.getPosition();
-        m_driveVelocitySignal = m_driveMotor.getVelocity();
-        m_turnPositionSignal = m_turnMotor.getPosition();
+
     }
 
     /** Sets the target wheel speed and angle for this module. */
@@ -807,101 +793,15 @@ class SwerveModule {
 
     /** Returns the current turn encoder position in rotations. */
     private double getTurnEncoderValueRotations() {
-        if (RobotBase.isSimulation()) return m_simTurnPosition.getRotations();
-        return m_turnPositionSignal.getValueAsDouble();
+        if (RobotBase.isSimulation()) return simulation.m_turnPosition.getRotations();
+        return odometry.m_turnPositionSignal.getValueAsDouble();
     }
 
     /** Resets the drive encoder distance to zero. */
     public void zeroDriveEncoder() {
-        if (RobotBase.isSimulation()) m_simDriveDistanceMeters = 0.0;
+        if (RobotBase.isSimulation()) simulation.m_driveDistanceMeters = 0.0;
         m_driveMotor.setPosition(0);
     }
-
-    //#endregion
-
-
-
-
-
-
-    /* --------------------------------------------------- Odometry ---------------------------------------------------
-    * Most of the explanation and actual odometry/pose estimation is in SwerveDrivebase
-    * The purpose of these methods are to return the data from each module so it can be fed into the pose estimator
-    * StatusSignal<T>s are used to return module data over the motors returning them directly for tracking the timestamp between updates
-        * They cache their data as well for less memory usage (I think) instead of repeatedly getting data from the motors
-    */
-    //#region
-
-    /** Returns the current drive velocity in meters per second. */
-    private double getDriveVelocityMetersPerSecond() {
-        if (RobotBase.isSimulation()) return m_simDriveVelocityMetersPerSecond;
-        return m_driveVelocitySignal.getValueAsDouble();
-    }
-
-    /** Returns the total drive distance traveled in meters. */
-    public double getDriveDistance() {
-        if (RobotBase.isSimulation()) return m_simDriveDistanceMeters;
-        return m_drivePositionSignal.getValueAsDouble();
-    }
-
-    /** Returns the module position used for swerve odometry. */
-    public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(getDriveDistance(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
-    }
-
-    /** Returns the module state used for kinematics and telemetry. */
-    public SwerveModuleVelocity getState() {
-        return new SwerveModuleVelocity(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
-    }
-
-    /** Updates all of the status signals in a singular method. */
-    public void refreshOdometryStatusSignals() {
-        BaseStatusSignal.refreshAll(
-            m_drivePositionSignal,
-            m_driveVelocitySignal,
-            m_turnPositionSignal
-        );
-    }
-
-    /** Returns the timstamp of the drive position status signal. */
-    public double getOdometryTimestampSeconds() {
-        return m_drivePositionSignal.getTimestamp().getTime();
-    }
-
-    //#endregion
-
-
-
-
-
-
-    /* -------------------------------------------------- Simulation --------------------------------------------------
-    * Simulatting the robot means keeping track of fake/not real information of each swerve module, including turn position, distance, and velocity
-    * A few methods may start with a conditional that checks if simulation is active, and then will return the "fake" value if so
-    * updateSim() is the main method for updating the all of the values based on the desired positioning of the module
-    * The best way to think of simulation is that it is the ideal movement based on the fact that it uses the desired position object (and represents it)
-    */
-    //#region
-
-    /** Updates the simulated module position and velocity over the given loop delay. */
-    public void updateSim(double delay) {
-        m_simDriveVelocityMetersPerSecond = m_desiredState.velocity;
-        m_simTurnPosition = m_desiredState.angle;
-        m_simDriveDistanceMeters += m_simDriveVelocityMetersPerSecond * delay;
-    }
-
-    //#endregion
-
-
-
-
-
-
-    /* -------------------------------------------------- Extraneous --------------------------------------------------
-    * Extra methods leftover from when I started to modify the swerve module code
-    * Nothing else really needed to be said
-    */
-    //#region
 
     /** Logs key encoder and target values for this module to SmartDashboard. */
     public void logData(String motor){
@@ -916,22 +816,117 @@ class SwerveModule {
         m_turnMotor.setThrottle(0.0);
     }
 
-    /** Updates the drive motor PID and feedforward constants. */
-    public void configDrivePID(double kP, double kV){
-        Slot0Configs m_driveConfig = new Slot0Configs();
-        m_driveConfig.kP = kP;
-        m_driveConfig.kV = kV;
-        m_driveMotor.getConfigurator().apply(m_driveConfig);
-    }
 
-    /** Updates the turn motor PID constants. */
-    public void configTurnPID(double kP, double kD){ 
-        Slot0Configs m_turnConfig = new Slot0Configs();
-        m_turnConfig.kP = kP;
-        m_turnConfig.kD = kD;
-        m_turnMotor.getConfigurator().apply(m_turnConfig);
-    }
 
+
+
+    //#region
+    /// NOTES:
+    /// - The purpose of these methods are to return the data from each module so it can be fed into the pose estimator
+    /// - StatusSignal<T>s are used to return module data over the motors returning them directly for tracking the timestamp between updates (better for odometry)
+    ///    * They cache their data as well for less memory usage (I think) instead of repeatedly getting data from the motors
     //#endregion
+    public class ModuleOdometry {
+
+      private StatusSignal<Angle> m_drivePositionSignal; 
+      private StatusSignal<AngularVelocity> m_driveVelocitySignal;
+      private StatusSignal<Angle> m_turnPositionSignal;
+
+      /** Should be called in Module constructor */
+      public ModuleOdometry() {
+        m_drivePositionSignal = m_driveMotor.getPosition();
+        m_driveVelocitySignal = m_driveMotor.getVelocity();
+        m_turnPositionSignal = m_turnMotor.getPosition();
+      }
+
+      /** Returns the current drive velocity in meters per second. */
+      private double getDriveVelocityMetersPerSecond() {
+          if (RobotBase.isSimulation()) return simulation.m_driveVelocityPerSecond;
+          return m_driveVelocitySignal.getValueAsDouble();
+      }
+
+      /** Returns the total drive distance traveled in meters. */
+      public double getDriveDistance() {
+          if (RobotBase.isSimulation()) return simulation.m_driveDistanceMeters;
+          return m_drivePositionSignal.getValueAsDouble();
+      }
+
+      /** Returns the module position used for swerve odometry. */
+      public SwerveModulePosition getPosition() {
+          return new SwerveModulePosition(getDriveDistance(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
+      }
+
+      /** Returns the module state used for kinematics and telemetry. */
+      public SwerveModuleVelocity getState() {
+          return new SwerveModuleVelocity(getDriveVelocityMetersPerSecond(), Rotation2d.fromRotations(getTurnEncoderValueRotations()));
+      }
+
+      /** Updates all of the status signals in a singular method. */
+      public void refreshStatusSignals() {
+          BaseStatusSignal.refreshAll(
+              m_drivePositionSignal,
+              m_driveVelocitySignal,
+              m_turnPositionSignal
+          );
+      }
+
+      /** Returns the timstamp of the drive position status signal. */
+      public double getTimestampSeconds() {
+          return m_drivePositionSignal.getTimestamp().getTime();
+      }
+
+    }
+
+    //#region
+    /// NOTES:
+    /// - Simulatting the robot means keeping track of fake/not real information of each swerve module, including turn position, distance, and velocity
+    /// - A few methods may start with a conditional that checks if simulation is active, and then will return the "fake" value if so
+    /// - update() is the main method for updating the all of the values based on the desired positioning of the module
+    /// - The best way to think of simulation is that it is the ideal movement based on the fact that it uses the desired position object (and represents it)
+    //#endregion
+    public class ModuleSimulation {
+
+      public double m_driveDistanceMeters = 0.0; 
+      public double m_driveVelocityPerSecond = 0.0;
+      public Rotation2d m_turnPosition = new Rotation2d();
+
+      /** Should be called in Module constructor */
+      public ModuleSimulation() {}
+
+      /** Updates the simulated module position and velocity over the given loop delay. */
+      public void update(double delay) {
+        m_driveVelocityPerSecond = m_desiredState.velocity;
+        m_turnPosition = m_desiredState.angle;
+        m_driveDistanceMeters += m_driveVelocityPerSecond * delay;
+      }
+
+    }
+
+    //#region
+    /// NOTES:
+    /// - Uses Slot0Config a.k.a. built in PID of TalonFX
+    //#endregion
+    public class ModuleDynamicTuning {
+
+      /** Should be called in Module constructor */
+      public ModuleDynamicTuning () {}
+
+      /** Updates the drive motor PID and feedforward constants. */
+      public void configDrivePID(double kP, double kV){
+          Slot0Configs m_driveConfig = new Slot0Configs();
+          m_driveConfig.kP = kP;
+          m_driveConfig.kV = kV;
+          m_driveMotor.getConfigurator().apply(m_driveConfig);
+      }
+
+      /** Updates the turn motor PID constants. */
+      public void configTurnPID(double kP, double kD){ 
+          Slot0Configs m_turnConfig = new Slot0Configs();
+          m_turnConfig.kP = kP;
+          m_turnConfig.kD = kD;
+          m_turnMotor.getConfigurator().apply(m_turnConfig);
+      }
+
+    }
 
 }
