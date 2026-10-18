@@ -38,7 +38,7 @@ public class Shooter extends SubsystemBase {
     private final InterpolatingDoubleTreeMap velocityTable = new InterpolatingDoubleTreeMap();
     private double m_currentRange = 0.0;
     private Pose3d targetPoseRobot;
-    private Limelight m_camera = SwerveDrivebase.getInstance().getLimelightCamera();
+    private Limelight m_camera = SwerveDrivebase.getInstance().odometry.m_camera;
 
     //global consts (for readability)
     private static final double g = ShooterConstants.kGravity;

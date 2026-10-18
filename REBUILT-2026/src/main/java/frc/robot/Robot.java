@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    SwerveDrivebase.getInstance().stopAutonomousDrive(); // written here to prevent autonomous drift problems
+    SwerveDrivebase.getInstance().autonomous.stopAutonomousDrive(); // written here to prevent autonomous drift problems
   }
 
   @Override

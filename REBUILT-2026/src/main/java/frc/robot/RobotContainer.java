@@ -65,7 +65,7 @@ public class RobotContainer {
           Commands.waitUntil(() ->
             m_shooter.isShooterAtSpeed(
               m_shooter.getDynamicRPS(
-                m_drivebase.getPoseSupplier(),
+                m_drivebase.odometry.getPoseSupplier(),
                 getAllianceHubLocation()
               )
             )
@@ -74,7 +74,7 @@ public class RobotContainer {
         ),
         m_shooter.ShootWithoutAprilTagCommand(
           m_shooter.getDynamicRPS(
-            m_drivebase.getPoseSupplier(),
+            m_drivebase.odometry.getPoseSupplier(),
             getAllianceHubLocation()
           )
         ),
@@ -117,61 +117,25 @@ public class RobotContainer {
     // auto-align commands
     m_driveController.leftTrigger().whileTrue( // auto-align only
       Commands.sequence(
-        Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
+        Commands.runOnce(() -> m_drivebase.autoAlignment.setupAutoAlignPID(getAllianceHubLocation().get())),
         Commands.parallel(
           this.getDriveCommand(
             1, 
             getJoystickValues(m_driveController::getLeftY, vx_limiter),
             getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-            () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
+            () -> m_drivebase.autoAlignment.getAutoAlignOutput(getAllianceHubLocation().get(), true),
             () -> true
           ),
           Commands.run(() -> {
-            Pose2d position = m_drivebase.getPose();
+            Pose2d position = m_drivebase.odometry.getPose();
             Translation2d fieldLocation = position.getTranslation();
             double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-            if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
+            if (m_drivebase.autoAlignment.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
             else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
           }, m_lights)
         )
       )
     );
-
-    // m_driveController.rightTrigger().whileTrue( // [EXPERIMENTAL] auto-align w/ dynamic shooting and free movement 
-    //   Commands.sequence(
-    //     Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
-    //     Commands.parallel(
-    //       this.getDriveCommand(
-    //         0.2, 
-    //         getJoystickValues(m_driveController::getLeftY, vx_limiter),
-    //         getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-    //         () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
-    //         () -> true
-    //       ),
-    //       Commands.sequence(
-    //         Commands.deadline(
-    //           Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
-    //           m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //         ),
-    //         m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-    //       ),
-    //       Commands.sequence(
-    //         Commands.waitUntil(() ->
-    //           m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
-    //           && m_drivebase.isAutoAligned()
-    //         ),
-    //         m_indexer.runIndexerCommand(0.4)
-    //       ),
-    //       Commands.run(() -> {
-    //         Pose2d position = m_drivebase.getPose();
-    //         Translation2d fieldLocation = position.getTranslation();
-    //         double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-    //         if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-    //         else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
-    //       }, m_lights)
-    //     )
-    //   )
-    // );
 
     //#endregion
 
@@ -210,38 +174,11 @@ public class RobotContainer {
     // auto-shoot (based off distance)
     m_subsystemController.leftTrigger().whileTrue( 
       Commands.sequence(
-        // Commands.runOnce(() -> m_drivebase.setupAutoAlignPID(getAllianceHubLocation().get())),
-        Commands.parallel(
-          // this.getDriveCommand(
-          //   0.2, 
-          //   getJoystickValues(m_driveController::getLeftY, vx_limiter),
-          //   getJoystickValues(m_driveController::getLeftX, vy_limiter), 
-          //   () -> m_drivebase.getAutoAlignOutput(getAllianceHubLocation().get(), true),
-          //   () -> true
-          // ),
-          Commands.sequence(
-            Commands.deadline(
-              Commands.waitUntil(() -> m_drivebase.isAutoAligned()),
-              m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-            ),
-            m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation()))
-          )
-          // ,
-          // Commands.sequence(
-          //   Commands.waitUntil(() ->
-          //     m_shooter.isShooterAtSpeed(m_shooter.getDynamicRPS(m_drivebase.getPoseSupplier(), getAllianceHubLocation())) 
-          //     && m_drivebase.isAutoAligned()
-          //   ),
-          //   m_indexer.runIndexerCommand(0.4)
-          // ),
-          // Commands.run(() -> {
-          //   Pose2d position = m_drivebase.getPose();
-          //   Translation2d fieldLocation = position.getTranslation();
-          //   double distance = getAllianceHubLocation().get().getDistance(fieldLocation);
-          //   if (m_drivebase.isAutoAligned() && m_shooter.isShooterInRange(distance)) m_lights.setLEDMode(LEDMode.AlignedToTarget);
-          //   else m_lights.setLEDMode(LEDMode.NotAlignedToTarget); 
-          // }, m_lights)
-        )
+        Commands.deadline(
+          Commands.waitUntil(() -> m_drivebase.autoAlignment.isAutoAligned()),
+          m_shooter.WarmUpShooter(m_shooter.getDynamicRPS(m_drivebase.odometry.getPoseSupplier(), getAllianceHubLocation()))
+        ),
+        m_shooter.ShootWithoutAprilTagCommand(m_shooter.getDynamicRPS(m_drivebase.odometry.getPoseSupplier(), getAllianceHubLocation()))
       )
     );
 
@@ -270,7 +207,7 @@ public class RobotContainer {
   private Supplier<Translation2d> getAllianceHubLocation() {
     // suppplier so that hub can change after binding has been created 
     return () -> { 
-      return (m_drivebase.shouldFlipPathForAlliance()) ? redHubLocation : blueHubLocation; 
+      return (m_drivebase.odometry.shouldFlipPathForAlliance()) ? redHubLocation : blueHubLocation; 
     };
   }
 
@@ -279,23 +216,23 @@ public class RobotContainer {
   public void configureAutos() {  
     // for autos that do nothing and only reset odometry use resetPoseFromAuto cuz initializeStartingPose() does not work during comp.
 
-    if (m_drivebase.isPathPlannerAvailable()) {
-      m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.getAutonomousCommand("LEFT Collect Neutral Zone"));
-      m_autoSelectable.add("LEFT Do Nathan", m_drivebase.resetPoseFromAuto("LEFT Shoot Preloaded"));
-      m_autoSelectable.add("LEFT Shoot Depot", m_drivebase.getAutonomousCommand("LEFT Shoot Depot"));
-      m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.getAutonomousCommand("LEFT Shoot Preloaded"));
-      m_autoSelectable.addDefault("MIDDLE Do Nathan", m_drivebase.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
-      m_autoSelectable.add("MIDDLE Shoot Depot", m_drivebase.getAutonomousCommand("MIDDLE Shoot Depot"));
-      m_autoSelectable.add("MIDDLE Shoot Outpost", m_drivebase.getAutonomousCommand("MIDDLE Shoot Outpost"));
-      m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.getAutonomousCommand("MIDDLE Shoot Preloaded"));
-      m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.getAutonomousCommand("RIGHT Collect Neutral Zone"));
-      m_autoSelectable.add("RIGHT Do Nathan", m_drivebase.resetPoseFromAuto("RIGHT Shoot Preloaded"));
-      m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.getAutonomousCommand("RIGHT Shoot Outpost"));
-      m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.getAutonomousCommand("RIGHT Shoot Preloaded"));
+    if (m_drivebase.autonomous.isPathPlannerAvailable()) {
+      m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.autonomous.getAutonomousCommand("LEFT Collect Neutral Zone"));
+      m_autoSelectable.add("LEFT Do Nathan", m_drivebase.autonomous.resetPoseFromAuto("LEFT Shoot Preloaded"));
+      m_autoSelectable.add("LEFT Shoot Depot", m_drivebase.autonomous.getAutonomousCommand("LEFT Shoot Depot"));
+      m_autoSelectable.add("LEFT Shoot Preloaded", m_drivebase.autonomous.getAutonomousCommand("LEFT Shoot Preloaded"));
+      m_autoSelectable.addDefault("MIDDLE Do Nathan", m_drivebase.autonomous.resetPoseFromAuto("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.add("MIDDLE Shoot Depot", m_drivebase.autonomous.getAutonomousCommand("MIDDLE Shoot Depot"));
+      m_autoSelectable.add("MIDDLE Shoot Outpost", m_drivebase.autonomous.getAutonomousCommand("MIDDLE Shoot Outpost"));
+      m_autoSelectable.add("MIDDLE Shoot Preloaded", m_drivebase.autonomous.getAutonomousCommand("MIDDLE Shoot Preloaded"));
+      m_autoSelectable.add("RIGHT Collect Neutral Zone", m_drivebase.autonomous.getAutonomousCommand("RIGHT Collect Neutral Zone"));
+      m_autoSelectable.add("RIGHT Do Nathan", m_drivebase.autonomous.resetPoseFromAuto("RIGHT Shoot Preloaded"));
+      m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.autonomous.getAutonomousCommand("RIGHT Shoot Outpost"));
+      m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.autonomous.getAutonomousCommand("RIGHT Shoot Preloaded"));
     } else {
-      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.resetPoseFromAuto(leftStartingPose));
-      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.resetPoseFromAuto(middleStartingPose));
-      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.resetPoseFromAuto(rightStartingPose));
+      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(leftStartingPose));
+      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(middleStartingPose));
+      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(rightStartingPose));
     }
 
     Tunables.publish("Auto Selectable", m_autoSelectable);
