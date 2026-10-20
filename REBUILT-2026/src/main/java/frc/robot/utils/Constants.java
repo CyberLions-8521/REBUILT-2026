@@ -69,8 +69,8 @@ public class Constants {
 
     //======== Auto-align ===================================================================
 
-        public static final double kMaxAcceleration = kMaxMetersPerSecond * 2; // meters (takes half a second to get to max accel)
-        public static final double kMaxAngularAcceleration = kMaxAngularSpeed * 2; // radians/sec^2 (takes half a second to get to max accel)
+        public static final double kMaxAcceleration = kMaxMetersPerSecond * 1.5; // meters (ex. X2 takes half a second to get to max accel)
+        public static final double kMaxAngularAcceleration = kMaxAngularSpeed * 1.5; // radians/sec^2 (ex. X2 takes half a second to get to max accel)
 
         public static final double kAutoAlignTolerance = Units.degreesToRadians(2.0);
         public static final double kAutoDistanceTolerance = 0.05; // meters

@@ -16,6 +16,7 @@ import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.Tunables;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.util.FlippingUtil;
 
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
@@ -135,6 +136,12 @@ public class RobotContainer {
           }, m_lights)
         )
       )
+    );
+
+    Pose2d outpost = new Pose2d(0.98, 1.03, Rotation2d.fromDegrees(45));
+    if (m_drivebase.odometry.shouldFlipPathForAlliance()) outpost = FlippingUtil.flipFieldPose(outpost);
+    m_driveController.rightTrigger().whileTrue( // fun button - press to pathfind to alliance corner
+      m_drivebase.autoAlignment.pathFindToPose(outpost) 
     );
 
     //#endregion

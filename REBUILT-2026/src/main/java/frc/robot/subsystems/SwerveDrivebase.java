@@ -22,6 +22,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.FlippingUtil;
 import org.wpilib.math.controller.ProfiledPIDController;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
@@ -56,11 +57,6 @@ import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
 import frc.robot.utils.Constants.LimelightConstants;
 import frc.robot.utils.Constants.SwerveConstants;
-import frc.robot.subsystems.SwerveDrivebase.SwerveAutoAlignment;
-import frc.robot.subsystems.SwerveDrivebase.SwerveAutonomous;
-import frc.robot.subsystems.SwerveDrivebase.SwerveDynamicTuning;
-import frc.robot.subsystems.SwerveDrivebase.SwerveOdometry;
-import frc.robot.subsystems.SwerveDrivebase.SwerveSimulation;
 import frc.robot.utils.Configs.SwerveConfigs;
 
 //#region
@@ -419,8 +415,15 @@ public class SwerveDrivebase extends SubsystemBase {
   //#endregion
   public class SwerveAutoAlignment {
 
-    public ProfiledPIDController m_autoAlignPID; 
-    public ProfiledPIDController m_autoDistancePID;
+    private ProfiledPIDController m_autoAlignPID; 
+    private ProfiledPIDController m_autoDistancePID;
+    private PathConstraints m_pathConstraints = new PathConstraints(
+      SwerveConstants.kMaxMetersPerSecond, 
+      SwerveConstants.kMaxAcceleration, 
+      SwerveConstants.kMaxAngularSpeed, 
+      SwerveConstants.kMaxAngularAcceleration, 
+      12.0
+    );
 
     /** Should be called in Drivebase constructor */
     public SwerveAutoAlignment() {
@@ -500,6 +503,11 @@ public class SwerveDrivebase extends SubsystemBase {
       // Third part - normalize PID output between 0.0 - 1.0 to act as a controller if necessary
       if (asControllerInput) return -(pidOutput / SwerveConstants.kMaxMetersPerSecond);
       return pidOutput; // negative for some reason i dont remember
+    }
+
+    /** Generate a path from robot to destination on the fly */
+    public Command pathFindToPose(Pose2d pose) {
+      return AutoBuilder.pathfindToPose(pose, m_pathConstraints);
     }
 
   }
