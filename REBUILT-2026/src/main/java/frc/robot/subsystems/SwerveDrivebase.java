@@ -78,8 +78,8 @@ public class SwerveDrivebase extends SubsystemBase {
   private final OnboardIMU m_gyro = new OnboardIMU(OnboardIMU.MountOrientation.FLAT);
   private ChassisVelocities m_lastRobotRelativeSpeeds = new ChassisVelocities();
 
-  public SwerveOdometry odometry;
   public SwerveSimulation simulation;
+  public SwerveOdometry odometry;
   public SwerveAutoAlignment autoAlignment;
   public SwerveAutonomous autonomous;
   public SwerveDynamicTuning dynamicTuning;
@@ -127,11 +127,11 @@ public class SwerveDrivebase extends SubsystemBase {
       new Translation2d(-SwerveConstants.kWheelBase / 2, -SwerveConstants.kTrackWidth / 2)
     );
 
-    odometry = new SwerveOdometry(); // should be declared here after kinematics and modules are set up
-    simulation = new SwerveSimulation();
-    autoAlignment = new SwerveAutoAlignment();
-    autonomous = new SwerveAutonomous();
-    dynamicTuning = new SwerveDynamicTuning();
+    simulation = new SwerveSimulation(); // should be declared here after kinematics and modules are set up
+    odometry = new SwerveOdometry(simulation); 
+    autoAlignment = new SwerveAutoAlignment(odometry);
+    autonomous = new SwerveAutonomous(odometry);
+    dynamicTuning = new SwerveDynamicTuning(autoAlignment);
   }
 
   /** Returns the instance of the SwerveDrivebase singleton */
@@ -171,7 +171,7 @@ public class SwerveDrivebase extends SubsystemBase {
   public void periodic() { 
     dynamicTuning.tunePIDControllers();
     odometry.update();    
-    simulation.updateField();
+    simulation.updateField(odometry.getPose());
 
   }
 
@@ -214,6 +214,8 @@ public class SwerveDrivebase extends SubsystemBase {
   //#endregion
   public class SwerveOdometry {
 
+    private SwerveSimulation m_simulation;
+
     private final SwerveDrivePoseEstimator m_poseEstimator; // odometry
     private final Pose3d m_cameraPoseRobotSpace = new Pose3d(
       LimelightConstants.kLimelightForwardOffset, 
@@ -229,7 +231,9 @@ public class SwerveDrivebase extends SubsystemBase {
     private TunableBoolean m_limelightToggleTunable = Tunables.addBoolean("Odometry/Use Limelight pose", true);
 
     /** Should be called in Drivebase constructor */
-    public SwerveOdometry() {
+    public SwerveOdometry(SwerveSimulation m_simulation) {
+      this.m_simulation = m_simulation;
+
       m_poseEstimator = new SwerveDrivePoseEstimator(
         m_kinematics, 
         getRawGyroHeading(), 
@@ -314,7 +318,7 @@ public class SwerveDrivebase extends SubsystemBase {
     /** Lets me flip the alliance the autos are based on dynamically in simulation and still works for real use */
     public boolean shouldFlipPathForAlliance() {
       if (RobotBase.isSimulation()) 
-        return simulation.m_simToggleTunable.get(); 
+        return m_simulation.m_simToggleTunable.get(); 
       return MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
     }
 
@@ -371,30 +375,29 @@ public class SwerveDrivebase extends SubsystemBase {
     }
 
     /** Updates the simulation field (should be called after pose estimation is updated) */
-    private void updateField() {
-      Pose2d robotPose = odometry.getPose();
+    public void updateField(Pose2d pose) {
 
-      m_field.setRobotPose(robotPose);
+      m_field.setRobotPose(pose);
 
-      m_frontLeftObject2d.setPose(robotPose.transformBy(
+      m_frontLeftObject2d.setPose(pose.transformBy(
         new Transform2d(
           new Translation2d(SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
           m_frontLeft.odometry.getState().angle
         )
       ));
-      m_frontRighObject2d.setPose(robotPose.transformBy(
+      m_frontRighObject2d.setPose(pose.transformBy(
         new Transform2d(
           new Translation2d(SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
           m_frontRight.odometry.getState().angle
         )
       ));
-      m_backLeftObject2d.setPose(robotPose.transformBy(
+      m_backLeftObject2d.setPose(pose.transformBy(
         new Transform2d(
           new Translation2d(-SwerveConstants.kWheelBase / 2,  SwerveConstants.kTrackWidth / 2), 
           m_backLeft.odometry.getState().angle
         )
       ));
-      m_backRightObject2d.setPose(robotPose.transformBy(
+      m_backRightObject2d.setPose(pose.transformBy(
         new Transform2d(
           new Translation2d(-SwerveConstants.kWheelBase / 2,  -SwerveConstants.kTrackWidth / 2), 
           m_backRight.odometry.getState().angle
@@ -415,18 +418,15 @@ public class SwerveDrivebase extends SubsystemBase {
   //#endregion
   public class SwerveAutoAlignment {
 
+    private SwerveOdometry m_odometry;
+
     private ProfiledPIDController m_autoAlignPID; 
     private ProfiledPIDController m_autoDistancePID;
-    private PathConstraints m_pathConstraints = new PathConstraints(
-      SwerveConstants.kMaxMetersPerSecond, 
-      SwerveConstants.kMaxAcceleration, 
-      SwerveConstants.kMaxAngularSpeed, 
-      SwerveConstants.kMaxAngularAcceleration, 
-      12.0
-    );
 
     /** Should be called in Drivebase constructor */
-    public SwerveAutoAlignment() {
+    public SwerveAutoAlignment(SwerveOdometry m_odometry) {
+      this.m_odometry = m_odometry;
+
       m_autoAlignPID = new ProfiledPIDController(
         SwerveConstants.kAutoAlignP, 
         SwerveConstants.kAutoAlignI, 
@@ -449,7 +449,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
     /** Resets the auto-align PID for the commands */
     public void setupAutoAlignPID(Translation2d m_targetPoint) {
-      Pose2d position = odometry.getPose();
+      Pose2d position = m_odometry.getPose();
       Rotation2d targetHeading = m_targetPoint.minus(position.getTranslation()).getAngle().orElse(new Rotation2d()); // simple fix for Optational<Rotation2d> change
       m_autoAlignPID.reset(position.getRotation().getRadians());
       m_autoAlignPID.setGoal(targetHeading.getRadians()); // this does not need to be run constantly when stop is false (tested)
@@ -457,7 +457,7 @@ public class SwerveDrivebase extends SubsystemBase {
 
     /** Calculates the PID output of the current angle to the targeted angle of the robot (should be used as omega input) */
     public double getAutoAlignOutput(Translation2d m_targetPoint, boolean asControllerInput) {
-      Pose2d position = odometry.getPose();
+      Pose2d position = m_odometry.getPose();
       Translation2d fieldLocation = position.getTranslation();
       Translation2d vectorBetweenPoints = m_targetPoint.minus(fieldLocation);
       Rotation2d dynamicHeading = vectorBetweenPoints.getAngle().orElse(new Rotation2d()); // simple fix for Optational<Rotation2d> change
@@ -484,14 +484,14 @@ public class SwerveDrivebase extends SubsystemBase {
 
     /** Resets the auto-distance PID for the commands */
     public void setupAutoDistancePID(Translation2d m_targetPoint) {
-      m_autoDistancePID.reset(m_targetPoint.getDistance(odometry.getPose().getTranslation()));
+      m_autoDistancePID.reset(m_targetPoint.getDistance(m_odometry.getPose().getTranslation()));
       m_autoDistancePID.setGoal(SwerveConstants.kAutoDistanceTarget);
     }
 
     /** Calculates the PID output of the current distance to the targeted distance off a certain Translation2d of the robot (should be used as x input, robot relative) */
     public double getAutoDistanceOutput(Translation2d m_targetPoint, boolean asControllerInput) {
       // First part - calculate distance between robot and target
-      Pose2d position = odometry.getPose();
+      Pose2d position = m_odometry.getPose();
       Translation2d fieldLocation = position.getTranslation();
       double distance = m_targetPoint.getDistance(fieldLocation);
 
@@ -503,11 +503,6 @@ public class SwerveDrivebase extends SubsystemBase {
       // Third part - normalize PID output between 0.0 - 1.0 to act as a controller if necessary
       if (asControllerInput) return -(pidOutput / SwerveConstants.kMaxMetersPerSecond);
       return pidOutput; // negative for some reason i dont remember
-    }
-
-    /** Generate a path from robot to destination on the fly */
-    public Command pathFindToPose(Pose2d pose) {
-      return AutoBuilder.pathfindToPose(pose, m_pathConstraints);
     }
 
   }
@@ -527,10 +522,21 @@ public class SwerveDrivebase extends SubsystemBase {
   //#endregion
   public class SwerveAutonomous {
 
-  private boolean m_pathPlannerAvailable = false; 
+    private SwerveOdometry m_odometry;
+
+    private boolean m_pathPlannerAvailable = false; 
+    private PathConstraints m_pathConstraints = new PathConstraints(
+      SwerveConstants.kMaxMetersPerSecond, 
+      SwerveConstants.kMaxAcceleration, 
+      SwerveConstants.kMaxAngularSpeed, 
+      SwerveConstants.kMaxAngularAcceleration, 
+      12.0
+    );
 
     /** Should be called in Drivebase constructor */
-    public SwerveAutonomous() {
+    public SwerveAutonomous(SwerveOdometry m_odometry) {
+      this.m_odometry = m_odometry;
+
       setupPathPlanner();
     }
 
@@ -574,9 +580,9 @@ public class SwerveDrivebase extends SubsystemBase {
 
         // Configure AutoBuilder last
         AutoBuilder.configure(
-            odometry::getPose,
+            m_odometry::getPose,
             // Robot pose supplier
-            odometry::reset,
+            m_odometry::reset,
             // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotVelocity,
             // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
@@ -590,7 +596,7 @@ public class SwerveDrivebase extends SubsystemBase {
                 // Rotation PID constants
             ),
             config,
-            odometry::shouldFlipPathForAlliance,
+            m_odometry::shouldFlipPathForAlliance,
             SwerveDrivebase.this
             // Reference to this subsystem to set requirements
                             );
@@ -644,23 +650,23 @@ public class SwerveDrivebase extends SubsystemBase {
           return;
         }
 
-        if (odometry.shouldFlipPathForAlliance()) {
+        if (m_odometry.shouldFlipPathForAlliance()) {
           startingPose = FlippingUtil.flipFieldPose(startingPose);
         }
 
-        odometry.reset(startingPose);
+        m_odometry.reset(startingPose);
       }, SwerveDrivebase.this);
   }
 
     /** Optional overload that resets odometry based off a given pose. Useful for when the robot cannot move but still requires a pose */
     public Command resetPoseFromAuto(Pose2d poseBlueRelative) {
       return Commands.runOnce(() -> {
-        if (odometry.shouldFlipPathForAlliance()) {
-          odometry.reset(FlippingUtil.flipFieldPose(poseBlueRelative));
+        if (m_odometry.shouldFlipPathForAlliance()) {
+          m_odometry.reset(FlippingUtil.flipFieldPose(poseBlueRelative));
           return;
         }
         
-        odometry.reset(poseBlueRelative);
+        m_odometry.reset(poseBlueRelative);
       }, SwerveDrivebase.this);
     }
 
@@ -669,6 +675,14 @@ public class SwerveDrivebase extends SubsystemBase {
       driveRobotRelative(new ChassisVelocities());
     }
     
+    /** Generate a path from robot to destination on the fly */
+    public Command pathFindToPose(Pose2d poseBlueRelative) {
+      if (m_odometry.shouldFlipPathForAlliance()) 
+        return AutoBuilder.pathfindToPose(FlippingUtil.flipFieldPose(poseBlueRelative), m_pathConstraints);
+
+      return AutoBuilder.pathfindToPose(poseBlueRelative, m_pathConstraints);
+    }
+
   }
 
   //#region
@@ -677,6 +691,8 @@ public class SwerveDrivebase extends SubsystemBase {
   /// - Will only update PID when value has changed
   //#endregion
   public class SwerveDynamicTuning {
+
+    private SwerveAutoAlignment m_autoAlignment;
 
     private TunableDouble m_pDriveTunable = Tunables.addDouble("PID Constants/Drive P", SwerveConstants.kDriveP); 
     private TunableDouble m_vDriveTunable = Tunables.addDouble("PID Constants/Drive V (feed forward)", SwerveConstants.kDriveV);
@@ -690,7 +706,9 @@ public class SwerveDrivebase extends SubsystemBase {
     private TunableDouble m_dAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
 
     /** Should be called in Drivebase constructor */
-    public SwerveDynamicTuning() {}
+    public SwerveDynamicTuning(SwerveAutoAlignment m_autoAlignment) {
+      this.m_autoAlignment = m_autoAlignment;
+    }
 
     /** Dynamically tune the PID controllers of the drivebase */
     public void tunePIDControllers () {
@@ -720,15 +738,15 @@ public class SwerveDrivebase extends SubsystemBase {
       }
 
       if (m_pAutoAlignTunable.hasChanged() || m_iAutoAlignTunable.hasChanged() || m_dAutoAlignTunable.hasChanged()) { 
-        autoAlignment.m_autoAlignPID.setP(autoAlignP);
-        autoAlignment.m_autoAlignPID.setI(autoAilgnI);
-        autoAlignment.m_autoAlignPID.setD(autoAlignD);
+        m_autoAlignment.m_autoAlignPID.setP(autoAlignP);
+        m_autoAlignment.m_autoAlignPID.setI(autoAilgnI);
+        m_autoAlignment.m_autoAlignPID.setD(autoAlignD);
       }
 
       if (m_pAutoDistanceTunable.hasChanged() || m_iAutoDistanceTunable.hasChanged() || m_dAutoDistanceTunable.hasChanged()) { 
-        autoAlignment.m_autoDistancePID.setP(autoDistanceP);
-        autoAlignment.m_autoDistancePID.setI(autoDistanceI);
-        autoAlignment.m_autoDistancePID.setD(autoDistanceD);
+        m_autoAlignment.m_autoDistancePID.setP(autoDistanceP);
+        m_autoAlignment.m_autoDistancePID.setI(autoDistanceI);
+        m_autoAlignment.m_autoDistancePID.setD(autoDistanceD);
       }
     }
 
@@ -752,8 +770,8 @@ class SwerveModule {
     private PositionVoltage m_turnRequest;
     private SwerveModuleVelocity m_desiredState = new SwerveModuleVelocity();
 
-    public ModuleOdometry odometry;
     public ModuleSimulation simulation;
+    public ModuleOdometry odometry;
     public ModuleDynamicTuning dynamicTuning;
 
     /** Creates a swerve module and applies the starting hardware configuration. */
@@ -762,8 +780,8 @@ class SwerveModule {
         m_turnMotor  = new TalonFX(turnMotorPort, new CANBus(SwerveConstants.kCANBus));
         m_CANcoder = new CANcoder(CANCoderPort, new CANBus(SwerveConstants.kCANBus));
 
-        odometry = new ModuleOdometry(); // should be declared here before encoders but after motor declaration
-        simulation = new ModuleSimulation(); // yeah the drivebase had it ez i know
+        simulation = new ModuleSimulation(); 
+        odometry = new ModuleOdometry(simulation); // should be declared here before encoders but after motor declaration
         dynamicTuning = new ModuleDynamicTuning();
         
         m_driveRequest = new VelocityVoltage(0);
@@ -836,12 +854,15 @@ class SwerveModule {
     //#endregion
     public class ModuleOdometry {
 
+      private ModuleSimulation m_simulation;
+
       private StatusSignal<Angle> m_drivePositionSignal; 
       private StatusSignal<AngularVelocity> m_driveVelocitySignal;
       private StatusSignal<Angle> m_turnPositionSignal;
 
       /** Should be called in Module constructor */
-      public ModuleOdometry() {
+      public ModuleOdometry(ModuleSimulation m_simulation) {
+        this.m_simulation = m_simulation;
         m_drivePositionSignal = m_driveMotor.getPosition();
         m_driveVelocitySignal = m_driveMotor.getVelocity();
         m_turnPositionSignal = m_turnMotor.getPosition();
@@ -849,13 +870,13 @@ class SwerveModule {
 
       /** Returns the current drive velocity in meters per second. */
       private double getDriveVelocityMetersPerSecond() {
-          if (RobotBase.isSimulation()) return simulation.m_driveVelocityPerSecond;
+          if (RobotBase.isSimulation()) return m_simulation.m_driveVelocityPerSecond;
           return m_driveVelocitySignal.getValueAsDouble();
       }
 
       /** Returns the total drive distance traveled in meters. */
       public double getDriveDistance() {
-          if (RobotBase.isSimulation()) return simulation.m_driveDistanceMeters;
+          if (RobotBase.isSimulation()) return m_simulation.m_driveDistanceMeters;
           return m_drivePositionSignal.getValueAsDouble();
       }
 

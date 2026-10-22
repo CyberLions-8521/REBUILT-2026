@@ -138,10 +138,9 @@ public class RobotContainer {
       )
     );
 
-    Pose2d outpost = new Pose2d(0.98, 1.03, Rotation2d.fromDegrees(45));
-    if (m_drivebase.odometry.shouldFlipPathForAlliance()) outpost = FlippingUtil.flipFieldPose(outpost);
+    Pose2d outpost = new Pose2d(0.98, 1.03, Rotation2d.fromDegrees(45)); // blue relative
     m_driveController.rightTrigger().whileTrue( // fun button - press to pathfind to alliance corner
-      m_drivebase.autoAlignment.pathFindToPose(outpost) 
+      m_drivebase.autonomous.pathFindToPose(outpost) 
     );
 
     //#endregion
