@@ -50,10 +50,10 @@ public class RobotContainer {
   public static final Translation2d blueHubLocation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
   public static final Translation2d redHubLocation = new Translation2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84));
 
-  //Backup starting pose objects
-  public static final Pose2d leftStartingPose = new Pose2d(3.5, 7.4, new Rotation2d());
-  public static final Pose2d middleStartingPose = new Pose2d(3.5, 4.05, new Rotation2d());
-  public static final Pose2d rightStartingPose = new Pose2d(3.5, 0.65, new Rotation2d());
+  //Backup starting pose objects (blue relative)
+  Pose2d leftStartingPose = new Pose2d(3.5, 7.4, new Rotation2d());
+  Pose2d middleStartingPose = new Pose2d(3.5, 4.05, new Rotation2d());
+  Pose2d rightStartingPose = new Pose2d(3.5, 0.65, new Rotation2d());
   //#endregion
 
   public RobotContainer() {
@@ -220,7 +220,6 @@ public class RobotContainer {
   // Selectable Autos
 
   public void configureAutos() {  
-    // for autos that do nothing and only reset odometry use resetPoseFromAuto cuz initializeStartingPose() does not work during comp.
 
     if (m_drivebase.autonomous.isPathPlannerAvailable()) {
       m_autoSelectable.add("LEFT Collect Neutral Zone", m_drivebase.autonomous.getAutonomousCommand("LEFT Collect Neutral Zone"));
@@ -236,9 +235,24 @@ public class RobotContainer {
       m_autoSelectable.add("RIGHT Shoot Outpost", m_drivebase.autonomous.getAutonomousCommand("RIGHT Shoot Outpost"));
       m_autoSelectable.add("RIGHT Shoot Preloaded", m_drivebase.autonomous.getAutonomousCommand("RIGHT Shoot Preloaded"));
     } else {
-      m_autoSelectable.add("LEFT Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(leftStartingPose));
-      m_autoSelectable.addDefault("MIDDLE Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(middleStartingPose));
-      m_autoSelectable.add("RIGHT Do Nothing", m_drivebase.autonomous.resetPoseFromAuto(rightStartingPose));
+      if (m_drivebase.odometry.shouldFlipPathForAlliance()) {
+        leftStartingPose = FlippingUtil.flipFieldPose(leftStartingPose);
+        middleStartingPose = FlippingUtil.flipFieldPose(middleStartingPose);
+        rightStartingPose = FlippingUtil.flipFieldPose(rightStartingPose);
+      } 
+
+      m_autoSelectable.add(
+        "LEFT Do Nothing", 
+        Commands.runOnce(() -> m_drivebase.odometry.reset(leftStartingPose), m_drivebase)
+      ); 
+      m_autoSelectable.addDefault(
+        "MIDDLE Do Nothing", 
+        Commands.runOnce(() -> m_drivebase.odometry.reset(middleStartingPose), m_drivebase)
+      );
+      m_autoSelectable.add(
+        "RIGHT Do Nothing", 
+        Commands.runOnce(() -> m_drivebase.odometry.reset(rightStartingPose), m_drivebase)
+      );
     }
 
     Tunables.publish("Auto Selectable", m_autoSelectable);

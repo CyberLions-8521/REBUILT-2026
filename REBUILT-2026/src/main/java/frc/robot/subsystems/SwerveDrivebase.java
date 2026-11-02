@@ -658,18 +658,6 @@ public class SwerveDrivebase extends SubsystemBase {
       }, SwerveDrivebase.this);
   }
 
-    /** Optional overload that resets odometry based off a given pose. Useful for when the robot cannot move but still requires a pose */
-    public Command resetPoseFromAuto(Pose2d poseBlueRelative) {
-      return Commands.runOnce(() -> {
-        if (m_odometry.shouldFlipPathForAlliance()) {
-          m_odometry.reset(FlippingUtil.flipFieldPose(poseBlueRelative));
-          return;
-        }
-        
-        m_odometry.reset(poseBlueRelative);
-      }, SwerveDrivebase.this);
-    }
-
     /** Will stop the robot if an auto is stopped prematurely. (To prevent a bug) SHOULD BE CALLED IN ROBOT.JAVA */
     public void stopAutonomousDrive() {
       driveRobotRelative(new ChassisVelocities());
