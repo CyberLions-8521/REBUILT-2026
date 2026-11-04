@@ -1,6 +1,6 @@
 # Branch for my version of the robot code
 
-May be possibly used for the SoCal competition
+Was used for the SoCal competition
 
 **Currently based on WPILIB 2027 Alpha 7**
 
@@ -10,6 +10,8 @@ May be possibly used for the SoCal competition
 * **LimelightLib 2**
 * **PathplannerLib**
 * **REVLib**
+
+## Features
 
 Anything below with a checkmark [✅] has been tested on the robot and confirmed to work.
 
@@ -23,13 +25,17 @@ Added:
 * Dynamic PID tuning [✅]
 * Limelight visionary pose estimation [✅]
 
-The odometry based auto-align and auto-distancing can take in any Translation2d object (any point on the field) and can target it. So anything is possible including using it for slightly easier passing, etc.
+Post competition additions:
+* Pathfinding 
+* AdvantageScope 3D simulation and tuning
+
+## Important
 
 (The branch Ethan-Drivebase is the original branch and the branch before I re-added the subsystems back onto the drivebase.)
 
-* Includes 2 Translation2d objects that allow the odometry-alignment commands to point to either hub depending on the alliance
-* Includes 7 autos designed in PathPlanner + 3 in code
-    * [List of autos here](/image-assets/autos/README.md)
+## Resources
+
+[List of the 12 autos here](/image-assets/autos/README.md)
 
 [User guide](/image-assets/start-poses/README.md)
 

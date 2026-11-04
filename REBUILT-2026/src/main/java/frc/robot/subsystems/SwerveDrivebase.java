@@ -693,6 +693,17 @@ public class SwerveDrivebase extends SubsystemBase {
     private TunableDouble m_iAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance I", SwerveConstants.kAutoDistanceI);
     private TunableDouble m_dAutoDistanceTunable = Tunables.addDouble("PID Constants/Auto-distance D", SwerveConstants.kAutoDistanceD);
 
+    private double m_lastDriveP = SwerveConstants.kDriveP; 
+    private double m_lastDriveV = SwerveConstants.kDriveV;
+    private double m_lastTurnP = SwerveConstants.kTurnP;
+    private double m_lastTurnD = SwerveConstants.kTurnD;
+    private double m_lastAutoAlignP = SwerveConstants.kAutoAlignP;
+    private double m_lastAutoAlignI = SwerveConstants.kAutoAlignI;
+    private double m_lastAutoAlignD = SwerveConstants.kAutoAlignD;
+    private double m_lastAutoDistanceP = SwerveConstants.kAutoDistanceP;
+    private double m_lastAutoDistanceI = SwerveConstants.kAutoDistanceI;
+    private double m_lastAutoDistanceD = SwerveConstants.kAutoDistanceD;
+
     /** Should be called in Drivebase constructor */
     public SwerveDynamicTuning(SwerveAutoAlignment m_autoAlignment) {
       this.m_autoAlignment = m_autoAlignment;
@@ -711,30 +722,44 @@ public class SwerveDrivebase extends SubsystemBase {
       double autoDistanceI = m_iAutoDistanceTunable.get(); 
       double autoDistanceD = m_dAutoDistanceTunable.get(); 
 
-      if (m_pDriveTunable.hasChanged() || m_vDriveTunable.hasChanged()) { 
+      if (driveP != m_lastDriveP || driveV != m_lastDriveV) { 
         m_frontLeft.dynamicTuning.configDrivePID(driveP, driveV);
         m_frontRight.dynamicTuning.configDrivePID(driveP, driveV);
         m_backLeft.dynamicTuning.configDrivePID(driveP, driveV);
         m_backRight.dynamicTuning.configDrivePID(driveP, driveV);
+
+        m_lastDriveP = driveP;
+        m_lastDriveV = driveV;
       }
 
-      if (m_pTurnTunable.hasChanged() || m_dTurnTunable.hasChanged()) { 
+      if (turnP != m_lastTurnP || turnD != m_lastTurnD) { 
         m_frontLeft.dynamicTuning.configTurnPID(turnP, turnD);
         m_frontRight.dynamicTuning.configTurnPID(turnP, turnD);
         m_backLeft.dynamicTuning.configTurnPID(turnP, turnD);
         m_backRight.dynamicTuning.configTurnPID(turnP, turnD);
+
+        m_lastTurnP = turnP;
+        m_lastTurnD = turnD;
       }
 
-      if (m_pAutoAlignTunable.hasChanged() || m_iAutoAlignTunable.hasChanged() || m_dAutoAlignTunable.hasChanged()) { 
+      if (autoAlignP != m_lastAutoAlignP || autoAilgnI != m_lastAutoAlignI || autoAlignD != m_lastAutoAlignD) { 
         m_autoAlignment.m_autoAlignPID.setP(autoAlignP);
         m_autoAlignment.m_autoAlignPID.setI(autoAilgnI);
         m_autoAlignment.m_autoAlignPID.setD(autoAlignD);
+
+        m_lastAutoAlignP = autoAlignP;
+        m_lastAutoAlignI = autoAilgnI;
+        m_lastAutoAlignD = autoAlignD;
       }
 
-      if (m_pAutoDistanceTunable.hasChanged() || m_iAutoDistanceTunable.hasChanged() || m_dAutoDistanceTunable.hasChanged()) { 
+      if (m_lastAutoDistanceP != autoDistanceP || m_lastAutoDistanceI != autoDistanceI || m_lastAutoDistanceD != autoDistanceD) { 
         m_autoAlignment.m_autoDistancePID.setP(autoDistanceP);
         m_autoAlignment.m_autoDistancePID.setI(autoDistanceI);
         m_autoAlignment.m_autoDistancePID.setD(autoDistanceD);
+
+        m_lastAutoDistanceP = autoDistanceP;
+        m_lastAutoDistanceI = autoDistanceI;
+        m_lastAutoDistanceD = autoDistanceD;
       }
     }
 
