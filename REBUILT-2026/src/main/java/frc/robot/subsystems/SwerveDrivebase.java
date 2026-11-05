@@ -52,6 +52,7 @@ import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.command2.Command;
+import org.wpilib.command2.Command.InterruptionBehavior;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
@@ -663,12 +664,20 @@ public class SwerveDrivebase extends SubsystemBase {
       driveRobotRelative(new ChassisVelocities());
     }
     
-    /** Generate a path from robot to destination on the fly */
-    public Command pathFindToPose(Pose2d poseBlueRelative) {
-      if (m_odometry.shouldFlipPathForAlliance()) 
-        return AutoBuilder.pathfindToPose(FlippingUtil.flipFieldPose(poseBlueRelative), m_pathConstraints);
+    /** Generate a path from robot to destination on the fly. Can maintain priority of the subsystem if chosen to (will release priority be default) */
+    public Command pathFindToPose(Pose2d poseBlueRelative, boolean hogSubsystem) {
+      Command command = AutoBuilder.pathfindToPose(poseBlueRelative, m_pathConstraints);
 
-      return AutoBuilder.pathfindToPose(poseBlueRelative, m_pathConstraints);
+      if (m_odometry.shouldFlipPathForAlliance())
+        command = AutoBuilder.pathfindToPose(FlippingUtil.flipFieldPose(poseBlueRelative), m_pathConstraints);
+
+      if (hogSubsystem) {
+        command = command
+          .andThen(Commands.idle(SwerveDrivebase.this))
+          .withInterruptBehavior(InterruptionBehavior.CANCEL_INCOMING);
+      }
+
+      return command;
     }
 
   }
